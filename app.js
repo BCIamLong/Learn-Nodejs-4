@@ -9,10 +9,20 @@ const userRouter = require('./routes/userRoutes');
 
 //!1, MIDDLEWARE
 // --> this is middlewares use for all of the routers
-app.use(morgan('tiny'));
+app.use(morgan('dev'));
 
 app.use(express.json());
 
+//>>>>>>SERVING STATIC FILES
+//! static file is file we can't access from browser or something because they don't have route
+//--! in this project we have some file static in public some css, images, icons, index.html
+//--> so to access this files in browser as index.html to we can see interface to build project
+
+app.use(express.static(`${__dirname}/public`)); //it's set route for this and now we can access index.html to watch interface 127.0.0.1:3000/index.html or 127.0.0.1:3000/img/pin/png
+//!! notice that: it's only work with static file we sedetify here, don't effect to any other routes
+
+//!!ANY PRIECE OF WEBSITE OR SERVER ALL GET REQUESTS TO CREATE A COMPLETE WEB APPLICATION SO IF YOU USE MORGAN YOU CAN WATCH ALL REQUESTS IN LOGGERS AND KNOWEGE THAT
+//-->How we can serve static file from folder and not a route
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
 
