@@ -9,7 +9,11 @@ const userRouter = require('./routes/userRoutes');
 
 //!1, MIDDLEWARE
 // --> this is middlewares use for all of the routers
-app.use(morgan('dev'));
+//!! THIS IS A EXAMPLE: LOGGER ONLY NESSCARY FOR DEVELOPMENT BECAUSE THAT'S TIME YOU NEED TO LOGGER TO WATCH MANY REQUEST AND HOW THEY WORK BUT IN PRODUCTION WE DON'T NEED IT BECAUSE APP DEPLOY AND USE BY USERS
+//--> AND THHAT'S WHEN WE CHANGE ENVIROMENT SO APPLICATION ALSSO CHANGE BASED ON ENV VARIABLE
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 app.use(express.json());
 
