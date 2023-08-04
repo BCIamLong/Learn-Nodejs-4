@@ -1,3 +1,7 @@
 //!! -->EXPRESS ALWAYS WORK WITH THE MIDDLEWARE STACK WITH THIS PINEPLINE AS MUCH AS WE CAN
 // * FUNTIONS HANDLE DON'T NEED CARE ABOUT VALIDATION AND FOCUS HANDLE MAIN WORK
 //--> THAT HOW EXPRESS APP WORK
+
+//---example for tours:
+//--> we don't need to create checkId() function for all function handle of tourController
+//--> you only need create param middleware and it's auto check id for you that's mean all function in tourController work with id don't need to check id because param middleware did it

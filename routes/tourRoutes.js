@@ -38,10 +38,18 @@ router.param('id', tourController.checkId); // !! this validation(id) data befor
 // * FUNTIONS HANDLE DON'T NEED CARE ABOUT VALIDATION AND FOCUS HANDLE MAIN WORK
 //--> THAT HOW EXPRESS APP WORK
 
+//--->create checkReqBody for post request
+//!!HOW TO RUN MUTILPE MIDDLEWARE: post(tourController.checkReqBody, tourController.createTour);
+// --> THE MIDDLEWARE BEFORE WILL RUN THE FIRST NOTICE THAT(VERY IMPORTANT) BECAUSE ORDER IN MIDDLEWARE IS IMPORTANT
+
+//? so in real project we use mupilte many time as we check user logging, check user has permission to buy something, to create new tours,....
+// --> so you need use mupilte middleware more time but NOTICE THE ORDER OF THEM BECAUSE IT'S VERY IMPORTANT IN MIDDLEWARE STACK , AND IF YOU PUT IT AFTER ENPOIT(ROUTE, CONTROLLER) MAYBE IT'LL NOT WORKING AS YOU WANT
+//--> WE CHECK ALL LOGIC BEFORE WE CREATE NEW TOUR
+// ? And you can't put middleware out side post method why? because maybe it's effect to another route not only post so mupilte very important, it's can use middlewares for one certian route
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(tourController.checkReqBody, tourController.createTour);
 
 router
   .route('/:id')

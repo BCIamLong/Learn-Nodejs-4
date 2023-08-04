@@ -1,3 +1,4 @@
+const { json } = require('express');
 const fs = require('fs');
 //!! controller is place we handle function, logic for rss
 //!!2,Refactory code handle routes function
@@ -82,7 +83,7 @@ const createTour = (req, res) => {
   tours.push(newTour);
 
   writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     res,
     { tour: newTour },
@@ -200,6 +201,19 @@ const deleteTour = (req, res) => {
   //     }
   //   );
 };
+
+const checkReqBody = (req, res, next) => {
+  // JSON.stringify(req.body) === "{}""
+  if (Object.keys(req.body).length === 0 || !req.body.name || !req.body.price)
+    //! 400 http code mean is bad request
+    return res.status(400).json({
+      status: 'Faild',
+      message: 'Missing data, you need fill all data to send',
+    });
+
+  next();
+};
+
 module.exports = {
   getAllTours,
   getTour,
@@ -207,4 +221,5 @@ module.exports = {
   deleteTour,
   updatePieceOfTour,
   checkId,
+  checkReqBody,
 };
