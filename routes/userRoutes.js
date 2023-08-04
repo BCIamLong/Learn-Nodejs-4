@@ -1,21 +1,22 @@
 const express = require('express');
 const fs = require('fs');
-
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
-
-//<<<<<<<<<<<<<<<<<<<<<Functions of user
-const getAllUsers = (req, res) => {};
-const getUser = (req, res) => {};
-const createUser = (req, res) => {};
-const updateUser = (req, res) => {};
-const deleteUser = (req, res) => {};
+const userRouter = require('./../controllers/userController');
+// const {
+//   getAllUsers,
+//   getUser,
+//   createUser,
+//   updateUser,
+//   deleteUser,
+// } = require('./../controllers/userController');
 
 //>>>>>>>>>>>>IMPLEMENT USERS RESOURCES
 const router = express.Router();
-router.route('/').get(getAllUsers).post(createUser);
+router.route('/').get(userRouter.getAllUsers).post(userRouter.createUser);
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+router
+  .route('/:id')
+  .get(userRouter.getUser)
+  .patch(userRouter.updateUser)
+  .delete(userRouter.deleteUser);
 
 module.exports = router;

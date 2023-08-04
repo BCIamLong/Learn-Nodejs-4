@@ -4,7 +4,7 @@
   "description": "Learing node express and monogdb",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js"
   },
   "author": "longhoang",
   "license": "ISC",
