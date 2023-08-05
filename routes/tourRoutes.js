@@ -2,7 +2,7 @@
 //!! you can say this is sub applation: tour app
 //!! you can connect with app.js file by import this sub app and use it as middleware
 const express = require('express');
-const tourController = require('./../controllers/tourController');
+const tourController = require('../controllers/tourController');
 //--> you can use destructor object to do it
 // const {
 //   getAllTours,

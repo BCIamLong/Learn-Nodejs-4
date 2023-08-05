@@ -1,11 +1,10 @@
-const { json } = require('express');
 const fs = require('fs');
 //!! controller is place we handle function, logic for rss
 //!!2,Refactory code handle routes function
 
 //!! note about link: if you use {__dirname} when use link for file in folder and you want access to out side folder use: ${__dirname}/../
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 );
 
 //1, --> create function
@@ -76,9 +75,10 @@ const getAllTours = (req, res) => {
   });
 };
 const createTour = (req, res) => {
-  const newIt = tours[tours.length - 1].id + 1;
+  const newId = tours[tours.length - 1].id + 1;
   console.log(req.body);
-  const newTour = Object.assign({ id: newIt }, req.body);
+  // const newTour = Object.assign({ id: newIt }, req.body);
+  const newTour = { newId, ...req.body };
 
   tours.push(newTour);
 
@@ -87,7 +87,7 @@ const createTour = (req, res) => {
     JSON.stringify(tours),
     res,
     { tour: newTour },
-    201
+    201,
   );
   //   fs.writeFile(
   //     `${__dirname}/dev-data/data/tours-simple.json`,
@@ -151,7 +151,7 @@ const updatePieceOfTour = (req, res) => {
     JSON.stringify(tours),
     res,
     { tour },
-    200
+    200,
   );
   //   fs.writeFile(
   //     `${__dirname}/dev-data/data/tours-simple.json`,
@@ -181,7 +181,7 @@ const deleteTour = (req, res) => {
     JSON.stringify(tours),
     res,
     null,
-    204
+    204,
   );
   //   fs.writeFile(
   //     `${__dirname}/dev-data/data/tours-simple.json`,

@@ -1,6 +1,7 @@
+const fs = require('fs');
 const express = require('express');
 // this app.js file is standard to config follow express
-const fs = require('fs');
+
 const app = express(); // this express() function call bunch of method to our app
 
 //!midleware: is function that can modify the incomming request data and it's in midle between request and response, this is a step request need though(trai qua) while processing, that's data from body can add to request object
@@ -24,7 +25,7 @@ app.use(express.json()); // help us data can pass and send to request body to se
 //*readFileSyc to get tour data from file dev-data/data/tours-simple.json
 //data return is json so you need to parse to objects array
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`),
 );
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>CREATE FUNCTION TO REFACTORY CODE
@@ -77,10 +78,12 @@ app.post('/api/v1/tours', (req, res) => {
 
   //? because this is fake database(use file as DB) so we can't auto create id so we need to create id with myselt
   //   const newId = tours.length + 1; with the id is total number
-  const newIt = tours[tours.length - 1].id + 1;
+  const newId = tours[tours.length - 1].id + 1;
   //   req.body.id = newIt;
   //   const newTour =  req.body;
-  const newTour = Object.assign({ id: newIt }, req.body);
+  // const newTour = Object.assign({ id: newIt }, req.body);
+  const tourUpdate = req.body;
+  const newTour = { newId, ...tourUpdate };
 
   //   const newTours = [...tours, newTour];
   tours.push(newTour);
@@ -110,7 +113,7 @@ app.post('/api/v1/tours', (req, res) => {
           tour: newTour,
         },
       });
-    }
+    },
   );
   //   res.send('Post is done'); //
   //res.send or res.json send data and end request so if you it you can't run code next
@@ -186,7 +189,7 @@ app.patch('/api/v1/tours/:id', (req, res) => {
           tour,
         },
       });
-    }
+    },
   );
 });
 
@@ -209,11 +212,9 @@ app.delete('/api/v1/tours/:id', (req, res) => {
         status: 'Success',
         data: null,
       });
-    }
+    },
   );
 });
-
-
 
 const port = 3000;
 app.listen(port, () => {
