@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "import-data": "node dev-data/data/import-dev-data.js --import",
+    "delete-data": "node dev-data/data/import-dev-data.js --delete"
   },
   "author": "longhoang",
   "license": "ISC",
