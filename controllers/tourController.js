@@ -16,8 +16,57 @@ const Tour = require('../models/tourModel');
 
 const getAllTours = async (req, res) => {
   try {
+    //HOW TO ACCESS TO QUERY STRING FROM REQUEST: USE req.query
+    // console.log(req.query);
+    // and we use data from this query to use for filter
+    // In mongo db we have two way to do that:
+    //? A, use filter object { conditions } in mongoDG, it's look as when we manipulate with normal mongoDB
+    // const tours = await Tour.find({
+    //      duration: 5,
+    //      price: 100
+    // });
+    // const tours = await Tour.find(req.query)
+    //!! but with this implement is too simple because we need some other feature as sort, pagination
+    //*for example: if you do 127.0.0.1:3000/api/v1/tours?duration=5&price=100&soft=true so with this way we don't understand what's soft=true it's not a field of data it's related sort handle function so we need create exclued fields for app still work and handle that exclued field,
+    //-->for example in this case we have sort=true, we exclude field soft and handle if(sort===true) we call sort function to soft data
+    //-->let's do it
+    const obQuery = { ...req.query }; // don't use const obQuery = req.quẻy; because it's not create new object it's create new reference mean is req.body and onQuery is have a same storage data place, when you change obQuery it's also effect to req.body
+
+    const excludedField = ['soft', 'pages', 'limit', 'fields'];
+    //--! Remove this excluded field from obQuery if obQuery constain this field
+    // const keys = obQuery.keys();
+    //*WAY1
+    // excludedField.forEach((el) => {
+    //   if (Object.keys(obQuery).includes(el)) delete obQuery[el];
+    // });
+    //*WAY2
+    excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
+    // console.log(obQuery);
+    //!!WE IMPLEMENT FILTER TO IGNORE EXCLUDED FIELD FROM QUERY STRING OF URL REQUEST
+    //?we also need to implements feature from execlued field
+    //-->Fact we get datas from filter then we will use function as sort, limit ... to manipulate with that datas
+
+    //? B, use some method of mongoose and chaning some special mongo method, and this methods build based on the code as the above code: in A
+    // const tours = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('price')
+    //   .equals(100);
+    //!!HOW QUERY WORK:
+    //  --- Tour.find() return query object(instance of query class) so that's reaso we can chaining methods as the above code
+    // -->await Tour.find() run: the query execute and come back with document that's actually match or query so if we do it like this we can't implement sort, pagination, limit,... after  await Tour.find() finish run because if we use  const tours = await Tour.find() => tours not query object that's normal objects
+
+    //--> so we need do it in query process that's we will save this Tour.find() to query object and chaining query object to can handle many feature, we can use sort(), limit(), ... bunch of methods and chaining them
+
+    //!!WE WILL IMPLEMENT IT LIKE THIS:
+    //*1 BUILD QUERY
+    const query = Tour.find(obQuery);
+
+    //*2 EXECUTE QUERY
     //Use query data: here we use query function built-in mongoose
-    const tours = await Tour.find({}); // return objects array
+    const tours = await query; // return objects array
+
+    //*3 SEND RESPONSE
     res.status(200).json({
       status: 'Sucess',
       result: tours.length,
