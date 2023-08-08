@@ -239,6 +239,36 @@ const deleteTour = async (req, res) => {
 
 //   next();
 // };
+//>>>>>>HANDLE ALIAS ROUTE
+//we will add query needed to req.query and handle in getAllTours() that's good to apply middleware to chan req query
+const aliasTop3CheapTours = (req, _, next) => {
+  // req.query = { sort: 'price -ratingAverage', limit: 3 };
+  req.query.sort = 'price -ratingAverage';
+  req.query.limit = '3'; //set string look like req.query we handle
+  req.query.fields = 'name,price,duration,ratingAverage,summary'; //select field to render friendly and easy look
+
+  next();
+};
+
+// !!We should apply the middleware as posible so let go that's above code
+// const getTop3CheapTours = async (_, res) => {
+//   try {
+//     const query = Tour.find().limit(3).sort('price -ratingAverage');
+//     const tours = await query;
+//     res.status(200).json({
+//       status: 'success',
+//       data: {
+//         tours,
+//       },
+//     });
+//   } catch (err) {
+//     res.status(400).json({
+//       status: 'Fails',
+//       message: 'Invalid link',
+//       error: err,
+//     });
+//   }
+// };
 
 module.exports = {
   getAllTours,
@@ -246,5 +276,6 @@ module.exports = {
   createTour,
   deleteTour,
   updateTour,
+  aliasTop3CheapTours,
   // checkReqBody,
 };

@@ -9,6 +9,14 @@ const router = express.Router();
 // -->so you don't need check id in mongo
 // router.param('id', tourController.checkId);
 
+//Alias route: top-3-quality-cheap-tours
+// router
+//   .route('/top-3-quality-cheap-tours')
+//   .get(tourController.getTop3CheapTours);
+router
+  .route('/top-3-quality-cheap-tours')
+  .get(tourController.aliasTop3CheapTours, tourController.getAllTours);
+
 router
   .route('/')
   .get(tourController.getAllTours)
