@@ -12,58 +12,59 @@ const Tour = require('../models/tourModel');
 //--> All query method return query object so you can use objects to do something filter, search, sort,...
 
 //! NOTICE: PATCH CAN UPDATE ONE OR MORE FIELDS OR ENTRIE OBJECT, PUT UPDATE ALL ENTRIRE OBJECT WITH OBJECT UPDATE SO EXAMPLE FOR PUT: {name: 'Long', age: 20} use put with data update is {name: 'ha'} => it's update and change your object to {name: 'ha'} so we lost age property so it's not flexty
-//===================================================
-//>>>>>>>>>>>>>>>AVANCED FILTER
-//this is query: 127.0.0.1:3000/api/v1/tours?duration=5&soft=2&price=997
-// so now we only query with: one field with one value but if we want more some as: less than equals, less than, greate than,... as: duration>=5, 3=< duration <=7 so how to do it
+//====================================================
+//>>>>>>>>>>>>>>>SOFT FUNCTION
+//1, Need check if soft in request url
+//2, if true we call sort function and chaining with query
 
-// BEFORE THAT WE NEED TO KNOW HOW WE WRITE LINK INCLUDE >, <, >=, <=
-//--> 127.0.0.1:3000/api/v1/tours?duration[gte]=5&soft=2&price=997
-//--! duration[gte]=5 so we use [name_operator], durantion is name and [gte] is specify operator and =5 is value
-
-//?We can use one field with two condition: for example we want    3< duration <=9
-//-->127.0.0.1:3000/api/v1/tours?duration[gte]=5&duration[lt]=10&soft=2
-//---127.0.0.1:3000/api/v1/tours?duration[gte]=5&duration[lt]=10&price[gt]=1000&soft=2//--!also have more field condition
 const getAllTours = async (req, res) => {
   try {
-    console.log(req.query);
-    // { duration: { gte: '5' }, soft: '2', price: '997' }: so the work here is add the $ notation before gte to mongo can understand and execute query
+    //1A,FILTER
     const obQuery = { ...req.query };
 
-    const excludedField = ['soft', 'pages', 'limit', 'fields'];
+    const excludedField = ['sort', 'pages', 'limit', 'fields'];
 
     excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
-
-    // const arr = [...ob];
-    // ?{ duration: { gte: '5' }, soft: '2', price: '997' }: so the work here is add the $ notation before gte to mongo can understand and execute query
-    //*WAY 1:
-    // const propertyArr = Object.keys(obQuery);
-    // // const options = ['gte', 'lte', 'gt, lt'];
-
-    // propertyArr.forEach((el) => {
-    //   if (obQuery[el].gte) {
-    //     obQuery[el].$gte = obQuery[el].gte;
-    //     delete obQuery[el].gte;
-    //   }
-    // });
-    // console.log(obQuery);
-    //*WAY2:USE REGULAR EXPRESSION, we use regular expresion to find data need to change
-    // const options = ['gte', 'lte', 'lt', 'gt'];
+    //1B, AVANCED FILTER
     let obQueryStr = JSON.stringify(obQuery);
-    // console.log(obQuery, obQueryStr);
-    // options.forEach((el) => obQueryStr.replace(el, `$${el}`));
-    // /\b(gte|lte|gt|lt)\b/g, \b we only wanna find and \b to return boolean type, and g is global i wanna find all don't find once for example: if i found it'll stop if not g notation
-    //--! replace() accept callback function so it's very powerful
+
     obQueryStr = obQueryStr.replace(
       /\b(gte|lte|gt|lt)\b/g,
       (match) => `$${match}`,
-    ); //!notice replace change but don't change the original string so if you want have a new value change you need assign is a variable
-    //!--> SO IN THE REAL WORLD WE HAVE TO WRITE DOCUMENT WHICH ALLOW USER TO KNOW WHICH KIND OPERATION THEY CAN DOON OUR API --> SO A GOOD IDEAL WE WILL COMPLETLY DOCUMENT OUR API AND GUIDE USERS THE WAY TO USE: SEDITIFYING REQUEST BY HTTP METHODS, AND SOME FEATERS AS SOFTING, FILTERING,... WHICH OF THEM AVALIABLE TO USE
-    //--> SO IF YOU WANT TO IMPLEMENT API FOR ANOTHER PEOPLE CAN USE WE NEED TO IMPLEMENTS THIS DOCUMENT
+    );
 
     // console.log(JSON.parse(obQueryStr));
     //*1 BUILD QUERY
-    const query = Tour.find(JSON.parse(obQueryStr));
+    // console.log(JSON.parse(obQueryStr));
+    let query = Tour.find(JSON.parse(obQueryStr));
+
+    //2, SOFT FUNCTION
+    //a, we use built-in soft function of mongoose
+    if (req.query.sort) {
+      // const sortQuery = req.query.sort.replaceAll(',', ' ');
+      const sortQuery = req.query.sort.split(',').join(' ');
+      //!so we use relaceAll because we wanna replace all , notation to " "
+      //!if you use replace('rating,op,ok,alo', " ") => retrun 'rating op,ok,alo' do with first catch
+      console.log(req.query.sort.replaceAll(',', ' '));
+      query = query.sort(sortQuery);
+      // * Sort(): how to sort with inscrease or descrease -> default sort() sort with inscrease but if yu want sort descrease you use - before field: sort('-price')
+      // *but if you apply for all fieal that's: sort('-price -rating -duration')
+    }
+    //!!BUT WE HAVE A PROBLEM THAT'S WHEN WE HAVE TWO OR MORE DOCUMENTS HAVE A SAME PRICE SO THE SORT IS RANDOM WITH THAT'S DOCUMENTS IN THIS CASE
+    //--! so how to solve this problem
+    //--> well we need to constrait by use more field for sort for example: you sort based on price and rating and duration and .... create constrait, so how to do that's in code?
+    //-->well in mongoose it's quite easy: sort('price average ...fields')
+    //--> the link from request:127.0.0.1:3000/api/v1/tours?sort=price,rating,...
+    //---so my work is replace , to " "
+    //! we need understand the way this work sort=price,rating => sort('price rating);
+    //-->1, we will sort price by default inscrease, you chance with -price to descrease
+    //-->2, if price1 === price2 => check rating by default inscrease
+    //-->3, if rating1 > rating2 => document1 sort after docment2
+    //--! if we have price1 === price2 we check condition constrait rating1 and rating2 and sort them with rating
+
+    //!!BUT YOU ALSO NEED SORT DEFAULT WHEN THE USER DON'T SEPECIFY SORT FEATURE
+    //---you can default soft by the date create, get the new tours to old tours
+    if (!req.query.sort) query = query.sort('-createAt');
 
     //*2 EXECUTE QUERY
 
