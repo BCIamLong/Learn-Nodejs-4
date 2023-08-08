@@ -13,58 +13,61 @@ const Tour = require('../models/tourModel');
 
 //! NOTICE: PATCH CAN UPDATE ONE OR MORE FIELDS OR ENTRIE OBJECT, PUT UPDATE ALL ENTRIRE OBJECT WITH OBJECT UPDATE SO EXAMPLE FOR PUT: {name: 'Long', age: 20} use put with data update is {name: 'ha'} => it's update and change your object to {name: 'ha'} so we lost age property so it's not flexty
 //===================================================
+//>>>>>>>>>>>>>>>AVANCED FILTER
+//this is query: 127.0.0.1:3000/api/v1/tours?duration=5&soft=2&price=997
+// so now we only query with: one field with one value but if we want more some as: less than equals, less than, greate than,... as: duration>=5, 3=< duration <=7 so how to do it
 
+// BEFORE THAT WE NEED TO KNOW HOW WE WRITE LINK INCLUDE >, <, >=, <=
+//--> 127.0.0.1:3000/api/v1/tours?duration[gte]=5&soft=2&price=997
+//--! duration[gte]=5 so we use [name_operator], durantion is name and [gte] is specify operator and =5 is value
+
+//?We can use one field with two condition: for example we want    3< duration <=9
+//-->127.0.0.1:3000/api/v1/tours?duration[gte]=5&duration[lt]=10&soft=2
+//---127.0.0.1:3000/api/v1/tours?duration[gte]=5&duration[lt]=10&price[gt]=1000&soft=2//--!also have more field condition
 const getAllTours = async (req, res) => {
   try {
-    //HOW TO ACCESS TO QUERY STRING FROM REQUEST: USE req.query
-    // console.log(req.query);
-    // and we use data from this query to use for filter
-    // In mongo db we have two way to do that:
-    //? A, use filter object { conditions } in mongoDG, it's look as when we manipulate with normal mongoDB
-    // const tours = await Tour.find({
-    //      duration: 5,
-    //      price: 100
-    // });
-    // const tours = await Tour.find(req.query)
-    //!! but with this implement is too simple because we need some other feature as sort, pagination
-    //*for example: if you do 127.0.0.1:3000/api/v1/tours?duration=5&price=100&soft=true so with this way we don't understand what's soft=true it's not a field of data it's related sort handle function so we need create exclued fields for app still work and handle that exclued field,
-    //-->for example in this case we have sort=true, we exclude field soft and handle if(sort===true) we call sort function to soft data
-    //-->let's do it
-    const obQuery = { ...req.query }; // don't use const obQuery = req.quẻy; because it's not create new object it's create new reference mean is req.body and onQuery is have a same storage data place, when you change obQuery it's also effect to req.body
+    console.log(req.query);
+    // { duration: { gte: '5' }, soft: '2', price: '997' }: so the work here is add the $ notation before gte to mongo can understand and execute query
+    const obQuery = { ...req.query };
 
     const excludedField = ['soft', 'pages', 'limit', 'fields'];
-    //--! Remove this excluded field from obQuery if obQuery constain this field
-    // const keys = obQuery.keys();
-    //*WAY1
-    // excludedField.forEach((el) => {
-    //   if (Object.keys(obQuery).includes(el)) delete obQuery[el];
-    // });
-    //*WAY2
+
     excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
+
+    // const arr = [...ob];
+    // ?{ duration: { gte: '5' }, soft: '2', price: '997' }: so the work here is add the $ notation before gte to mongo can understand and execute query
+    //*WAY 1:
+    // const propertyArr = Object.keys(obQuery);
+    // // const options = ['gte', 'lte', 'gt, lt'];
+
+    // propertyArr.forEach((el) => {
+    //   if (obQuery[el].gte) {
+    //     obQuery[el].$gte = obQuery[el].gte;
+    //     delete obQuery[el].gte;
+    //   }
+    // });
     // console.log(obQuery);
-    //!!WE IMPLEMENT FILTER TO IGNORE EXCLUDED FIELD FROM QUERY STRING OF URL REQUEST
-    //?we also need to implements feature from execlued field
-    //-->Fact we get datas from filter then we will use function as sort, limit ... to manipulate with that datas
+    //*WAY2:USE REGULAR EXPRESSION, we use regular expresion to find data need to change
+    // const options = ['gte', 'lte', 'lt', 'gt'];
+    let obQueryStr = JSON.stringify(obQuery);
+    // console.log(obQuery, obQueryStr);
+    // options.forEach((el) => obQueryStr.replace(el, `$${el}`));
+    // /\b(gte|lte|gt|lt)\b/g, \b we only wanna find and \b to return boolean type, and g is global i wanna find all don't find once for example: if i found it'll stop if not g notation
+    //--! replace() accept callback function so it's very powerful
+    obQueryStr = obQueryStr.replace(
+      /\b(gte|lte|gt|lt)\b/g,
+      (match) => `$${match}`,
+    ); //!notice replace change but don't change the original string so if you want have a new value change you need assign is a variable
+    //!--> SO IN THE REAL WORLD WE HAVE TO WRITE DOCUMENT WHICH ALLOW USER TO KNOW WHICH KIND OPERATION THEY CAN DOON OUR API --> SO A GOOD IDEAL WE WILL COMPLETLY DOCUMENT OUR API AND GUIDE USERS THE WAY TO USE: SEDITIFYING REQUEST BY HTTP METHODS, AND SOME FEATERS AS SOFTING, FILTERING,... WHICH OF THEM AVALIABLE TO USE
+    //--> SO IF YOU WANT TO IMPLEMENT API FOR ANOTHER PEOPLE CAN USE WE NEED TO IMPLEMENTS THIS DOCUMENT
 
-    //? B, use some method of mongoose and chaning some special mongo method, and this methods build based on the code as the above code: in A
-    // const tours = await Tour.find()
-    //   .where('duration')
-    //   .equals(5)
-    //   .where('price')
-    //   .equals(100);
-    //!!HOW QUERY WORK:
-    //  --- Tour.find() return query object(instance of query class) so that's reaso we can chaining methods as the above code
-    // -->await Tour.find() run: the query execute and come back with document that's actually match or query so if we do it like this we can't implement sort, pagination, limit,... after  await Tour.find() finish run because if we use  const tours = await Tour.find() => tours not query object that's normal objects
-
-    //--> so we need do it in query process that's we will save this Tour.find() to query object and chaining query object to can handle many feature, we can use sort(), limit(), ... bunch of methods and chaining them
-
-    //!!WE WILL IMPLEMENT IT LIKE THIS:
+    // console.log(JSON.parse(obQueryStr));
     //*1 BUILD QUERY
-    const query = Tour.find(obQuery);
+    const query = Tour.find(JSON.parse(obQueryStr));
 
     //*2 EXECUTE QUERY
-    //Use query data: here we use query function built-in mongoose
-    const tours = await query; // return objects array
+
+    const tours = await query;
 
     //*3 SEND RESPONSE
     res.status(200).json({
