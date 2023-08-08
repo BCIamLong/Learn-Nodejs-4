@@ -13,21 +13,14 @@ const Tour = require('../models/tourModel');
 
 //! NOTICE: PATCH CAN UPDATE ONE OR MORE FIELDS OR ENTRIE OBJECT, PUT UPDATE ALL ENTRIRE OBJECT WITH OBJECT UPDATE SO EXAMPLE FOR PUT: {name: 'Long', age: 20} use put with data update is {name: 'ha'} => it's update and change your object to {name: 'ha'} so we lost age property so it's not flexty
 //====================================================
-//>>>>>>>>>>>>>>>LIMIT FIELD: USE SELECT FUNCTION
-//is feature allow api user can get some field which they sepecify back from response
-//it's useful especially when we have big data, data set, data heavy
-
-//---How to write query string on url to request API:
-//-->127.0.0.1:3000/api/v1/tours?fields=name,duration,price,...
-
-//!!READ MORE: https://mongoosejs.com/docs/api/query.html#Query.prototype.select()
+//>>>>>>>>>>>>>>>PAGINATION
 
 const getAllTours = async (req, res) => {
   try {
     //1A,FILTER
     const obQuery = { ...req.query };
 
-    const excludedField = ['sort', 'pages', 'limit', 'fields'];
+    const excludedField = ['sort', 'page', 'limit', 'fields'];
 
     excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
     //1B, AVANCED FILTER
@@ -57,22 +50,54 @@ const getAllTours = async (req, res) => {
       const queryFields = req.query.fields.split(',').join(' ');
       query = query.select(queryFields);
     }
-    //127.0.0.1:3000/api/v1/tours?fields=name,duration,price for included
-    //127.0.0.1:3000/api/v1/tours?fields=-name,-duration,-price for excluded
-    //don't use 127.0.0.1:3000/api/v1/tours?fields=-name,duration,price because it's not valid and return error
+
     if (!req.query.fields) {
-      //we need set default for this to remove some data don't sen to client:
-      //in this case it's __v: it's auto created by mongo but it's not needed for client
-      query = query.select('-__v'); //get everything except __v
+      query = query.select('-__v');
     }
-    //!!WE CAN ALSO REMOVE FIELD FROM SCHEMA AS SOME SENTITIVE DATA: PASSWORD,CREATE AT....
-    //--> GO TO SCHEMA AND ADD IN FIELD NEED HIDE: select: false
+    //4, PAGINATION
+    //-->The better wau to do pagination use skip().limit()
+    // query.skip(2).limit(10);
+    //---limit(10): max number of documments in a page is 10, limited amounts of documents
+    //* https://mongoosejs.com/docs/api/query.html#Query.prototype.limit()
+    //---skip(): is the amount of results that's should be skipped before atually quering data, it's similar a planhodler
+    //*https://mongoosejs.com/docs/api/query.html#Query.prototype.skip()
 
-    //--!BUT IN SOME SPECIAL SITUATION WE WANNA DISPLAY THIS DATA: USE +
-    // --> select('name,price,duration,+createdAt')
-    //--> this force return field has select: false
+    //?page=2,limit=10
+    //-->limit=10 per page has 10 results => page 1: 1->10, page 2: 11->20.... page n: (n-1)*10+1->n*numofperpage(10)
+    //-->page=2: we skip all result form page 1: 1-10 -> skip(10), if page=3 -> skip(20) -> page n ->skip(page*numofperpage)
+    //---we need skip all results before and run results for this page
+    //--?so why we don't directly write skip on query string, because page is abtraction and it's friendly and convinien
 
-    //
+    // console.log(req.query);
+    // -->WAY 1:
+    // if (req.query.page && req.query.limit) {
+    //   const page = +req.query.page;
+    //   const perPage = +req.query.limit;
+    //    console.log(page, perPage);
+    //   query = query.skip((page - 1) * perPage).limit(+perPage);
+    // }
+    // if (!(req.query.page && req.query.limit)) query = query.skip(2).limit(3);
+    // --> WAY 2:
+    //? Question if i try to access the not exist page so the server should send back an errors so i need to handle it because if not this return [] empty array and it's not error
+    // const count = await Tour.countDocuments({});//but it's low in big collection and so if you want count all documents and don't use filer object you can use estimatedDocumentCount() this is fast
+    // *https://mongoosejs.com/docs/api/query.html#Query.prototype.estimatedDocumentCount()
+    // *https://mongoosejs.com/docs/api/query.html#Query.prototype.countDocument()
+    // we also have count() but now it's not use you can read here* https://mongoosejs.com/docs/api/query.html#Query.prototype.count()
+    const count = await Tour.estimatedDocumentCount();
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 10;
+    const skip = (page - 1) * limit;
+    //use math.ceil() to rounding up because when we have 14 docs and limit is 4 totalPage = 14/4 =3.5 and so we have 3 pages have 12 docs and 1 page have 2 docs so it's still have docs to render so it's not error we need to use it to fix it
+    const totalDocs = Math.ceil(count / limit);
+    //if (skip <= totalDocs)
+    if (page <= totalDocs) query = query.skip(skip).limit(limit);
+    else throw new Error('Page invalid');
+    //--?so why i use throw Erorr because we are in try catch block so we don't handle error as normal way we use throw to throw error and catch() catch this error and handle
+    //!NOTICE WHEN YOU IMPLEMENTS NEW FEATURE YOU SHOULD SURE OPTION OF THAT'S FEATURE S DON'T IN FIND OBJECT BECAUSE find({page: 2}) => in document doesn't have this page field so it return empty array []
+
+    //>>>>>>>>>SUMMARY THE CHAINING QUERY METHOD IS LOOK LIKE THIS:
+    //--> query.find().sort().select().skip().limit() because this methods return query object from promise so youc an chaining this like that
+
     //*2 EXECUTE QUERY
 
     const tours = await query;
@@ -89,7 +114,7 @@ const getAllTours = async (req, res) => {
     res.status(404).json({
       status: 'Fails',
       message: 'Data not found',
-      error: err,
+      error: err.message,
     });
   }
 };
