@@ -13,9 +13,14 @@ const Tour = require('../models/tourModel');
 
 //! NOTICE: PATCH CAN UPDATE ONE OR MORE FIELDS OR ENTRIE OBJECT, PUT UPDATE ALL ENTRIRE OBJECT WITH OBJECT UPDATE SO EXAMPLE FOR PUT: {name: 'Long', age: 20} use put with data update is {name: 'ha'} => it's update and change your object to {name: 'ha'} so we lost age property so it's not flexty
 //====================================================
-//>>>>>>>>>>>>>>>SOFT FUNCTION
-//1, Need check if soft in request url
-//2, if true we call sort function and chaining with query
+//>>>>>>>>>>>>>>>LIMIT FIELD: USE SELECT FUNCTION
+//is feature allow api user can get some field which they sepecify back from response
+//it's useful especially when we have big data, data set, data heavy
+
+//---How to write query string on url to request API:
+//-->127.0.0.1:3000/api/v1/tours?fields=name,duration,price,...
+
+//!!READ MORE: https://mongoosejs.com/docs/api/query.html#Query.prototype.select()
 
 const getAllTours = async (req, res) => {
   try {
@@ -39,33 +44,35 @@ const getAllTours = async (req, res) => {
     let query = Tour.find(JSON.parse(obQueryStr));
 
     //2, SOFT FUNCTION
-    //a, we use built-in soft function of mongoose
     if (req.query.sort) {
-      // const sortQuery = req.query.sort.replaceAll(',', ' ');
       const sortQuery = req.query.sort.split(',').join(' ');
-      //!so we use relaceAll because we wanna replace all , notation to " "
-      //!if you use replace('rating,op,ok,alo', " ") => retrun 'rating op,ok,alo' do with first catch
+
       console.log(req.query.sort.replaceAll(',', ' '));
       query = query.sort(sortQuery);
-      // * Sort(): how to sort with inscrease or descrease -> default sort() sort with inscrease but if yu want sort descrease you use - before field: sort('-price')
-      // *but if you apply for all fieal that's: sort('-price -rating -duration')
     }
-    //!!BUT WE HAVE A PROBLEM THAT'S WHEN WE HAVE TWO OR MORE DOCUMENTS HAVE A SAME PRICE SO THE SORT IS RANDOM WITH THAT'S DOCUMENTS IN THIS CASE
-    //--! so how to solve this problem
-    //--> well we need to constrait by use more field for sort for example: you sort based on price and rating and duration and .... create constrait, so how to do that's in code?
-    //-->well in mongoose it's quite easy: sort('price average ...fields')
-    //--> the link from request:127.0.0.1:3000/api/v1/tours?sort=price,rating,...
-    //---so my work is replace , to " "
-    //! we need understand the way this work sort=price,rating => sort('price rating);
-    //-->1, we will sort price by default inscrease, you chance with -price to descrease
-    //-->2, if price1 === price2 => check rating by default inscrease
-    //-->3, if rating1 > rating2 => document1 sort after docment2
-    //--! if we have price1 === price2 we check condition constrait rating1 and rating2 and sort them with rating
 
-    //!!BUT YOU ALSO NEED SORT DEFAULT WHEN THE USER DON'T SEPECIFY SORT FEATURE
-    //---you can default soft by the date create, get the new tours to old tours
     if (!req.query.sort) query = query.sort('-createAt');
+    //3, LIMIT FIELD
+    if (req.query.fields) {
+      const queryFields = req.query.fields.split(',').join(' ');
+      query = query.select(queryFields);
+    }
+    //127.0.0.1:3000/api/v1/tours?fields=name,duration,price for included
+    //127.0.0.1:3000/api/v1/tours?fields=-name,-duration,-price for excluded
+    //don't use 127.0.0.1:3000/api/v1/tours?fields=-name,duration,price because it's not valid and return error
+    if (!req.query.fields) {
+      //we need set default for this to remove some data don't sen to client:
+      //in this case it's __v: it's auto created by mongo but it's not needed for client
+      query = query.select('-__v'); //get everything except __v
+    }
+    //!!WE CAN ALSO REMOVE FIELD FROM SCHEMA AS SOME SENTITIVE DATA: PASSWORD,CREATE AT....
+    //--> GO TO SCHEMA AND ADD IN FIELD NEED HIDE: select: false
 
+    //--!BUT IN SOME SPECIAL SITUATION WE WANNA DISPLAY THIS DATA: USE +
+    // --> select('name,price,duration,+createdAt')
+    //--> this force return field has select: false
+
+    //
     //*2 EXECUTE QUERY
 
     const tours = await query;
