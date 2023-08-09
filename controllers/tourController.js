@@ -1,106 +1,23 @@
-//NOW WE'RE WORKING WITH MONGODB SO WE DON'T NEED ANY THING ABOUT DATA FROM JSON FILE SO WE DELETED ALL THIS
-//import tour model to  handle CRUD and more actions with DB
 const Tour = require('../models/tourModel');
-
-// const sendRes = (cod, stt, data, res) => {
-//   res.status(cod).json({
-//     status: stt,
-//     data: data,
-//   });
-// };
-// QUERY METHOD IN MONGOOSE
-//--> All query method return query object so you can use objects to do something filter, search, sort,...
-
-//! NOTICE: PATCH CAN UPDATE ONE OR MORE FIELDS OR ENTRIE OBJECT, PUT UPDATE ALL ENTRIRE OBJECT WITH OBJECT UPDATE SO EXAMPLE FOR PUT: {name: 'Long', age: 20} use put with data update is {name: 'ha'} => it's update and change your object to {name: 'ha'} so we lost age property so it's not flexty
-//====================================================
-//>>>>>>>>>>>>>>>PAGINATION
+const APIFeatures = require('../utils/apiFeatures');
 
 const getAllTours = async (req, res) => {
   try {
-    //1A,FILTER
-    const obQuery = { ...req.query };
-
-    const excludedField = ['sort', 'page', 'limit', 'fields'];
-
-    excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
-    //1B, AVANCED FILTER
-    let obQueryStr = JSON.stringify(obQuery);
-
-    obQueryStr = obQueryStr.replace(
-      /\b(gte|lte|gt|lt)\b/g,
-      (match) => `$${match}`,
-    );
-
-    // console.log(JSON.parse(obQueryStr));
-    //*1 BUILD QUERY
-    // console.log(JSON.parse(obQueryStr));
-    let query = Tour.find(JSON.parse(obQueryStr));
-
-    //2, SOFT FUNCTION
-    if (req.query.sort) {
-      const sortQuery = req.query.sort.split(',').join(' ');
-
-      console.log(req.query.sort.replaceAll(',', ' '));
-      query = query.sort(sortQuery);
-    }
-
-    if (!req.query.sort) query = query.sort('-createAt');
-    //3, LIMIT FIELD
-    if (req.query.fields) {
-      const queryFields = req.query.fields.split(',').join(' ');
-      query = query.select(queryFields);
-    }
-
-    if (!req.query.fields) {
-      query = query.select('-__v');
-    }
-    //4, PAGINATION
-    //-->The better wau to do pagination use skip().limit()
-    // query.skip(2).limit(10);
-    //---limit(10): max number of documments in a page is 10, limited amounts of documents
-    //* https://mongoosejs.com/docs/api/query.html#Query.prototype.limit()
-    //---skip(): is the amount of results that's should be skipped before atually quering data, it's similar a planhodler
-    //*https://mongoosejs.com/docs/api/query.html#Query.prototype.skip()
-
-    //?page=2,limit=10
-    //-->limit=10 per page has 10 results => page 1: 1->10, page 2: 11->20.... page n: (n-1)*10+1->n*numofperpage(10)
-    //-->page=2: we skip all result form page 1: 1-10 -> skip(10), if page=3 -> skip(20) -> page n ->skip(page*numofperpage)
-    //---we need skip all results before and run results for this page
-    //--?so why we don't directly write skip on query string, because page is abtraction and it's friendly and convinien
-
-    // console.log(req.query);
-    // -->WAY 1:
-    // if (req.query.page && req.query.limit) {
-    //   const page = +req.query.page;
-    //   const perPage = +req.query.limit;
-    //    console.log(page, perPage);
-    //   query = query.skip((page - 1) * perPage).limit(+perPage);
-    // }
-    // if (!(req.query.page && req.query.limit)) query = query.skip(2).limit(3);
-    // --> WAY 2:
-    //? Question if i try to access the not exist page so the server should send back an errors so i need to handle it because if not this return [] empty array and it's not error
-    // const count = await Tour.countDocuments({});//but it's low in big collection and so if you want count all documents and don't use filer object you can use estimatedDocumentCount() this is fast
-    // *https://mongoosejs.com/docs/api/query.html#Query.prototype.estimatedDocumentCount()
-    // *https://mongoosejs.com/docs/api/query.html#Query.prototype.countDocument()
-    // we also have count() but now it's not use you can read here* https://mongoosejs.com/docs/api/query.html#Query.prototype.count()
+    //*BUILD QUERY
+    //! >>>>>>REFACTORING CODE WITH CLASS METHODS
+    //! don't inclue  const count = await Tour.estimatedDocumentCount(); in pagination() method cuz this is promise and to comsume promise you consvert pagination() to async pagination() but this will retrun promise pending because const features = new APIFeatures(Tour.find(), req.query).filter().sort().select().pagination(count); we don't use await
     const count = await Tour.estimatedDocumentCount();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 10;
-    const skip = (page - 1) * limit;
-    //use math.ceil() to rounding up because when we have 14 docs and limit is 4 totalPage = 14/4 =3.5 and so we have 3 pages have 12 docs and 1 page have 2 docs so it's still have docs to render so it's not error we need to use it to fix it
-    const totalDocs = Math.ceil(count / limit);
-    //if (skip <= totalDocs)
-    if (page <= totalDocs) query = query.skip(skip).limit(limit);
-    else throw new Error('Page invalid');
-    //--?so why i use throw Erorr because we are in try catch block so we don't handle error as normal way we use throw to throw error and catch() catch this error and handle
-    //!NOTICE WHEN YOU IMPLEMENTS NEW FEATURE YOU SHOULD SURE OPTION OF THAT'S FEATURE S DON'T IN FIND OBJECT BECAUSE find({page: 2}) => in document doesn't have this page field so it return empty array []
-
-    //>>>>>>>>>SUMMARY THE CHAINING QUERY METHOD IS LOOK LIKE THIS:
-    //--> query.find().sort().select().skip().limit() because this methods return query object from promise so youc an chaining this like that
+    console.log(count);
+    //Tour.find(), req.query is from express and we need query to query chaining, we need req.query because in class we create above we don't have permission to access to req.query so we pass this as field of class
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .select()
+      .pagination(count);
 
     //*2 EXECUTE QUERY
 
-    const tours = await query;
+    const tours = await features.query;
 
     //*3 SEND RESPONSE
     res.status(200).json({
