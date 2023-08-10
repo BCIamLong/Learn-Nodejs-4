@@ -17,6 +17,12 @@ router
   .route('/top-3-quality-cheap-tours')
   .get(tourController.aliasTop3CheapTours, tourController.getAllTours);
 
+//Tour statistics route: we shouldn't set /get-tours-stats because we have get is http verbs => tours-stats(good)
+router.route('/tours-stats').get(tourController.getTourStats);
+
+//Bussiness problem: get busiest month of tours, in that month we have many(max) tours in a sepecify year
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+
 router
   .route('/')
   .get(tourController.getAllTours)
