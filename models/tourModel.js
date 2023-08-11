@@ -2,15 +2,21 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-//>>>MODELING DATA BASIC
-//!WHEN WE HAVE ENGOUH REQUIRES FROM CUSTUMERS, USERS EXPERECCE, ... WE NEED DEFINE ALL COLLECTIONS, ALL FIELD OF COLLECTION TO CREATE SCHEMA FOR PER COLLECTION
-//--> AND FIND ALL COLLECTIONS AND ALL FIELD FOR PER COLLECTIONS NECESSARY TO PROJECT CAN WORK GOOD THAT'S IMPORTANT
+//!>>>>>>>>>>>>>VALIDATION BUILT-IN IN MONGOOSE
+//* validation usually in create docs and update docs
+//? https://mongoosejs.com/docs/validation.html#built-in-validators read this
+//!NOTICE THAT'S IN UPDATE METHODS OF MONGOOSE IT'S NOT APPLY VALIDATOR IF YOU WANT TURN ON VALIDATE YOU NEED GIVE OPTION runValidators: true
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      //* this is validation built-in mongoose: we can use validator required, ,...
       required: [true, 'Tour name is required field'],
-      unique: true,
+      unique: true, //! note: unique not really  validator, but return error when field same
+      trim: true, //this's also not validator it's special of schema
+      maxLength: [30, 'A name of tour not greater than 30 characters'],
+      minLength: [9, 'A name of tour not less than 9 characters'],
     },
     slug: String,
     duration: {
@@ -21,9 +27,19 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have max group size'],
     },
+    //*use validator enum built-in: the value equals in array element value it's accept, opposite it's fails
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
+      // required: {
+      //   values: true,//! this is behide the code required: [true, 'A tour must have a difficulty'],
+      //   message: 'A tour must have a difficulty',
+      // },
+      // enum: ['easy', 'difficult', 'medium'],//?so how we can set messages for this
+      enum: {
+        values: ['easy', 'difficult', 'medium'],
+        message: 'Difficult either: easy, difficult, medium',
+      },
     },
     ratingAverage: {
       type: Number,
@@ -33,7 +49,14 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    price: { type: Number, required: [true, 'Tour price is required field'] },
+    //*Validator for number built-in
+    price: {
+      type: Number,
+      required: [true, 'Tour price is required field'],
+      //! notice: MIN AND MAX use for number and ALSO USE FOR DATE
+      max: [10000, 'Atour must have price less than 10000 $'],
+      min: [100, 'A tour must have price greater than 100 $'],
+    },
     summary: {
       type: String,
       trim: true,
