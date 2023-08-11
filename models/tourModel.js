@@ -1,11 +1,14 @@
 // all thing are related to model and we will export model and import to controller to handler
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
-//!>>>>>>>>>>>>>VALIDATION BUILT-IN IN MONGOOSE
+//!>>>>>>>>>>>>>VALIDATION DEV IN MONGOOSE
 //* validation usually in create docs and update docs
-//? https://mongoosejs.com/docs/validation.html#built-in-validators read this
-//!NOTICE THAT'S IN UPDATE METHODS OF MONGOOSE IT'S NOT APPLY VALIDATOR IF YOU WANT TURN ON VALIDATE YOU NEED GIVE OPTION runValidators: true
+// sometime the validatoer of mongoose is not enough for our project especially big project so you need create the own validator
+//a validator iss simple function retun boolean type(true or false) true is accept and false is error
+//?Also we have pakages on npm can help to validate: validator,...
+//-->https://www.npmjs.com/package/validator: //!This library validates and sanitizes strings only.
 
 const tourSchema = new mongoose.Schema(
   {
@@ -45,9 +48,20 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
     },
+    //!!So i want the ratingQuantity is always less than ratingAverage so if you use built-in validator mongoose you can't do that ==> let's create your validator
     ratingQuantity: {
       type: Number,
       default: 0,
+      validate: {
+        validator: function (val) {
+          //val parameter here is value of ratingQuantity
+          //use regular function because we need use this keyword to access current docs
+          //!NOTICE: THIS KEYWORD ONLY POITING THE CURRENT DOCUMENT WHEN WE CREATE A NEW DOCUMENT, MEAN IS IT'S NOT WORK FOR UPDATE
+          return val < this.ratingAverage;
+        },
+        //VALUE  is sepecify the value of ratingQuantity and it's related to mongo not JS
+        message: 'The rating quantity(VALUE) must to less than rating average',
+      },
     },
     //*Validator for number built-in
     price: {
@@ -61,6 +75,13 @@ const tourSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, 'A tour must have summary'],
+      // validate: function (val) {
+      //   return validator.isEmpty(val);
+      // },
+      //?This is the way validator function work
+      //with this function you can use [], insteand use {values: '', message: ""}
+      //is Alpha is only contains characters, if white space it's also error
+      validate: [validator.isAlpha, 'The summary is only contains characters'],
     },
     description: {
       type: String,
