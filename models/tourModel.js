@@ -1,5 +1,6 @@
 // all thing are related to model and we will export model and import to controller to handler
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 //>>>MODELING DATA BASIC
 //!WHEN WE HAVE ENGOUH REQUIRES FROM CUSTUMERS, USERS EXPERECCE, ... WE NEED DEFINE ALL COLLECTIONS, ALL FIELD OF COLLECTION TO CREATE SCHEMA FOR PER COLLECTION
@@ -11,6 +12,7 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'Tour name is required field'],
       unique: true,
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have duration'],
@@ -61,19 +63,46 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-//!VIRTUAL PROPERTIES
-//--- this is a example fat model: use business login as more as posible in model
-//--? because this virtual properties total related to data(model) you change data(duration) to useful data(durationWeek) not related to res, req(app logic)
-//-->we don't go to controller create new field duratioWeek and do some login and add this to Database, instead we do it in model, and as you see mongo also support for our methods, tech to do that
+//!DOCUMENT MIDDLEWARE
+//---like virtual properties we need write document middleware mongoose in this file
+///---run before a save() or create() command, NOTICE IT DOESN'T USE FOR INSERTMANY OR ONE
+tourSchema.pre('save', function (next) {
+  //because we want use this keyword in here so don't use arrow func
+  //and this keyword in this function is processed document that's reason we call this docs middleware
+  //-->we can do something in here before the data really added to DB
+  //-->we want add slug field in document
 
-//why are we using get()?cuz this virtual properties will be created each time that we get some data out of the database-->so it can be called getter()
+  //---slugify: https://www.npmjs.com/package/slugify
+  this.slug = slugify(this.name, {
+    replacement: '-',
+    lower: true,
+  });
+  //* notice: you need defined slug in your schema if not slug don't add into your db
+  next();
+  //--! before we didn't call next but why it's still work cuz that's time we only have a middleware, if you have many middleware you need call next if not your cyccles is stuck
+  // console.log(this);
+});
+
+//?WE CAN SAY 'SAVE middeware' IS A save HOOK, WE CAN SAY IS A SAVE MIDDWARE OR SAVE HOOKS => PRE SAVE HOOK OR MIDDLEWAR, POST SAVE HOOK OR MIDDLEWARE
+//!We can have many pre oR post middleware
+
+tourSchema.pre('save', function (next) {
+  console.log('Document will save....');
+
+  next();
+  //!!NOTICE WHEN YOU HAVE MANY HOOKS(MIDDLEWARE) YOU NEED NOTICE CALL NEXT() IF NOT THE REQ RES CYCLE IS STUCK AND IT'S DON'T NEVER RETURN RESULT AND YOU CAN SEE IT'LL LOADING FORERVER
+});
+
+tourSchema.post('save', function (doc, next) {
+  //wwork when all pre middleware completed
+  // you access to doc just saved to db and next()
+  console.log(doc);
+  next();
+  //we don't really need next() here, example if after this post you have middleware you can use next() for example when you have many post middleware
+});
+
 tourSchema.virtual('durationWeek').get(function () {
-  //this function is not an arrow function because the arrow function doesn't use this key this keyword, and this time this is a represetation for the current document so we need use function(){}
-
-  //consvert days to week
-  return this.duration / 7; //this is pointing to the current document
-  //--> remember this virtual doesn't in database, it's only be there when we get data
-  //--> we can't use durationWeek in query
+  return this.duration / 7;
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
