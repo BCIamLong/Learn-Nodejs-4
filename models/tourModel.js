@@ -76,51 +76,49 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-// tourSchema.pre('save', function (next) {
-//   console.log('Document will save....');
-
-//   next();
-// });
-
-// tourSchema.post('save', function (doc, next) {
-//   console.log(doc);
-//   next();
-// });
-
-//!!QUERY MIDDLEWARE
-//?Read this: https://mongoosejs.com/docs/middleware.html#notes
-//It's also look like docs middeware, but the difference is find hook and this keywword now point to current query not document
-
-//*Use regex(regular expression): to execute with hook name start with find: find, findOne,findById, findOneAndUpdate, findOneAndDelete...
 tourSchema.pre(/^find/, function (next) {
-  //^find is trigger function if hook name start with find
-  // tourSchema.pre('find', function (next) {
-  // you can use pre query to query before data come to real query
-  //for example: you can do somethigns only show the normal tours and the secret tours for vip is hide because it's only for richer
-  //when we request it'll run features = new APIFeatures(Tour.find(), req.query).filter().sort().select().pagination(count); and but it's really execute in  const tours = await features.query; and between this we can chaining query to query object: new APIFeatures(Tour.find(), req.query).filter().sort().select().pagination(count).find({ vip: { $ne: 'true' } })
-  //this is query object so we can chaining method return query object
   this.find({ vip: { $ne: 'true' } }); //filter vip true out
 
   //because this is query object you can use chaining query method and also set new properties for this object
   this.start = Date.now();
   next();
-  //!notice because this is find hook so it's not effect to findOne query if you use findOne query it's not working so how to do that, well we have two way: 1 we create new pre query middleware handle with findOne hook, 2 we use regex(this way is better because you don't need to waste your rss)
 });
 
-// tourSchema.pre('findOne', function(next){
-
-// next();
-// })
-
 tourSchema.post(/^find/, function (docs, next) {
-  //when we run finish query executed, and return results as docs we can access to docs in post query middleware
-  // console.log(Date.now() - docs.start); //!notice docs is results from query not query object so start we set in query object not in here ==> we need use this keyword cuz this keyword poiting query object
   console.log(
     `Time to query to finish is: ${Date.now() - this.start} miliseconds`,
   );
   console.log(docs);
   next();
 });
+
+//!!AGGREGATION MIDDLEWARE
+//?Read this: https://mongoosejs.com/docs/middleware.html#notes
+tourSchema.pre('aggregate', function (next) {
+  // in thiss function wwe can access to current aggregation object via this keyword before it execute:
+  //--> const stats = await Tour.aggregate([])
+  // console.log(this.pipeline()); //pipeline() to show the pipeline code we defined in aggregate and it's really place we can change to do something
+  //why don't we use this.aggregate() well cuz aggregate not like query object it contains many stuff, and the code it's storage in pipeline and to get this we use this.pipeline()
+  // this.pipeline() return array contains all stages, if and per stages is a element object, if you want change add or remove stages for you goal you use JS array method push(), pop(), unshirt(), shirt(), splice(),.... to do that and edit stages in this array //! https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/
+  //then this array still work in aggregate and execute normal
+  this.pipeline().unshift({
+    //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
+    //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
+    $match: {
+      vip: { $ne: true },
+    },
+  });
+  next();
+});
+
+// tourSchema.post('aggregate', function (docs, next) {
+//   console.log(this.pipeline());
+//   console.log(docs); //this post aggregate hook not useful but maybe it's can use in certion situation in future
+//   next();
+// });
+
+//!!MODEL MIDDLEWARE
+//Model middleware is realy not useful because it's only for insertMany event for insertMany() so you can see in project we usually don't use this method => it's not useful
 
 tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;

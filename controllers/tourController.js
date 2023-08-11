@@ -191,7 +191,7 @@ const getTourStats = async (req, res) => {
     res.status(400).json({
       status: 'Fails',
       message: 'cant request',
-      error: err,
+      error: err.message,
     });
   }
 };
@@ -266,7 +266,8 @@ const getMonthlyPlan = async (req, res) => {
       },
       {
         //* https://www.mongodb.com/docs/manual/reference/operator/aggregation/limit/
-        $limit: 1,
+        // $limit: 10,
+        $limit: 1, //is get max num tours in a month
       },
     ]);
 
