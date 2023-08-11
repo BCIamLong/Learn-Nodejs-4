@@ -55,6 +55,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    vip: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     //we need defined the output for virtual properties
@@ -63,42 +67,59 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-//!DOCUMENT MIDDLEWARE
-//---like virtual properties we need write document middleware mongoose in this file
-///---run before a save() or create() command, NOTICE IT DOESN'T USE FOR INSERTMANY OR ONE
 tourSchema.pre('save', function (next) {
-  //because we want use this keyword in here so don't use arrow func
-  //and this keyword in this function is processed document that's reason we call this docs middleware
-  //-->we can do something in here before the data really added to DB
-  //-->we want add slug field in document
-
-  //---slugify: https://www.npmjs.com/package/slugify
   this.slug = slugify(this.name, {
     replacement: '-',
     lower: true,
   });
   //* notice: you need defined slug in your schema if not slug don't add into your db
   next();
-  //--! before we didn't call next but why it's still work cuz that's time we only have a middleware, if you have many middleware you need call next if not your cyccles is stuck
-  // console.log(this);
 });
 
-//?WE CAN SAY 'SAVE middeware' IS A save HOOK, WE CAN SAY IS A SAVE MIDDWARE OR SAVE HOOKS => PRE SAVE HOOK OR MIDDLEWAR, POST SAVE HOOK OR MIDDLEWARE
-//!We can have many pre oR post middleware
+// tourSchema.pre('save', function (next) {
+//   console.log('Document will save....');
 
-tourSchema.pre('save', function (next) {
-  console.log('Document will save....');
+//   next();
+// });
 
+// tourSchema.post('save', function (doc, next) {
+//   console.log(doc);
+//   next();
+// });
+
+//!!QUERY MIDDLEWARE
+//?Read this: https://mongoosejs.com/docs/middleware.html#notes
+//It's also look like docs middeware, but the difference is find hook and this keywword now point to current query not document
+
+//*Use regex(regular expression): to execute with hook name start with find: find, findOne,findById, findOneAndUpdate, findOneAndDelete...
+tourSchema.pre(/^find/, function (next) {
+  //^find is trigger function if hook name start with find
+  // tourSchema.pre('find', function (next) {
+  // you can use pre query to query before data come to real query
+  //for example: you can do somethigns only show the normal tours and the secret tours for vip is hide because it's only for richer
+  //when we request it'll run features = new APIFeatures(Tour.find(), req.query).filter().sort().select().pagination(count); and but it's really execute in  const tours = await features.query; and between this we can chaining query to query object: new APIFeatures(Tour.find(), req.query).filter().sort().select().pagination(count).find({ vip: { $ne: 'true' } })
+  //this is query object so we can chaining method return query object
+  this.find({ vip: { $ne: 'true' } }); //filter vip true out
+
+  //because this is query object you can use chaining query method and also set new properties for this object
+  this.start = Date.now();
   next();
-  //!!NOTICE WHEN YOU HAVE MANY HOOKS(MIDDLEWARE) YOU NEED NOTICE CALL NEXT() IF NOT THE REQ RES CYCLE IS STUCK AND IT'S DON'T NEVER RETURN RESULT AND YOU CAN SEE IT'LL LOADING FORERVER
+  //!notice because this is find hook so it's not effect to findOne query if you use findOne query it's not working so how to do that, well we have two way: 1 we create new pre query middleware handle with findOne hook, 2 we use regex(this way is better because you don't need to waste your rss)
 });
 
-tourSchema.post('save', function (doc, next) {
-  //wwork when all pre middleware completed
-  // you access to doc just saved to db and next()
-  console.log(doc);
+// tourSchema.pre('findOne', function(next){
+
+// next();
+// })
+
+tourSchema.post(/^find/, function (docs, next) {
+  //when we run finish query executed, and return results as docs we can access to docs in post query middleware
+  // console.log(Date.now() - docs.start); //!notice docs is results from query not query object so start we set in query object not in here ==> we need use this keyword cuz this keyword poiting query object
+  console.log(
+    `Time to query to finish is: ${Date.now() - this.start} miliseconds`,
+  );
+  console.log(docs);
   next();
-  //we don't really need next() here, example if after this post you have middleware you can use next() for example when you have many post middleware
 });
 
 tourSchema.virtual('durationWeek').get(function () {
