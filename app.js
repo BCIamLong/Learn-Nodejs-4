@@ -1,46 +1,78 @@
 const express = require('express');
-// const fs = require('fs');
+
 const morgan = require('morgan');
 
 const app = express();
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
-//-->YOU NEED TO CONVENIEN WITH ALL FILE SEPERATE BECAUSE THAT'S ALSO STARDAND OF EXPRESS
-
-//!1, MIDDLEWARE
-// --> this is middlewares use for all of the routers
-//!! THIS IS A EXAMPLE: LOGGER ONLY NESSCARY FOR DEVELOPMENT BECAUSE THAT'S TIME YOU NEED TO LOGGER TO WATCH MANY REQUEST AND HOW THEY WORK BUT IN PRODUCTION WE DON'T NEED IT BECAUSE APP DEPLOY AND USE BY USERS
-//--> AND THHAT'S WHEN WE CHANGE ENVIROMENT SO APPLICATION ALSSO CHANGE BASED ON ENV VARIABLE
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+//?IF YOU GIVE HANDLE NOT DEFINE ROUTE FUNCITON IN HERE IT'S ALWAY CATCH IN HERE, SEND res.status(404).json({ AND END THE REQ RES CYCLE
+// app.all('*', (req, res, next) => {
+//   // * notation all request verbs(get,post,...)
+//   res.status(404).json({
+//     status: 'Fails',
+//     message: `Route for ${req.originalUrl} not defined on application`,
+//   });
+//   next();
+// });
+
 app.use(express.json());
 
-//>>>>>>SERVING STATIC FILES
-//! static file is file we can't access from browser or something because they don't have route
-//--! in this project we have some file static in public some css, images, icons, index.html
-//--> so to access this files in browser as index.html to we can see interface to build project
-
-app.use(express.static(`${__dirname}/public`)); //it's set route for this and now we can access index.html to watch interface 127.0.0.1:3000/index.html or 127.0.0.1:3000/img/pin/png
-//!! notice that: it's only work with static file we sedetify here, don't effect to any other routes
-
-//!!ANY PRIECE OF WEBSITE OR SERVER ALL GET REQUESTS TO CREATE A COMPLETE WEB APPLICATION SO IF YOU USE MORGAN YOU CAN WATCH ALL REQUESTS IN LOGGERS AND KNOWEGE THAT
-//-->How we can serve static file from folder and not a route
+app.use(express.static(`${__dirname}/public`));
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
 
   next();
 });
-//==============================
-//!!3, ROUTES
 
-// ? this mounting router, app.use() moun tourRouter middleware when req url is /api/v1/tours => create connected bettween app and tourRouter by use middleware
-// --> you create spereter with per route with per rss by files and putting everything together in one main app file
-// --> THIS IS MIDDLEWARE APPLY FOR SPECIFY ROUTER THAT'S
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 
-//!! this mean is we have configuration applation in one standlone file
+//!ALL THING IN APP.JS IS RELATED TO EXRESS APPLICATION
+//!HANDLE ROUTER NOT DEFINED
+//---request go though middleware stack if it's come to here  mean is it be ignore by all route above so => if it came to here => it's not defined route
+//-->now we can catch it in here
+//router.get() .post(),... that time we write many line to handle for this but we wanna handle all not defined routes => we can use router.all() catch all the request(get, post, patch,...)
+//-->IDEAL: catch route not defined by give it after all router if request can come here => it's not defined route and opposite it's maybe be catch by some route above handle and sen res so the req-res cycle end and it will not catch in here
+app.all('*', (req, res, next) => {
+  // * notation all request verbs(get,post,...)
+  // res.status(404).json({
+  //   status: 'Fails',
+  //   message: `Route for ${req.originalUrl} not defined on application`,
+  // });
+  //?2 CREATE ERRORS
+  //we will Error built-in contructor to create new instance of error
+  const err = new Error(`Route for this link not defined on application`); //err contructor accept message(String)
+  err.status = 'fails';
+  err.statusCode = 404;
+  //--> this error will handle in next step
+
+  //anything you pass in next() whatever Express auto know that there was an error => it's assume all we pass in next() is errors and this apply all middleware in express
+  //and then express skip all middleware in middleware stack and send the error we passed to our global error handling middleware
+  next(err); //=> skip all middleware in middleware stack and send the error to global error middleware
+  //?WE ALSO IMPLEMENTS ALL THIS CODE IN THE ORTHER HANDLE FUNCTION, MIDDLEWARE IF THEY HAVE ERROR WE CREATE ERROR SEND TO GLOBAL ERROR MIDDLEWARE
+  //! BUT IF YOU DO IT AND WRITE MANY CODE AND REPEAT MANY TIMES IT'S NOT GOOD SO WE SHOULD CREATE A CLASS ERROR AND WRITE METHODS THEN CREATE INSTANCE OF THIS CLASS AND USE ERRORS THAT'S BETTER AND IT'S ALSO BE USE POPULAR
+});
+
+//!>>>>>>>>>Errors handling middleware
+//---1, we need create error handling middleware
+//---2, we create error, for example: throw newError() functions and this will be ctach in here
+//?1 CREATE ERRORS HANDLER MIDDLEWARE
+app.use((err, req, res, next) => {
+  // with four parameters express know this is error handling middleware, because express has error middleware handle out of the box
+  err.statusCode = err.statusCode || 500;
+  //* Why we need to set default: because there will be errors that are not comming from us, because there are gonna be errors withou status code so errors that not create by us but maybe some another place in node js apllication
+  err.status = err.status || 'error';
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+
+  next();
+});
+
 module.exports = app;

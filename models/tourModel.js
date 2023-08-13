@@ -56,7 +56,7 @@ const tourSchema = new mongoose.Schema(
         validator: function (val) {
           //val parameter here is value of ratingQuantity
           //use regular function because we need use this keyword to access current docs
-          //!NOTICE: THIS KEYWORD ONLY POITING THE CURRENT DOCUMENT WHEN WE CREATE A NEW DOCUMENT, MEAN IS IT'S NOT WORK FOR UPDATE
+          //NOTICE: THIS KEYWORD ONLY POITING THE CURRENT DOCUMENT WHEN WE CREATE A NEW DOCUMENT, MEAN IS IT'S NOT WORK FOR UPDATE //! IN THE NEW VERSION MONGOOSE FIX IT AND WE CAN USE FOR CREATE AND UPDATE
           return val < this.ratingAverage;
         },
         //VALUE  is sepecify the value of ratingQuantity and it's related to mongo not JS

@@ -25,10 +25,15 @@ const getAllTours = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(404).json({
-      status: 'Fails',
+    // res.status(404).json({
+    //   status: 'Fails',
+    //   message: 'Data not found',
+    //   error: err.message,
+    // });
+    throw new Error({
+      statusCode: 404,
+      status: 'fails',
       message: 'Data not found',
-      error: err.message,
     });
   }
 };
