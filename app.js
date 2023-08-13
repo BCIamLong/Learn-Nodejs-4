@@ -1,10 +1,11 @@
 const express = require('express');
-
 const morgan = require('morgan');
-
-const app = express();
+const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const globalErrorsHandler = require('./controllers/errorController');
+
+const app = express();
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -46,9 +47,22 @@ app.all('*', (req, res, next) => {
   // });
   //?2 CREATE ERRORS
   //we will Error built-in contructor to create new instance of error
-  const err = new Error(`Route for this link not defined on application`); //err contructor accept message(String)
-  err.status = 'fails';
-  err.statusCode = 404;
+  // const err = new Error(`Route for this link not defined on application`); //err contructor accept message(String)
+  // err.status = 'fails';
+  // err.statusCode = 404;
+  //* User App Error class custom
+  const err = new AppError(
+    404,
+    `Route for this ${req.originalUrl} not defined on application`,
+  );
+  //--> you can use next() like this
+  // next(
+  //   new AppError(
+  //     404,
+  //     `Route for this ${req.originalUrl} not defined on application`,
+  //   ),
+  // );
+
   //--> this error will handle in next step
 
   //anything you pass in next() whatever Express auto know that there was an error => it's assume all we pass in next() is errors and this apply all middleware in express
@@ -62,17 +76,6 @@ app.all('*', (req, res, next) => {
 //---1, we need create error handling middleware
 //---2, we create error, for example: throw newError() functions and this will be ctach in here
 //?1 CREATE ERRORS HANDLER MIDDLEWARE
-app.use((err, req, res, next) => {
-  // with four parameters express know this is error handling middleware, because express has error middleware handle out of the box
-  err.statusCode = err.statusCode || 500;
-  //* Why we need to set default: because there will be errors that are not comming from us, because there are gonna be errors withou status code so errors that not create by us but maybe some another place in node js apllication
-  err.status = err.status || 'error';
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-
-  next();
-});
+app.use(globalErrorsHandler);
 
 module.exports = app;
