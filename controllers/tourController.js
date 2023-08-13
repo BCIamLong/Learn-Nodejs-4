@@ -1,6 +1,7 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
+const AppError = require('../utils/appError');
 
 const getAllTours = catchAsync(async (req, res, next) => {
   const count = await Tour.estimatedDocumentCount();
@@ -10,6 +11,9 @@ const getAllTours = catchAsync(async (req, res, next) => {
     .select()
     .pagination(count);
   const tours = await features.query;
+  //! WHY WE DON'T USE HANDLE 404 ERROR IN HERE AS WE DON'T FOUND ANY RESULT, OR FILTER NOT VALID, PAGE INVALID
+  //* --> Because the 0 results is also result and we can display some thing not result,... with 0 result filter is filter to 0 result and data request to DB and get 0 result from DB and we will send back 0 result with http 200
+  //?--> it really can't consider an error when the user request all the tours, unless mongoDB has some problem and occurs errors then mongo auto give an error and it'll catch by catchAsync function and send next(err) and the global handler will handle this
   res.status(200).json({
     status: 'Sucess',
     result: tours.length,
@@ -44,6 +48,13 @@ const getTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const tour = await Tour.findById(id); //return an object
 
+  //?HANDLER 404 ERROR
+  //* We can throw this error and catch method in catchSync() will catch this error
+  // if (!tour) throw new AppError(404, 'Id invalid');
+  // you also use:
+  if (!tour) return next(new AppError(404, 'Id invalid')); //! you need return here because next() not end process and if you haven't return well we have error that: Cannot set headers after they are sent to the client
+  //--> this way better because we dont need many work as throw: we throw (create new error) -> catch() catch error and send next(err), this way only send next(create new error)
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -59,7 +70,7 @@ const updateTour = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true, //now the validator in schema enable and can check data
   });
-
+  if (!tourUpdate) return next(new AppError(400, 'Update data invalid'));
   res.status(200).json({
     status: 'success',
     data: {
@@ -70,7 +81,8 @@ const updateTour = catchAsync(async (req, res, next) => {
 
 const deleteTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  await Tour.findByIdAndDelete(id);
+  const tour = await Tour.findByIdAndDelete(id);
+  if (!tour) return next(new AppError(400, 'Update data invalid'));
   res.status(204).json({
     status: 'success',
     data: null,

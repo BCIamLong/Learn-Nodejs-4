@@ -23,6 +23,7 @@ router.route('/tours-stats').get(tourController.getTourStats);
 //Bussiness problem: get busiest month of tours, in that month we have many(max) tours in a sepecify year
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
+//! WE ALSO CAN USE THE asyncCatch() in here insteand do in controller: asyncCatch(tourController.getAllTours) but the result is the same and maybe in this case when we have the sync function we need to remember or know what the method is sync or async cuz if it's sync you use asyncCatch(syncFuntion) => not working and even it's not anoucce your error so it's really hard to find so you should use it in controller
 router
   .route('/')
   .get(tourController.getAllTours)

@@ -1,3 +1,4 @@
+// const AppError = require('./appError');
 module.exports = (fn) => (req, res, next) => {
   // * we return a fuction express expected (req, res, next)
   // * this time we habe req, res, next come from request and can handle  fn(req, res, next)
