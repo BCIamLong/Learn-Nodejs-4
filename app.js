@@ -24,11 +24,11 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 
 app.use(express.static(`${__dirname}/public`));
-// app.use((req, res, next) => {
-//   req.requestTime = new Date().toISOString();
-
-//   next();
-// });
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  // console.log(x); //* PUT UNCAUGHT ERROR IN MIDDLEWARE: THIS WILL CATCH BY GLOBAL ERROR SO DON'T WORRY ABOUT THIS
+  next();
+});
 
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
@@ -71,6 +71,8 @@ app.all('*', (req, res, next) => {
   //?WE ALSO IMPLEMENTS ALL THIS CODE IN THE ORTHER HANDLE FUNCTION, MIDDLEWARE IF THEY HAVE ERROR WE CREATE ERROR SEND TO GLOBAL ERROR MIDDLEWARE
   //! BUT IF YOU DO IT AND WRITE MANY CODE AND REPEAT MANY TIMES IT'S NOT GOOD SO WE SHOULD CREATE A CLASS ERROR AND WRITE METHODS THEN CREATE INSTANCE OF THIS CLASS AND USE ERRORS THAT'S BETTER AND IT'S ALSO BE USE POPULAR
 });
+//* PUT SOME UNCAUGHT EXCEPTION HERE
+// console.log(x); // it's also catch by UNCAUGHT EXCEPTION event listenner
 
 //!>>>>>>>>>Errors handling middleware
 //---1, we need create error handling middleware
