@@ -82,7 +82,7 @@ const updateTour = catchAsync(async (req, res, next) => {
 const deleteTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const tour = await Tour.findByIdAndDelete(id);
-  if (!tour) return next(new AppError(400, 'Update data invalid'));
+  if (!tour) return next(new AppError(400, 'Id invalid'));
   res.status(204).json({
     status: 'success',
     data: null,
