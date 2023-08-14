@@ -47,6 +47,7 @@ const tourSchema = new mongoose.Schema(
     ratingAverage: {
       type: Number,
       default: 4.5,
+      max: 5,
     },
     //!!So i want the ratingQuantity is always less than ratingAverage so if you use built-in validator mongoose you can't do that ==> let's create your validator
     ratingQuantity: {
