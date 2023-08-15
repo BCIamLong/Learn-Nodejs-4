@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 const Tour = require('../../models/tourModel');
+const User = require('../../models/userModel');
 
 //! NOTICE: ./ <=> LINK OF FOLDER START THIS PROJECT: C://.../natours you know if you use ../../config.env you are wating find file config.env in dev-data/data
 dotenv.config({ path: `./config.env` });
@@ -19,9 +20,9 @@ mongoose
   .then(() => console.log('DB connect success'))
   .catch((err) => console.log(err));
 
-const importData = async () => {
+const importData = async (model, data) => {
   try {
-    await Tour.create(tours);
+    await model.create(data);
     console.log('Import data success');
   } catch (err) {
     console.log(err);
@@ -32,10 +33,10 @@ const importData = async () => {
   mongoose.connection.close();
 };
 
-const deleteData = async () => {
+const deleteData = async (model) => {
   try {
     //User Tour.deleteMany(); is delete all data in tours collection
-    await Tour.deleteMany();
+    await model.deleteMany();
     console.log('Delete all data success');
   } catch (err) {
     console.log(err);
@@ -52,5 +53,7 @@ const deleteData = async () => {
 // process.argv place constain all commands you write when you run app
 //when you run: node app.js , node and app.js will store in process.argv
 console.log(process.argv);
-if (process.argv[2] === '--import') importData();
-if (process.argv[2] === '--delete') deleteData();
+// if (process.argv[2] === '--import-user') importData(User, tours);
+if (process.argv[2] === '--delete-users') deleteData(User);
+if (process.argv[2] === '--import-tours') importData(Tour, tours);
+if (process.argv[2] === '--delete-tours') deleteData(Tour);
