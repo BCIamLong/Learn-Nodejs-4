@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     // unique: true,
     minLength: [8, 'Password need at least 8 characters'], //!but we also have many rules for password as at least one number, letter, character, special chracter, symbol... but maybe it's not strict, security more cuz usually the best password is the longest ones and not password have crazy symbol, character,... and all that
     //* --> we also set specifics fields for password in manage password in the database
+
+    //!WE SHOULDN'T SHOW THE HASH PASSWORD WHEN WE GET ALL USER BECAUSE IT'S NOT SECURITY
+    select: false, //!hide password but we also can force(ep buoc) show by use +password when use field filter
+    //* so with this the password don't a part of output and this so important because when you login you need interract with DB and get email and password from the user so this process maybe can hack to get our password
   },
   photo: {
     type: String,
@@ -75,6 +79,31 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+//?IMPLEMENTS CHECK PASSWORD IS CORRECT?
+//*1, create instance method: is bassically method that is going to be available on all documents of a certain collection
+
+userSchema.methods.passwordCorrect = async function (
+  cadidatePassword,
+  userPassword,
+) {
+  //?this is pointing the current document
+  //--! but we can't use this.password cuz we used select:false so it's not available, that why we need parameter for this password
+  //-->the goal function return true if correct and opposite
+  return await bcrypt.compare(cadidatePassword, userPassword);
+};
+
+// userSchema.post('findOne', async function (user, next) {//!this code can't implements because don't have password from request and can't access to password in curren document(we used select:false)
+//   const con = await bcrypt.compare(password, user.password);
+//   console.log(this);
+//   if (!con)
+//     return next(
+//       new AppError(
+//         400,
+//         'User password not correct, please check and try again',
+//       ),
+//     );
+//   next();
+// });
 const User = mongoose.model('User', userSchema); // use mongoose.model() is a function to create a model
 
 module.exports = User;

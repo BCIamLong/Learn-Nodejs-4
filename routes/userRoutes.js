@@ -9,6 +9,8 @@ const router = express.Router();
 // ?special route: this route have special enpoint(/signup) and doesn't fit the rest architecture, so cuz in some certain we also need a special end point like get-top-3-cheap-tours,loggin, change password,.... so some endpoint maybe do not fit with the res philosophy(triet ly)
 //--> we will implemants all function if user itself so it's not admin
 router.post('/signup', authController.signup);
+//?IMPLEMENTS USER LOGIN
+router.post('/login', authController.login); //* use post method because we need pass data to check logging for user
 
 //!We also need the route code bellow  cuz some possibility of a system administrator updating or deleting or getting the user based on their id
 //--> we will implemants all function if user itself so it's not admin loggin in a user instead it's only user(admin) that's going to sign up himself or log himself
