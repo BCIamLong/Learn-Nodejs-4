@@ -11,6 +11,7 @@ const router = express.Router();
 router.post('/signup', authController.signup);
 //?IMPLEMENTS USER LOGIN
 router.post('/login', authController.login); //* use post method because we need pass data to check logging for user
+router.get('/logout', authController.logout);
 
 //!We also need the route code bellow  cuz some possibility of a system administrator updating or deleting or getting the user based on their id
 //--> we will implemants all function if user itself so it's not admin loggin in a user instead it's only user(admin) that's going to sign up himself or log himself

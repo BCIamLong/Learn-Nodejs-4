@@ -3,6 +3,7 @@
 //!! you can connect with app.js file by import this sub app and use it as middleware
 const express = require('express');
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -24,9 +25,11 @@ router.route('/tours-stats').get(tourController.getTourStats);
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 //! WE ALSO CAN USE THE asyncCatch() in here insteand do in controller: asyncCatch(tourController.getAllTours) but the result is the same and maybe in this case when we have the sync function we need to remember or know what the method is sync or async cuz if it's sync you use asyncCatch(syncFuntion) => not working and even it's not anoucce your error so it's really hard to find so you should use it in controller
+
+//* So we will use authetication protect to check the user has the valid token to access this route
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.protectManually, tourController.getAllTours)
   .post(tourController.createTour);
 
 router

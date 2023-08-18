@@ -46,6 +46,9 @@ const userSchema = new mongoose.Schema({
       message: 'Password invalid, please enter password you just fill ',
     },
   },
+  passwordChangedAt: Date,
+  //* We need this field to know when the password changed, and this date can help user know correct with the time user change password
+  //* this date always change when password change => defaut users don't have this field and if in the future they changed their password this field will update
 });
 
 //!ENCRYPT PASSWORD: this is useful when we use pre save hook middleware, because we can't encrypt password in schema, and we can encrypt in controller but we need to keep the bussiness logic(data) seperate with app logic
@@ -104,6 +107,24 @@ userSchema.methods.passwordCorrect = async function (
 //     );
 //   next();
 // });
+
+//?IMPLEMENTS THE CHECK PASSWORD HAS BEED CHANGED OR NOT METHOD
+//!Remember this method is static instance method
+//* with parameter: we need jwt timestamp, which give us info when the token was issued
+userSchema.methods.checkPasswordChangeAfter = async function (JWTTimestamp) {
+  //check the user has changed the password after the token was issued? return true if changed and false (not change)
+  //--> we also need create a field now in our schema for that day password has changed
+  if (this.passwordChangedAt) {
+    // console.log(this.passwordChangedAt, JWTTimestamp);
+    // console.log(this.passwordChangedAt.getSeconds());
+    const changedTime = Math.floor(Date.parse(this.passwordChangedAt) / 1000);
+    return changedTime > JWTTimestamp; //time you change password always greater than time you created this account(password), when in 200s you change password but the token issued in 300s so 200 >300 => false=> password no changed
+  }
+
+  //if user not change password we return false
+  return false;
+};
+
 const User = mongoose.model('User', userSchema); // use mongoose.model() is a function to create a model
 
 module.exports = User;

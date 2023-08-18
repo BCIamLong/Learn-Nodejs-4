@@ -13,6 +13,7 @@ const sendErrorDev = (err, res) => {
 };
 
 const sendErrorProd = (err, res) => {
+  // console.error(`ERROR: ${err}`);
   if (err.isOperational)
     return res.status(err.statusCode).json({
       status: err.status,
@@ -55,6 +56,10 @@ const handleValidationErrorDB = (err) => {
   // console.log(message2);
   return new AppError(400, message);
 };
+const handleJWTError = () =>
+  new AppError(403, 'Invalid token, please login again');
+const handleJWTExpiresError = () =>
+  new AppError(401, 'Your login turn was expires, please login again ');
 
 module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') sendErrorDev(err, res);
@@ -88,6 +93,10 @@ module.exports = (err, req, res, next) => {
 
     // * NOW WE CAN DEFINED DIFFERENT ERROR SEVERRITY(NGHIEM TRONG CUA LOI) LEVELS
     //--> for example we can say this error is important or not important, or critical(nghiem trong), with critical error we can send message for admistrator about critical error
+
+    //*WHEN YOU DISCORVE THE ERROS FROM THE PACKAGES, DATABASE,... AND IT'S NOT BE CATCH WITH NORMAL WAY, SO WITH THESE ERRORS WE NEED CUSTOM TO CLIENT IN PRODUCTION BECAUSE THÍ ERROR FROM USER AND WE NEED CUSTOM MESSAGES FOR USER UNDERSTAND WHAT'RE THEY DOING
+    if (errProd.name === 'JsonWebTokenError') errProd = handleJWTError();
+    if (errProd.name === 'TokenExpiredError') errProd = handleJWTExpiresError();
 
     //! AND IF YOU FIND AN ERRORS SIMILAR WITH ERRORS ABOUT YOU CAN ADD ERRORS AS THE CODE ABOVE, AND IDEAL IS MARK ERRORS AS ERROR ISOPERATIONA (CUSTEM ERRORS)
     sendErrorProd(errProd, res); //--> SEND ERROR IN HERE

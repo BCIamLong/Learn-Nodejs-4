@@ -65,7 +65,7 @@ class APIFeatures {
 
     const totalDocs = Math.ceil(count / limit);
     //if (skip <= totalDocs)
-    console.log(skip, limit);
+    // console.log(skip, limit);
     if (page <= totalDocs) {
       this.query = this.query.skip(skip).limit(limit);
     } else throw new Error('Page invalid');
