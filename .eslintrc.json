@@ -1,6 +1,9 @@
 {
   "extends": ["airbnb", "prettier", "plugin:node/recommended"],
   "plugins": ["prettier"],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
   "rules": {
     // "prettier/prettier": "error",
     "import/no-extraneous-dependencies": ["warn", { "devDependencies": true }],

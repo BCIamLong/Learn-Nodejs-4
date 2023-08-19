@@ -1,10 +1,9 @@
 const { promisify } = require('util');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
-const { decode } = require('punycode');
 
 const createToken = (user) =>
   //*add password for check if user change password when the jwt issued
@@ -19,6 +18,7 @@ const signup = catchSync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
+    // roles: req.body.roles, //! you should give this roles always default so we don't need this line code in here but now we are developing so wen use this to check info or you can go to compass GUI and change
   });
   const token = createToken(newUser);
   res.status(200).json({
@@ -93,12 +93,11 @@ const protect = catchSync(async (req, res, next) => {
   next();
 });
 
-const logout = (req, res, next) => {
-  return res.clearCookie('access_token').status(200).json({
+const logout = (req, res, next) =>
+  res.clearCookie('access_token').status(200).json({
     status: 'success',
     message: 'Successfully logged out',
   });
-};
 
 const protectManually = catchSync(async (req, res, next) => {
   //! 1, check token
@@ -143,7 +142,7 @@ const protectManually = catchSync(async (req, res, next) => {
   const freshUser = await User.findById(decoded.id);
   if (!freshUser) {
     //a, delete token
-    decode.iat = decode.iat + decode.exp / 100; // with we will do decode.iat > decode.exp => token was expires
+    decoded.iat += decoded.exp / 100; // with we will do decode.iat > decode.exp => token was expires
     //b, send error
     return next(
       new AppError(
@@ -159,6 +158,7 @@ const protectManually = catchSync(async (req, res, next) => {
   //--> why we should create in model because this has many code and related to model, data(bussiness logic) and not related to controller(application logic)
 
   //check password changed?
+
   if (freshUser.checkPasswordChangeAfter(decoded.iat)) {
     //!change token: we don't need change this action is another place not in this, maybe it's in change, reset password features
     // req.headers.authorization.split(' ')[1] = createToken(freshUser);
@@ -173,7 +173,36 @@ const protectManually = catchSync(async (req, res, next) => {
   // *GRANT ACCESS TO PROTECTED ROUTE
   //---put the entire user data on the request: cuz we need user data to manipulate with some data in future
   //--! remmember this req object can travel in all middleware in middleware stack and to put data to the next middleware well we will storage that data in req object
+  //!So the id ussually add to json wen token it's make then know whether the user that's trying to perform the action in the user or if the admin, leading guide or whatever
+  //! we have id we can get user from DB via id => we pass data to req.user and after middleware use this data to perfrom something like authoriztion, ....
   req.user = freshUser;
   next();
 });
-module.exports = { signup, login, protect, logout, protectManually };
+
+//?IMPLEMENTS AUTHORIZATION USERS
+//* create wapper function return function of middleware type which express expected(because we using this function as middleware so we also need return type of middleware, if not it'll never work)
+//* res and spread operator in ES6 js: https://www.freecodecamp.org/news/three-dots-operator-in-javascript/
+//* THIS IS ALSO A PART OF AUTHETICATION WORKFLOW
+const restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    //* remember this data we get from before middleware that's protect middeware we use  req.user = freshUser; to add user into req, req can travel in middleware cycle
+
+    //!When we access to this function why we can access to roles, well that's closure and the first running was be snipshot and it's still in here and we can access
+    if (!roles.includes(req.user.roles))
+      return next(
+        //!403 is forbidden it's for authorization: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+        new AppError(403, 'You dont have permission to do access to this'),
+      );
+
+    next(); //allow perform action
+  };
+
+module.exports = {
+  signup,
+  login,
+  protect,
+  logout,
+  protectManually,
+  restrictTo,
+};

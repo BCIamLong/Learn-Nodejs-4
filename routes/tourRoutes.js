@@ -7,35 +7,35 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-// -->so you don't need check id in mongo
-// router.param('id', tourController.checkId);
-
-//Alias route: top-3-quality-cheap-tours
-// router
-//   .route('/top-3-quality-cheap-tours')
-//   .get(tourController.getTop3CheapTours);
 router
   .route('/top-3-quality-cheap-tours')
   .get(tourController.aliasTop3CheapTours, tourController.getAllTours);
 
-//Tour statistics route: we shouldn't set /get-tours-stats because we have get is http verbs => tours-stats(good)
 router.route('/tours-stats').get(tourController.getTourStats);
 
 //Bussiness problem: get busiest month of tours, in that month we have many(max) tours in a sepecify year
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
-//! WE ALSO CAN USE THE asyncCatch() in here insteand do in controller: asyncCatch(tourController.getAllTours) but the result is the same and maybe in this case when we have the sync function we need to remember or know what the method is sync or async cuz if it's sync you use asyncCatch(syncFuntion) => not working and even it's not anoucce your error so it's really hard to find so you should use it in controller
-
-//* So we will use authetication protect to check the user has the valid token to access this route
+//!PROTECT IS CHECK USER LOGGED IN ?
+//? AND NOW WE WILL CHECK WHEN USER/ADMIN LOGGED IN WHAT CAN THEY DO? WELL IT'S BASSICALLY THEIR ROLE, SO WE WILL WRITE MIDDLEWARE(RESTRICT FUNCTION) TO CHECK ROLE
 router
   .route('/')
   .get(authController.protectManually, tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(authController.protectManually, tourController.createTour);
 
+//* so we will use function restrictTo('') and pass some user role which will be authorized to interact with this resources for example, user, guide, leading-guide, admin,... and roles can different with other application
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .patch(authController.protectManually, tourController.updateTour)
+  .delete(
+    //!we also need to check if user/admin login
+    authController.protectManually,
+    //!only admin and leading-guide can delete data(you can set more it's depen on your application)
+    authController.restrictTo('admin', 'leading-guide'),
+    //! only roles we sepecify can perform this action( delete action)
+    //* --> if the user request pass thought two middleware above now they have permission to do this action
+    tourController.deleteTour,
+  );
 
 module.exports = router;
