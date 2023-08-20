@@ -58,19 +58,22 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
+  //! you can set in case you update wwith save and want avoid creation document you can do like this instead create new pre save hooks(middleware)
+  if (this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
-userSchema.pre('save', function (next) {
-  //--! this.isNew check if create document => next() because we only want for update(in this case we use save() as update)
-  if (this.isModified('password') || this.isNew) return next();
-  this.passwordChangedAt = Date.now() - 1000; //* so we  fix that with minus for 1000 miliseconds to set timestamp of passwordChangedAt  always always create after (<) timestamp of json web token
+// userSchema.pre('save', function (next) {
+//--! this.isNew check if create document => next() because we only want for update(in this case we use save() as update)
+// if (this.isModified('password') || this.isNew) return next();
+// this.passwordChangedAt = Date.now() - 1000; //* so we  fix that with minus for 1000 miliseconds to set timestamp of passwordChangedAt  always always create after (<) timestamp of json web token
 
-  //! so it's really working good but sometime maybe it's can occurs problem, and that problem is that sometime saving to the DB is little slower than oupputing the json web token so the password timestamp(dau thoi gian) change is sometimes set a bit later after the json web token created so that the user can't login using the new token that does it
-  //? and becasue we use timestamp of passwordChangedAt to compare with timestamp of json web token that's mean this time timestamp of passwordChangedAt  always > timestamp of json web token
-  //* and if timestamp of passwordChangedAt  always > timestamp of json web token => this doesn't allow use login because we set validator for this
-  next();
-});
+//! so it's really working good but sometime maybe it's can occurs problem, and that problem is that sometime saving to the DB is little slower than oupputing the json web token so the password timestamp(dau thoi gian) change is sometimes set a bit later after the json web token created so that the user can't login using the new token that does it
+//? and becasue we use timestamp of passwordChangedAt to compare with timestamp of json web token that's mean this time timestamp of passwordChangedAt  always > timestamp of json web token
+//* and if timestamp of passwordChangedAt  always > timestamp of json web token => this doesn't allow use login because we set validator for this
+//   next();
+// });
 
 userSchema.methods.passwordCorrect = async function (cadidatePassword, userPassword) {
   return await bcrypt.compare(cadidatePassword, userPassword);
