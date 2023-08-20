@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'User must have a password'],
+    required: [true, 'Please fill your password'],
     // unique: true,
     minLength: [8, 'Password need at least 8 characters'],
     select: false,
@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Pls confirm your password'],
+    required: [true, 'Please confirm your password'],
     validate: {
       validator: function (val) {
         return val === this.password;
@@ -61,10 +61,18 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.methods.passwordCorrect = async function (
-  cadidatePassword,
-  userPassword,
-) {
+userSchema.pre('save', function (next) {
+  //--! this.isNew check if create document => next() because we only want for update(in this case we use save() as update)
+  if (this.isModified('password') || this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000; //* so we  fix that with minus for 1000 miliseconds to set timestamp of passwordChangedAt  always always create after (<) timestamp of json web token
+
+  //! so it's really working good but sometime maybe it's can occurs problem, and that problem is that sometime saving to the DB is little slower than oupputing the json web token so the password timestamp(dau thoi gian) change is sometimes set a bit later after the json web token created so that the user can't login using the new token that does it
+  //? and becasue we use timestamp of passwordChangedAt to compare with timestamp of json web token that's mean this time timestamp of passwordChangedAt  always > timestamp of json web token
+  //* and if timestamp of passwordChangedAt  always > timestamp of json web token => this doesn't allow use login because we set validator for this
+  next();
+});
+
+userSchema.methods.passwordCorrect = async function (cadidatePassword, userPassword) {
   return await bcrypt.compare(cadidatePassword, userPassword);
 };
 
@@ -97,10 +105,7 @@ userSchema.methods.createResetPasswordToken = function () {
   //--! if we would just simply store this reset token in our database now then if some hackes gains access to the database then use that's token and create new password and control your account
   //--> just like a password we should never store a plain(simple) reset token in the DB
   //--! with password we use strong encrypt but with this reset token which less get attack from hacker we can use not strong encrypt
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
   //--! so we should save this encrypt reset token in database then we can compare it with the token that user provides
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //* reset password in 10 minutes
   console.log(resetToken, this.passwordResetToken);

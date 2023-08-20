@@ -1,4 +1,5 @@
 const { promisify } = require('util');
+const crypto = require('crypto');
 // const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
@@ -236,7 +237,55 @@ const forgotPassword = catchSync(async (req, res, next) => {
   }
 });
 
-const resetPassword = (req, res, next) => {};
+//?IMPLEMENTS SETTING PASSWORD FOR USER: We always should implememts this reset password features in most application because it’s nessecary
+
+const resetPassword = catchSync(async (req, res, next) => {
+  //!1,get user based on token
+  //* i named it passwordResset token to easy pass in findOne({passwordResetToken}) in the same with field in DB
+  //! this code create encrypt reset token is repeat two time so we should refactoring to one funtion and reuse
+  const passwordResetToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  //* we get resetToken(original) and we consvert to encrypt type to compare resetToken(encrypt) in DB, that's we use this token with passwordResetToken field and get use findOne
+  // console.log(req.params.token);
+  // console.log(passwordResetToken);
+  //* if you pass any type of Date like 121442142 miliseconds, year-month-day, Date.now(),... mongo auto understand and may be it'll consvert to one type and compare so you don't worry abou this
+  const user = await User.findOne({
+    passwordResetToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  //?mongo file user and then compare with passwordChangedAt if not => return user = null so mongo don't create this error so we can catch this and don't need to custom error for the production like we did before
+
+  //!2, if token not expires we set new password and save it into DB
+  if (!user) return next(new AppError(400, 'Token invalid or expiresd'));
+
+  // if (Date.now() > user.passwordResetExpires)//! because this only related with data and we can implements this model so we should implements with model(seperate bussiness and app logic)
+  //   return next(new AppError(404, 'The link is expiresed, please try again'));
+
+  // const { password, passwordConfirm } = req.body;
+  // if (!password || !passwordConfirm)//! we don't need check this because we have validator in the user schema and here we use save() and it's can turn on the schema validators
+  //   return next(new AppError(400, 'Please fill in required fields'));
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  // ? why do we need to delete two passwordResetToken and passwordResetExpires because this is only use  for reset password, and when we reset password it's also create again and we can check
+  //? but some people say that if we save in DB it's still ok, in fact it's not because this data use for reset password in certain time and after certain time(10 minutes) it's useless, so save it in DB do waste resources and lost more perfromance(need more money) to maintain data(especially when we have big application)
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+  //* So with user authotetication we always use save() to update because we need validators in schema working, and we need the pre save hooks(middleware) to do something like consvert the password to encypt type when we reset password,.... and if you build features and need validator from schema, and pre save hooks,... you should use save() to update
+
+  //!3, update passwordChangedAt for current user
+  //* we shouldn't update passwordChangedAt in here because it's only related to data and we can do it in model with pre save hooks so do it in there
+  // user.passwordChangedAt = Date.now();
+
+  //!4, log the user in, send JWT
+  const token = createToken(user); //we use this function in the login, signup and now it's in here maybe in future we will refactoting this as the better function
+
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
+});
 
 module.exports = {
   signup,
