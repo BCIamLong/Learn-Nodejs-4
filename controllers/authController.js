@@ -13,6 +13,15 @@ const createToken = user =>
     expiresIn: process.env.JWT_EXPRIES_IN, // add some data to additional payload
   });
 
+//!Because we use this code is many times and it's repeat, so we need refactory this code
+const sendJWT = (res, statusCode, user) => {
+  const token = createToken(user);
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+  });
+};
+
 const signup = catchSync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -128,7 +137,7 @@ const protectManually = catchSync(async (req, res, next) => {
   //!3, check if user still exits
   //--> what happen if the user has been deleted in the meantime so the token will still exist, => when user has been deleted we don't want this token still here we need deleted user => deleted the token
   //-->some reason as: user comment bad and insult with more other accouts => admistrator decided to delete this accout, or some other reason this account is auto, is bot,...=> need delete
-  const freshUser = await User.findById(decoded.id);
+  const freshUser = await User.findById(decoded.id); //.select('+password');//! i use this to forced get password and pass to  freshUser, and finally send this to next middleware and we can use passowrd without get user via freshUser id, because if don't have this command password auto hide becasue we set it in schema
   if (!freshUser) {
     //a, delete token
     decoded.iat += decoded.exp / 100; // with we will do decode.iat > decode.exp => token was expires
@@ -287,6 +296,37 @@ const resetPassword = catchSync(async (req, res, next) => {
   });
 });
 
+const updatePassword = catchSync(async (req, res, next) => {
+  //!1,get user and check current password correct
+  //--> why do we need check current password: because if open computer and maybe you have work you go you forgot shutdow your computer so anyone person can use your commputer on web app and they change your password, if we don't check current => this person can change your password and then you will be logout in this web app and lost your accout if you don't link security(like phone, email,...)
+  // const { user } = req; //* in this way we have password so we don't get data user again
+  const user = await User.findById(req.user.id).select('+password'); //* the sencond way we need to get data from user id in req
+
+  const { currentPassword } = req.body;
+  if (!currentPassword) return next(new AppError(400, 'Please fill your current password'));
+
+  const check = await user.passwordCorrect(currentPassword, user.password);
+  if (!check)
+    return next(new AppError(401, 'Your current password not correct, please check and try again'));
+
+  //!2, check new password and new password confirm  then update in DB
+  //* we don't need validation in here because in we validation with validators in user schema
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+
+  await user.save();
+  // await user.findByIdAndUpdate(); is not working
+  //!3,log user and sen jwt in respose
+  // const token = createToken(user);
+  //?when you changed the password that's time the old token was not working because we check logic with timestamp of passwordChangedAt and decoded.iat right so if user still use old token and access to protect resources he will be loggout and must to login again to get access, so we need create new token and now this user loggin with this new token
+  // res.status(201).json({
+  //   status: 'success',
+  //   token,
+  // });
+  //*Refactory for this code above was comments
+  sendJWT(res, 201, user);
+});
+
 module.exports = {
   signup,
   login,
@@ -296,4 +336,5 @@ module.exports = {
   restrictTo,
   forgotPassword,
   resetPassword,
+  updatePassword,
 };

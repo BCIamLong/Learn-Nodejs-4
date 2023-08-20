@@ -42,7 +42,9 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please confirm your password'],
     validate: {
       validator: function (val) {
-        return val === this.password;
+        return val === this.password; // !validator we defined(validator custom, validator library) only for save and creation new Document not for update,... because this key word not pointing the current document so you can't manipulate with data => error
+        //* behide the scene mongoose don't keep the curren documents object in memmory so therefore this keyword not working on update,...
+        //? --> don't use update for anything related to password, instead we use save()
       },
       message: 'Password invalid, please enter password you just fill ',
     },

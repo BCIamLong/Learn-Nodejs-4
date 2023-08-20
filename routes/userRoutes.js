@@ -15,6 +15,16 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
 
+//*IMPLEMENTS UPDATE PASSWORD
+//--> In case user want update password without forgot password like user feel this password not strong and want update, user doubt that the account get other access so want change password to protect account,…
+
+router.patch(
+  '/update-current-password',
+  //!you need check login, if user logged in user just have permisson update password, and we also need the user data in req to perform updatePasssword function
+  authController.protectManually,
+  authController.updatePassword,
+);
+
 router.route('/').get(userController.getAllUsers);
 // * post(userController.createUser); for admin
 
