@@ -28,14 +28,14 @@ const sendErrorProd = (err, res) => {
 
   // next(); cuz this middleware function is a last one so we don't need use next()
 };
-const handleCastErrorDB = (err) => {
+const handleCastErrorDB = err => {
   //! handle mongo error DB ID: when you access web with invalid id => mongoose create cast error
   const message = `Invalid ${err.path}: ${err.value}`;
   // console.log(message);
   return new AppError(400, message);
 };
 
-const handleDuplicateErrorDB = (err) => {
+const handleDuplicateErrorDB = err => {
   //!handle duplicate error in mongodb driver
   const message = `Duplicate error: ${err.keyValue.name} was exists, please enter other value`;
   //* if you don't have keyValue.name instead is a message: you can use regex get string between "" because the value key duplicate in here
@@ -44,11 +44,11 @@ const handleDuplicateErrorDB = (err) => {
   return new AppError(400, message);
 };
 
-const handleValidationErrorDB = (err) => {
+const handleValidationErrorDB = err => {
   //!handle duplicate error in mongodb driver
   // const erorrs = [...err.errors].map((el) => el.message).join('\n');
   const erorrs = Object.values(err.errors)
-    .map((el) => el.message)
+    .map(el => el.message)
     .join(' and ');
   const message = `Data update invalid: ${erorrs}`;
   //* if you don't have keyValue.name instead is a message: you can use regex get string between "" because the value key duplicate in here
@@ -56,8 +56,7 @@ const handleValidationErrorDB = (err) => {
   // console.log(message2);
   return new AppError(400, message);
 };
-const handleJWTError = () =>
-  new AppError(403, 'Invalid token, please login again');
+const handleJWTError = () => new AppError(403, 'Invalid token, please login again');
 const handleJWTExpiresError = () =>
   new AppError(401, 'Your login turn was expires, please login again ');
 
@@ -81,8 +80,7 @@ module.exports = (err, req, res, next) => {
       errProd = handleCastErrorDB(errProd);
 
     //?HANDLE DUPLICATE DB FIELDs: WHEN YOU CREATE THE FIEALD IN THE SAME WITH UNIQUE THE FIELD
-    if (errProd.code && errProd.code === 11000)
-      errProd = handleDuplicateErrorDB(errProd);
+    if (errProd.code && errProd.code === 11000) errProd = handleDuplicateErrorDB(errProd);
 
     //?HANDLE VALIDATION ERROR IN SCHEMA VALIDATOR: MAX, MIN, MAXLENGTH, MINLENGTH, VALIDATOR FUNCTION,....
     //--> if you get two or more error in schema validation it's will send two or more object error => therefore we need to custom this

@@ -6,7 +6,12 @@
   },
   "rules": {
     // "prettier/prettier": "error",
-    "import/no-extraneous-dependencies": ["warn", { "devDependencies": true }],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true
+      }
+    ],
     // "import/no-extraneous-dependencies": "warn",
     "spaced-comment": "off",
     "no-console": "warn",
