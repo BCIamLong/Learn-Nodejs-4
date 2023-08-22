@@ -303,7 +303,7 @@ const updatePassword = catchSync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password'); //* the sencond way we need to get data from user id in req
 
   const { currentPassword } = req.body;
-  if (!currentPassword) return next(new AppError(400, 'Please fill your current password'));
+  if (!currentPassword) return next(new AppError(400, 'Please fill your current password '));
 
   const check = await user.passwordCorrect(currentPassword, user.password);
   if (!check)

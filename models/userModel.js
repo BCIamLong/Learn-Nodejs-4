@@ -7,13 +7,13 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'User must have a name'],
+    required: [true, 'Please fill your name'],
     // unique: true,
   },
   email: {
     // !use the email as username to loggin
     type: String,
-    required: [true, 'User must have an email'],
+    required: [true, 'Please fill your email'],
     unique: true,
     lowercase: true,
     validate: [validator.isEmail, 'Email must type of email'],

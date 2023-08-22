@@ -4,6 +4,10 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+//?IMPLEMENTS UPDATE CURRENT USER DATA
+//!authController.protectManually will check user login with JWT valid or invalid? if user pass this protect check id from user and pass it to JWT and send, because you can't change id cuz you don't have jwt sceret => id is security that's mean now user data is security but maybe we can still get attack from hacker but it's special case
+router.patch('/update-me', authController.protectManually, userController.updateMe);
+
 //?IMPLEMENT RESET PASSWORD
 //
 router.post('/forgot-password', authController.forgotPassword); //  receive the email address
