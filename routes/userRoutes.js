@@ -4,6 +4,10 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+//?IMPLEMENTS DELETE CURRENT USER DATA
+//* So we don't need data from url and data from body request because all things we need that's user id and it come from encoded inside Json Web Token
+router.delete('/delete-me', authController.protectManually, userController.deleteMe);
+
 //?IMPLEMENTS UPDATE CURRENT USER DATA
 //!authController.protectManually will check user login with JWT valid or invalid? if user pass this protect check id from user and pass it to JWT and send, because you can't change id cuz you don't have jwt sceret => id is security that's mean now user data is security but maybe we can still get attack from hacker but it's special case
 router.patch('/update-me', authController.protectManually, userController.updateMe);

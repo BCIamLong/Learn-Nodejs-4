@@ -54,6 +54,13 @@ const userSchema = new mongoose.Schema({
   passwordResetToken: String,
   //!we also need the password expipres to who when the password expires and maybe in 3 min, 5 min, 10 min,... to reset yout password
   passwordResetExpires: Date,
+  //*IMPLEMENT DELETE CURRENT USER:
+  active: {
+    //! we need active property to allow we know Is the use activing or not
+    type: Boolean,
+    default: true, //all user we created all set to true
+    select: false, //!we don't want this property display for user in profile because this data is sentitive
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -117,6 +124,15 @@ userSchema.methods.createResetPasswordToken = function () {
   return resetToken; //* it's one part we send to email, and because we wil use this to compare with the encrypt reset password in DB when user send
   //? we send one token via email and then we have the encrypted version in our DB and that encrypted one is then bassically useless(vo dung) to change the password it's just like when we're saving only the encrypted password itself to the DB, look like when we create password we need to save it based on encrypted in DB and then when we need login we compare two version via bcrypt modules, right
 };
+
+userSchema.pre(/^find/, function (next) {
+  //! we should do it in here because it can effect to all find() method in anywhere you use
+  //!this is pre query so we still use query yet
+  this.find({ active: { $ne: false } }); //retur query object, to the next() when we use find() is also can chaining
+  //?{ active: true }: it's only for delte user and why we should do it?
+  //! well we use $ne because maybe in fact the user can do somthing forbiden action and maybe we will marking they like ban acc in the long time,... not only for the user delete hisself
+  next();
+});
 
 const User = mongoose.model('User', userSchema); // use mongoose.model() is a function to create a model
 

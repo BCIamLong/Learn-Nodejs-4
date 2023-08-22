@@ -4,7 +4,7 @@ const catchSync = require('../utils/catchSync');
 
 //<<<<<<<<<<<<<<<<<<<<<Functions of user
 const getAllUsers = catchSync(async (req, res, next) => {
-  const users = await User.find();
+  const users = await User.find(); //find({ active: true }); //! to filter all not active users but we should do all place we use find methods instead one in here, so to do that we use: query pre hooks find in user model
 
   res.status(200).json({
     status: 'success',
@@ -59,7 +59,7 @@ const updateMe = catchSync(async (req, res, next) => {
   const filterBody = filterObject(req.body, 'name', 'email', 'photo');
 
   const user = await User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     // {
     //   name: req.body.name,
     //   photo: req.body.photo,
@@ -88,9 +88,26 @@ const updateMe = catchSync(async (req, res, next) => {
     },
   });
 });
+
+//? IMPLEMENTS DELETE CURRENT USER: USER DELETED HIS ACCOUT WITH HISSELF
+
+const deleteMe = catchSync(async (req, res, next) => {
+  //the goal is update the active field to false
+  //1, check fill password and confirm to delete
+
+  //2, delete(upate active to false)
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+  //3, send res
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+  //! --> so we don't really delete user from DB, but now user can't use to access anywhere, so it still fine to use DELETE http method here
+});
+
 const getUser = (req, res) => {};
 const createUser = (req, res) => {};
 const updateUser = (req, res) => {}; //! for admin can update all users
 const deleteUser = (req, res) => {};
 
-module.exports = { getAllUsers, getUser, createUser, updateUser, deleteUser, updateMe };
+module.exports = { getAllUsers, getUser, createUser, updateUser, deleteUser, updateMe, deleteMe };
