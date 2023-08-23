@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 // const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -12,6 +13,31 @@ const app = express();
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+//!rateLimit() return the middleware function like(req, res, next)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  //!this max is for testing api and development project in fact you need adjust(dieu chinh) the max request to fit with your application like 1000, or maybe can more
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  //!legacyHeaders (X-rateLimit) you should set it false to hide it because this info may useful for attack because they now in how many minute they can sen how many request => always set to false
+  // message: 'You only send 3 request in 15 minutes',
+  handler: (req, res, next) =>
+    res.status(429).json({
+      status: 'fails',
+      message: 'You only send 3 request in 15 minutes',
+    }),
+});
+
+//!WHEN WE RESTART APPLICATION WE ALSO RESTART LIMIT REQUEST NUMBERS, SO MAYBE YOU THINK THE ATTACKER TRY TO CRASH SERVER AND THEN WHEN SERVER START AGAIN HE ALSO TRY ATTACK BUT IT'S NOT BECAUSE IN FACT THE SERVER NOT EASY TO CRASH BECAUSE COMPANNY HAS MANY SECURITY METHODS  SO ASSUME IF THEY WILL BE CRASH THEY ALSO FIX THIS AND THE SECOND NOT EASY FOR ATTACKER CAN DO IT AGAIN
+
+//? if you user this for api you don't need to sepecify the  route because with api all router start with api/ right
+app.use(limiter);
+
+//* but if you use in web dynamic web or the app like this, you need to sepecify for per router, if you want use for this api web you need
+// app.use('/api', limiter);
+// app.use('/createUser', limiter);
 
 app.use(express.json());
 // app.use(cookieparse());

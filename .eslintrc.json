@@ -9,7 +9,10 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": true
+        // default the eslint consider(true) the devDependencies, optionalDependencies, peerDependencies are no-extraneous-dependencies so to fix it you need to set it to false
+        "devDependencies": false,
+        "optionalDependencies": false,
+        "peerDependencies": false
       }
     ],
     // "import/no-extraneous-dependencies": "warn",
