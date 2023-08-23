@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
 // const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -50,7 +51,9 @@ app.use(limiter);
 
 //*>>>>>>>BODY PARSER: reading data from body into req.body
 //you can also implemts limit data
-app.use(express.json({ limit: '10kb' })); //data come into req.body not greater than 10kb if it's greater than well it's not accepted
+// app.use(express.json({ limit: '10kb' })); //data come into req.body not greater than 10kb if it's greater than well it's not accepted
+//! use body parser package instead user express.json()
+app.use(bodyParser.json({ limit: '90kb' }));
 // app.use(cookieparse());
 
 //*SERVING STATIC FILE: use to development dynamic website
