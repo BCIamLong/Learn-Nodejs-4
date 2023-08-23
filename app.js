@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 // const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -10,10 +11,18 @@ const globalErrorsHandler = require('./controllers/errorController');
 
 const app = express();
 
+//*SECURITY HTTP HEADERS
+//* Implements setting security HTTP headers with helmet packages
+app.use(helmet());
+//to sure the headers to be set
+//! and also we always put it in the first middleware stack we build in project
+
+//development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+//?LIMIT REQUEST FROM SAME API
 //!rateLimit() return the middleware function like(req, res, next)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -39,14 +48,19 @@ app.use(limiter);
 // app.use('/api', limiter);
 // app.use('/createUser', limiter);
 
-app.use(express.json());
+//*>>>>>>>BODY PARSER: reading data from body into req.body
+//you can also implemts limit data
+app.use(express.json({ limit: '10kb' })); //data come into req.body not greater than 10kb if it's greater than well it's not accepted
 // app.use(cookieparse());
+
+//*SERVING STATIC FILE: use to development dynamic website
 app.use(express.static(`${__dirname}/public`));
 
 //?CREATE THE PLACE TO STORAGE AND WE WILL CHECK IT
 //---1, We can use the packages from npm to support create cookie
 //--> check npm for cookie: goto npm hompage
 //-->2, we can set manually on the header of request
+//* TEST MIDDLEWARE IN DEVELOPMENT
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   console.log(req.headers);
