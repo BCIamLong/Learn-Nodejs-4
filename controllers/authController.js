@@ -13,9 +13,24 @@ const createToken = user =>
     expiresIn: process.env.JWT_EXPRIES_IN, // add some data to additional payload
   });
 
+// console.log(process.env.JWT_COOKIE_EXPIRES_IN);
+//! we should create a cookie options object
+const cookieOptions = {
+  //* if expires time of cookie is expired so that time browser or clien general auto delete this cookie
+  expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // it will format to Thu Aug 24 2023 19:06:02 GMT+0700 for browser can understand
+  // secure: true, // set this cookie always be sent on an encrypted connection, so bassically we're using https
+  //! now it's not work cuz secure not be created and not be sent to client so bassically we only actives this part here in production
+  httpOnly: true, // set the cookie cannot be accessed or mordified in any way by browser and it's important to prevent cross-site scripting attacks
+  // browser will stores cookie and sends it automatically along with every request
+};
+
+//secure is option for production cuz that time we https protocol not http
+if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
 //!Because we use this code is many times and it's repeat, so we need refactory this code
 const sendJWT = (res, statusCode, user) => {
   const token = createToken(user);
+  res.cookie('jwt', token, cookieOptions);
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -31,14 +46,17 @@ const signup = catchSync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     // roles: req.body.roles, //! you should give this roles always default so we don't need this line code in here but now we are developing so wen use this to check info or you can go to compass GUI and change
   });
-  const token = createToken(newUser);
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  // const token = createToken(newUser);
+  // res.status(200).json({
+  //   status: 'success',
+  //   token,
+  //   data: {
+  //     user: newUser,
+  //   },
+  // });
+  //! we set password is select in schema but in here it's still available in output that's because this is create function so we can do like this:
+  newUser.password = undefined; //cuz we only want edit in this when we send to client and not update in DB right so we don't use newUser.save()
+  sendJWT(res, 200, newUser);
 });
 
 const login = catchSync(async (req, res, next) => {

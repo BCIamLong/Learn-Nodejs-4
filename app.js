@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const cookieparse = require('cookie-parser');
+// const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json());
-app.use(cookieparse());
+// app.use(cookieparse());
 app.use(express.static(`${__dirname}/public`));
 
 //?CREATE THE PLACE TO STORAGE AND WE WILL CHECK IT
@@ -36,10 +36,7 @@ app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 
 app.all('*', (req, res, next) => {
-  const err = new AppError(
-    404,
-    `Route for this ${req.originalUrl} not defined on application`,
-  );
+  const err = new AppError(404, `Route for this ${req.originalUrl} not defined on application`);
   next(err);
 });
 app.use(globalErrorsHandler);

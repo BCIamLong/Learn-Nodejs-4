@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv'); //ENVIROMENT VARIABLE MAIPULATE
 
 //!WE SHOULD PUT BEFORE ALL CODE, ESPECIALLY WITH BEFORE APP.JS(ONLY THE DEV MODULES), NOT FOR CORE MODULES AND LIBRARIES MODULES(WHICH SHOULD PUT BEFOR THIS CODE)
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   //we listenning here
   console.log('UNCAUGHT EXCEPTION ! shutting down');
   console.log(err.name, err.message);
@@ -21,10 +21,7 @@ dotenv.config({ path: './config.env' });
 const app = require('./app'); //APPLICATION
 
 //* Connect to mongoDB
-const DB = process.env.DATABASE.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD,
-); //link connect to DBs
+const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD); //link connect to DBs
 
 //CONNECT WITH HOSTED CLOUD DATABASE ALTAS
 mongoose
@@ -47,7 +44,7 @@ const server = app.listen(port, () => {
 //* Now we will use the event and event listenner
 //---When the unhanled error occurs it'll auto emit an object called unhandled rejection, and we can set the event for this error
 
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', err => {
   console.log(err.name, err.message);
 
   //!if we met the unhandledRejection error in this case the our apllication not work at all so the things we can do that's shutdown our project
