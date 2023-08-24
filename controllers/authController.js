@@ -101,7 +101,7 @@ const protect = catchSync(async (req, res, next) => {
   //!3, check user still exist or not(based on JWT_EXPIRES_IN)
   // console.log(data);
   if (data.iat > data.exp) return next(new AppError('Token was expires', 403));
-  console.log(token);
+  // console.log(token);
 
   //!4, check if user change password after the jwt was issued(dc cap):
   //-->because if the password changed you need rejected this user we don't have any request for resset passowrd, maybe the 3rd party wanna change the password and wanna get your account(username, email very easy to get they can go to profile and can take it)
@@ -113,7 +113,7 @@ const protect = catchSync(async (req, res, next) => {
   // data.password = user.password;
 
   //!5,allow or rejected the request
-  console.log('Token is valid ');
+  // console.log('Token is valid ');
   next();
 });
 
@@ -259,7 +259,7 @@ const forgotPassword = catchSync(async (req, res, next) => {
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
     // 500 status code: because maybe this error can occurs in the server
-    console.log(err);
+    // console.log(err);
     return next(new AppError(500, 'There was an error sending email. Try again later!'));
   }
 });

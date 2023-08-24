@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 // const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -15,8 +17,6 @@ const app = express();
 //*SECURITY HTTP HEADERS
 //* Implements setting security HTTP headers with helmet packages
 app.use(helmet());
-//to sure the headers to be set
-//! and also we always put it in the first middleware stack we build in project
 
 //development logging
 if (process.env.NODE_ENV === 'development') {
@@ -28,19 +28,14 @@ if (process.env.NODE_ENV === 'development') {
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 15, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-  //!this max is for testing api and development project in fact you need adjust(dieu chinh) the max request to fit with your application like 1000, or maybe can more
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  //!legacyHeaders (X-rateLimit) you should set it false to hide it because this info may useful for attack because they now in how many minute they can sen how many request => always set to false
-  // message: 'You only send 3 request in 15 minutes',
   handler: (req, res, next) =>
     res.status(429).json({
       status: 'fails',
       message: 'You only send 3 request in 15 minutes',
     }),
 });
-
-//!WHEN WE RESTART APPLICATION WE ALSO RESTART LIMIT REQUEST NUMBERS, SO MAYBE YOU THINK THE ATTACKER TRY TO CRASH SERVER AND THEN WHEN SERVER START AGAIN HE ALSO TRY ATTACK BUT IT'S NOT BECAUSE IN FACT THE SERVER NOT EASY TO CRASH BECAUSE COMPANNY HAS MANY SECURITY METHODS  SO ASSUME IF THEY WILL BE CRASH THEY ALSO FIX THIS AND THE SECOND NOT EASY FOR ATTACKER CAN DO IT AGAIN
 
 //? if you user this for api you don't need to sepecify the  route because with api all router start with api/ right
 app.use(limiter);
@@ -56,6 +51,27 @@ app.use(limiter);
 app.use(bodyParser.json({ limit: '90kb' }));
 // app.use(cookieparse());
 
+//?IMPLEMENTS DATA SANITIZATION: the good place to do it is after we parse json body request
+//Data sanitization against NoSQL query injection: implemens this is very important
+//* this middleware will lool to request body, request query string and also request.paramsn and then basically filter out all of the dollar signs and dots because that how operators of mongoDB are writen and removing that the operator will no longer
+app.use(
+  mongoSanitize({
+    onSanitize: ({ req, res }) => {
+      console.warn(`This request is sanitized`, req);
+    },
+  }),
+);
+
+//Data sanitization against XSS(cross-site scripting attack)
+//* this middleware xss() from xss-clean modules will delete any user input from malicious html code
+// so image attacker want to insert some malicious html css code and js code attached to it and so if that would then later be injected into our html site, it could create some damage
+//--> using middleware to prevent that basically to prevent consvert html symbol
+//--- mongoose validation itself is actually already a very good protection against xss cuz it won't allow any crazy stuff to go into our DB as long as we use it correctly
+//--> whenever you can just add some validation to your schemas and that should then mostly protect you from cross-site scipting at least on the server side
+app.use(xss()); //parse all html css js symbols to string and it can't run like html css js code because now it's string
+
+//! In validator modules from npm we also have some functions can validator and sanitization data and we can apply them to our schema but if you use mongoose it's not really necessary because mongoose implemented a strict schema so if it's feel data is something like bad, dammage it'll auto create error and our work is custom this error especially in production process
+
 //*SERVING STATIC FILE: use to development dynamic website
 app.use(express.static(`${__dirname}/public`));
 
@@ -66,7 +82,7 @@ app.use(express.static(`${__dirname}/public`));
 //* TEST MIDDLEWARE IN DEVELOPMENT
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.headers);
+  // console.log(req.headers);
   //* we can set the cookie in this header
   //* now to send a json web token as header these actually a standard to do that
   //* the standard sending a token we should use a header called authorization and the value is bearer why because we bearer, we have, we posses(so huu) this token and then here the value of token like this:
