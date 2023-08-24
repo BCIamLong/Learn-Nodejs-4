@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const hpp = require('hpp');
 // const cookieparse = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -57,7 +58,7 @@ app.use(bodyParser.json({ limit: '90kb' }));
 app.use(
   mongoSanitize({
     onSanitize: ({ req, res }) => {
-      console.warn(`This request is sanitized`, req);
+      console.warn(`This request is sanitized`); // req);
     },
   }),
 );
@@ -69,6 +70,15 @@ app.use(
 //--- mongoose validation itself is actually already a very good protection against xss cuz it won't allow any crazy stuff to go into our DB as long as we use it correctly
 //--> whenever you can just add some validation to your schemas and that should then mostly protect you from cross-site scipting at least on the server side
 app.use(xss()); //parse all html css js symbols to string and it can't run like html css js code because now it's string
+
+//?IMPLEMENTS PREVENT POLLTION PARAMETERS: use HPP npm packages
+app.use(
+  hpp({
+    whitelist: ['duration', 'price', 'maxGroupSize', 'ratingAverage', 'ratingQuantity'], // white list is array constain values(fields) we allow can dupplicate because it's may useful in some sisuation
+    //! so image we have many resources and now we also need add whitelist the necesarry to query so the whitelist in so bigger than in the future
+    //* we can do some complex stuff here in order to get these field name from the model itself
+  }),
+); // it's should use here because it only clear up the query String
 
 //! In validator modules from npm we also have some functions can validator and sanitization data and we can apply them to our schema but if you use mongoose it's not really necessary because mongoose implemented a strict schema so if it's feel data is something like bad, dammage it'll auto create error and our work is custom this error especially in production process
 

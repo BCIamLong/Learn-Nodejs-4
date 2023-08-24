@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
 
 const getAllTours = catchAsync(async (req, res, next) => {
+  console.log(req);
   const count = await Tour.estimatedDocumentCount();
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
