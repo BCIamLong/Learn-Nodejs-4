@@ -119,10 +119,20 @@ const tourSchema = new mongoose.Schema(
     ],
     //* So now we created embedded or denormalized data sets, data sets really close relationship with the tours data so both really belong together so that we decided to embedded instead referencing
     //? after that when we build some features and need query to this locations data like find a tour near this location,....
-    //? IMPLEMENTS MODELLING TOUR GUIDES DATA: EMBEDDED DATA
-    guides: Array, // it's simple IDs array of tour guides id, and when we want tour guides info we only need query with this id
-    //* and when we add id in create new tour and then behide the scene retrive the two user documents corresponding to these two IDs
-    //! When the admin add new tour and that's time admin enter some tour info and admin will choose the user for tour guides and when admin choose user this is only id and behide the scene we will retrive to this id user and get user info and add to tour guides in tour collection
+    //? IMPLEMENTS MODELLING TOUR GUIDES DATA: REFERENCING/NOMARLIZING DATA
+    //! https://mongoosejs.com/docs/populate.html   read this
+    // * the ideal: user and tour remain completely seperate entities in our database, when we save certain tour document is the IDs of users that are the tour guides for that sepecific tour
+    // * then when we query tour we also get access to tour guides but without tour guides save in document it's only id so exactly it's referencing
+    //* so now we will referencing with mongoose
+    guides: [
+      //decribes data for sub document so embedded document
+      {
+        type: mongoose.Schema.ObjectId, //means that we expect a type id of  each of elements in the guides array to be a mongoDB ID, because the id here must to mongoDB id type, 64e60110b4989c0d39918107 is mongoDB id type
+        ref: 'User', // sepecific referencing to User and so that how we establish(thanh lap) references between different data set in mongoose, we don't need to import this User model in here
+        //! the id must in the user collections if id not in user collection => it'll return an error because we referencing to User model
+        //* so we will this referencing id to get data of guides we to show to out put when we show info of tour or more other actions
+      },
+    ],
   },
 
   {
@@ -137,21 +147,6 @@ tourSchema.pre('save', function (next) {
     lower: true,
   });
   //* notice: you need defined slug in your schema if not slug don't add into your db
-  next();
-});
-
-// const users = ['5c88fa8cf4afda39709c295a', '5c88fa8cf4afda39709c2961'].map(id => User.findById(id));
-// console.log(users);
-
-//?IMPLEMENTS ADD USER INFO IN TO TOUR GUIDES IN TOUR COLLECTION
-tourSchema.pre('save', async function (next) {
-  // const guides = this.guides.map(async id => await User.findById(id));
-  //* User.findById(id) return promise <=> async id => await User.findById(id) also return promise cuz it's async function
-  const guides = this.guides.map(id => User.findById(id)); // result = [promise1, promise2];
-  //! we can't use await [promise1, promise2] right so to run many promises in sam time we need use combinator of promise: Promise.all()
-  this.guides = await Promise.all(guides);
-  //* this simple code only create new documents not update documents, to implements update this tour guide document we need update in user for example this user guide update his email and we must to check that's user guide has exist in tour guides in tour collection? and if it's we update user guide in tour collection as well so it's more work and not goood
-  // ? therefore in this case we should implements child referencing
   next();
 });
 
