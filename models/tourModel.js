@@ -1,14 +1,7 @@
 // all thing are related to model and we will export model and import to controller to handler
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
-
-//!>>>>>>>>>>>>>VALIDATION DEV IN MONGOOSE
-//* validation usually in create docs and update docs
-// sometime the validatoer of mongoose is not enough for our project especially big project so you need create the own validator
-//a validator iss simple function retun boolean type(true or false) true is accept and false is error
-//?Also we have pakages on npm can help to validate: validator,...
-//-->https://www.npmjs.com/package/validator: //!This library validates and sanitizes strings only.
+// const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -16,8 +9,8 @@ const tourSchema = new mongoose.Schema(
       type: String,
       //* this is validation built-in mongoose: we can use validator required, ,...
       required: [true, 'Tour name is required field'],
-      unique: true, //! note: unique not really  validator, but return error when field same
-      trim: true, //this's also not validator it's special of schema
+      unique: true,
+      trim: true,
       maxLength: [30, 'A name of tour not greater than 30 characters'],
       minLength: [9, 'A name of tour not less than 9 characters'],
     },
@@ -30,15 +23,9 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have max group size'],
     },
-    //*use validator enum built-in: the value equals in array element value it's accept, opposite it's fails
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
-      // required: {
-      //   values: true,//! this is behide the code required: [true, 'A tour must have a difficulty'],
-      //   message: 'A tour must have a difficulty',
-      // },
-      // enum: ['easy', 'difficult', 'medium'],//?so how we can set messages for this
       enum: {
         values: ['easy', 'difficult', 'medium'],
         message: 'Difficult either: easy, difficult, medium',
@@ -49,18 +36,13 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       max: 5,
     },
-    //!!So i want the ratingQuantity is always less than ratingAverage so if you use built-in validator mongoose you can't do that ==> let's create your validator
     ratingQuantity: {
       type: Number,
       default: 0,
       validate: {
         validator: function (val) {
-          //val parameter here is value of ratingQuantity
-          //use regular function because we need use this keyword to access current docs
-          //NOTICE: THIS KEYWORD ONLY POITING THE CURRENT DOCUMENT WHEN WE CREATE A NEW DOCUMENT, MEAN IS IT'S NOT WORK FOR UPDATE //! IN THE NEW VERSION MONGOOSE FIX IT AND WE CAN USE FOR CREATE AND UPDATE
           return val < this.ratingAverage;
         },
-        //VALUE  is sepecify the value of ratingQuantity and it's related to mongo not JS
         message: 'The rating quantity(VALUE) must to less than rating average',
       },
     },
@@ -68,7 +50,6 @@ const tourSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: [true, 'Tour price is required field'],
-      //! notice: MIN AND MAX use for number and ALSO USE FOR DATE
       max: [10000, 'Atour must have price less than 10000 $'],
       min: [100, 'A tour must have price greater than 100 $'],
     },
@@ -76,13 +57,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, 'A tour must have summary'],
-      // validate: function (val) {
-      //   return validator.isEmpty(val);
-      // },
-      //?This is the way validator function work
-      //with this function you can use [], insteand use {values: '', message: ""}
-      //is Alpha is only contains characters, if white space it's also error
-      validate: [validator.isAlpha, 'The summary is only contains characters'],
+      // validate: [validator.isAlpha, 'The summary is only contains characters'],
     },
     description: {
       type: String,
@@ -92,21 +67,58 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A tour must have an image'],
     },
-    images: [String], // if you want this type is string array, number, date array you need put type inside []
+    images: [String],
     createdAt: {
       type: Date,
       default: Date.now(),
-      //!BECAUSE THIS IS SENTITIVE DATA SO I DON'T WANT IT SENT TO CLIENT SO USE SELECT FALSE
       select: false,
     },
     startDates: [Date],
     vip: {
       type: Boolean,
       default: false,
+      //! this object here is schema type options
     },
+    //?IMPLEMENTS MODELLING LOCATION (GEOSPATIAL DATA)
+    // * we embedded location into tour so we will declare it in tour model
+    startLocation: {
+      // --- in mongoDB: it's support geospatial and we can do anything with this
+      //--- Geospatial data in mongoDB is a special data format called GeoJson
+      //* https://www.mongodb.com/docs/v7.0/reference/geojson/
+      //* --- and this type here not shcema type options like we have in the code above
+      // ! this really is embedded object
+      //? so we type and coordinates have own schema type option, so we have schema type options for type and shcema type option for coordinates just like field in tour model like name {},... and in here we have two subfield like that
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'], //startLocaton always a point right
+      },
+      coordinates: [Number], //* [longidude, latidude] it's not working as normal we have [latidude, longidude] right but in GeoJson mongoDB it works like this so you can go to google map and you can see this
+      //! ==> basically when we create location GeoJson  we create new object has at least two fields type and coordinates also we can add more fields depends your location feature
+      address: String,
+      description: String,
+      //* but now this data only start point not totally is document itself, and create new document and embedded them in the other document we need create an array includes all start points
+      //--> that's thing we will do in locations
+    },
+    //? we also can delete start point field instead we use location and start point in here is day 0 right, but we have start point seperated is good in some certion situation
+    locations: [
+      //! we also need this locations: basically an array of object this will then create brand new document inside of the parent document which is this case the tour
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number, // the day users go to the this location
+      },
+    ],
+    //* So now we created embedded or denormalized data sets, data sets really close relationship with the tours data so both really belong together so that we decided to embedded instead referencing
+    //? after that when we build some features and need query to this locations data like find a tour near this location,....
   },
   {
-    //we need defined the output for virtual properties
     toJSON: { virtual: true }, // to consvert to json type
     toObject: { virtuals: true }, // to display based on object type
   },
@@ -122,30 +134,20 @@ tourSchema.pre('save', function (next) {
 });
 
 tourSchema.pre(/^find/, function (next) {
-  this.find({ vip: { $ne: 'true' } }); //filter vip true out
+  this.find({ vip: { $ne: 'true' } });
 
-  //because this is query object you can use chaining query method and also set new properties for this object
   this.start = Date.now();
   next();
 });
 
 tourSchema.post(/^find/, function (docs, next) {
-  console.log(
-    `Time to query to finish is: ${Date.now() - this.start} miliseconds`,
-  );
-  // console.log(docs);
+  console.log(`Time to query to finish is: ${Date.now() - this.start} miliseconds`);
   next();
 });
 
 //!!AGGREGATION MIDDLEWARE
 //?Read this: https://mongoosejs.com/docs/middleware.html#notes
 tourSchema.pre('aggregate', function (next) {
-  // in thiss function wwe can access to current aggregation object via this keyword before it execute:
-  //--> const stats = await Tour.aggregate([])
-  // console.log(this.pipeline()); //pipeline() to show the pipeline code we defined in aggregate and it's really place we can change to do something
-  //why don't we use this.aggregate() well cuz aggregate not like query object it contains many stuff, and the code it's storage in pipeline and to get this we use this.pipeline()
-  // this.pipeline() return array contains all stages, if and per stages is a element object, if you want change add or remove stages for you goal you use JS array method push(), pop(), unshirt(), shirt(), splice(),.... to do that and edit stages in this array //! https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/
-  //then this array still work in aggregate and execute normal
   this.pipeline().unshift({
     //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
     //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
@@ -155,15 +157,6 @@ tourSchema.pre('aggregate', function (next) {
   });
   next();
 });
-
-// tourSchema.post('aggregate', function (docs, next) {
-//   console.log(this.pipeline());
-//   console.log(docs); //this post aggregate hook not useful but maybe it's can use in certion situation in future
-//   next();
-// });
-
-//!!MODEL MIDDLEWARE
-//Model middleware is realy not useful because it's only for insertMany event for insertMany() so you can see in project we usually don't use this method => it's not useful
 
 tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;

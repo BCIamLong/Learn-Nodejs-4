@@ -8,17 +8,15 @@ const User = require('../../models/userModel');
 //! NOTICE: ./ <=> LINK OF FOLDER START THIS PROJECT: C://.../natours you know if you use ../../config.env you are wating find file config.env in dev-data/data
 dotenv.config({ path: `./config.env` });
 
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`));
+// const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`));
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`));
 
-const DB = process.env.DATABASE.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD,
-);
+const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 mongoose
   .connect(DB)
   .then(() => console.log('DB connect success'))
-  .catch((err) => console.log(err));
+  .catch(err => console.log(err));
 
 const importData = async (model, data) => {
   try {
@@ -33,7 +31,7 @@ const importData = async (model, data) => {
   mongoose.connection.close();
 };
 
-const deleteData = async (model) => {
+const deleteData = async model => {
   try {
     //User Tour.deleteMany(); is delete all data in tours collection
     await model.deleteMany();
