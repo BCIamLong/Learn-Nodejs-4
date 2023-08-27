@@ -1,6 +1,8 @@
 // all thing are related to model and we will export model and import to controller to handler
+// const { promisify } = require('util');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const User = require('./userModel');
 // const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
@@ -117,7 +119,12 @@ const tourSchema = new mongoose.Schema(
     ],
     //* So now we created embedded or denormalized data sets, data sets really close relationship with the tours data so both really belong together so that we decided to embedded instead referencing
     //? after that when we build some features and need query to this locations data like find a tour near this location,....
+    //? IMPLEMENTS MODELLING TOUR GUIDES DATA: EMBEDDED DATA
+    guides: Array, // it's simple IDs array of tour guides id, and when we want tour guides info we only need query with this id
+    //* and when we add id in create new tour and then behide the scene retrive the two user documents corresponding to these two IDs
+    //! When the admin add new tour and that's time admin enter some tour info and admin will choose the user for tour guides and when admin choose user this is only id and behide the scene we will retrive to this id user and get user info and add to tour guides in tour collection
   },
+
   {
     toJSON: { virtual: true }, // to consvert to json type
     toObject: { virtuals: true }, // to display based on object type
@@ -130,6 +137,21 @@ tourSchema.pre('save', function (next) {
     lower: true,
   });
   //* notice: you need defined slug in your schema if not slug don't add into your db
+  next();
+});
+
+// const users = ['5c88fa8cf4afda39709c295a', '5c88fa8cf4afda39709c2961'].map(id => User.findById(id));
+// console.log(users);
+
+//?IMPLEMENTS ADD USER INFO IN TO TOUR GUIDES IN TOUR COLLECTION
+tourSchema.pre('save', async function (next) {
+  // const guides = this.guides.map(async id => await User.findById(id));
+  //* User.findById(id) return promise <=> async id => await User.findById(id) also return promise cuz it's async function
+  const guides = this.guides.map(id => User.findById(id)); // result = [promise1, promise2];
+  //! we can't use await [promise1, promise2] right so to run many promises in sam time we need use combinator of promise: Promise.all()
+  this.guides = await Promise.all(guides);
+  //* this simple code only create new documents not update documents, to implements update this tour guide document we need update in user for example this user guide update his email and we must to check that's user guide has exist in tour guides in tour collection? and if it's we update user guide in tour collection as well so it's more work and not goood
+  // ? therefore in this case we should implements child referencing
   next();
 });
 
