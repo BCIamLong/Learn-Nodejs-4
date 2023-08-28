@@ -4,8 +4,12 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewController = require('../controllers/reviewController');
 
 const router = express.Router();
+
+router.post('/:id/reviews', authController.protectManually, reviewController.createReview);
+router.get('/:id/reviews', reviewController.getAllReviews);
 
 router
   .route('/top-3-quality-cheap-tours')
