@@ -131,9 +131,8 @@ const tourSchema = new mongoose.Schema(
       },
     ],
   },
-
   {
-    toJSON: { virtual: true }, // to consvert to json type
+    toJSON: { virtuals: true }, // to consvert to json type
     toObject: { virtuals: true }, // to display based on object type
   },
 );
@@ -164,6 +163,7 @@ tourSchema.pre(/^find/, function (next) {
     path: 'guides',
     select: '-__v -passwordChangedAt',
   });
+  //.populate('reviews');
   this.start = Date.now();
   next();
 });
@@ -189,6 +189,18 @@ tourSchema.pre('aggregate', function (next) {
 
 tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;
+});
+//*IMPLEMENTS AVANCED VIRTUAL POPULATE FEATURE OF MONGOOSE
+//! https://mongoosejs.com/docs/tutorials/virtuals.html#populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  // --- so now we actually sepetify the name of the field in order to connect the two data: so this complicated part of implementing this virtual populate
+  foreignField: 'tour', // this is a name of the field in the other model(so here it's review model) where the reference to the current model is stored so that's tour because we want get id of tour from reviews right because this is id of tour we stored in review right so it's will connection reference two model Tour and Review
+  localField: '_id', //_id is which how it's called in the local model and it's called tour in foregin model
+  //* so with foreignField and localFiel that's how we connect these two models together, _id of Tour connect to tour of Review ( _id and tour here all are id but we called different in Review) so this connection help us can get entire data from Review and pass to reviews virtual populate
+
+  //* so we will populate with get one tour not get all tour because that would be a bit too much infomation to send down to client when they get all the tour, also when we getting all the tour that's usually to build like an overview page an that case we usually do not need access to all the reviews
+  //* we only need that when we are really displaying just one tour so therefore we should populate this virtual reviews in tourController because we only apply for get one tour(getTour() method)
 });
 
 const Tour = mongoose.model('Tour', tourSchema);

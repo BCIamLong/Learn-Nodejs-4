@@ -69,7 +69,12 @@ const getTour = catchAsync(async (req, res, next) => {
   //   select: '-__v -passwordChangedAt',
   // });
   //populatedData(Tour.findById(id));
-  const tour = await Tour.findById(id);
+  //! so we will use populate('reviews) here in tourController because we only want apply this virtual populate for get one tour(getTour() method)
+  //? so now we have problem we have tour being populated with reviews and the reviews also populated with the tour and populated with user, and in tour we also have populated with guide again it's not ideal at all so here we have chain 3 populate also performance is not ideal at all and data is so mixing and not good
+  //* solution here: we will turn of populating the reviews with the tour, but of course if in your application case it's always depend on how your application work in your sepecific case
+  //* and so in this our application that's logical when we have reviews available on tour and it's not that important having the tour available on the reviews so we comments this code populated tour to reviews because we don't need it
+
+  const tour = await Tour.findById(id).populate('reviews');
   // * so this populate() function is an absolutely fundamental tool for working with data in mongoose and especially of course when there are relasionship between data
   //! Behide the scene of populate is really create new query and so this might affect your performance so if you only use this for small project so it's small hit on performance is no big deal
   //! But with huge application with tons of populates all over the place so that's sure effect to your performance

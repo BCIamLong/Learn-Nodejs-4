@@ -39,19 +39,29 @@ const reviewSchema = new mongoose.Schema(
   },
 );
 
+//?IMPLEMENTS VIRTUAL POPULATE TOUR AND REVIEW
+//* so now here we populated reviews data with tour and user data
+//! so it still have problem here how can we access the reviews on the tour so basically the other way around so let's say data query for sepecific tour and then how will i get access to all the reviews for that tour and this problems is we did parent reference on the review, from reviews we can access to user or tour but oposite with user or tour we can't retrieve to reviews(parent reference: parent don't know anything about their children)
+//* so it might good sometime but now when we need get access from tour  to reviews it's realy is problem
+//?we have two solution:
+//-->1: we will manually query for reviews each time that we query for tours but it would be a bit cumbersome(ruom ra) doing it manually like this: i did it
+//-->2: also do child refencing on the tours: we will have an array has all the review IDs on each tour document then we will populated data to this array but this solution we sould remove in first time because the array can grow to indefinitely and maybe it'll over 16 megabytes
+//*-->3:use avanced features virtual populate which mongoose offered it for us, so with virtual populate we can populate the tours with reviews so we can get all reviews for certain tour
+//--> so virtual populate like a way of keeping that array of reviews IDs on a tour bu with out actually don't save in Database so that solve the problem that we have with child referencing so it's look like virtual property in schema but now it's for populate
+// * we will implements it likes array id in child reference but it's virtual and it actually not save to DB
+
 reviewSchema.pre(/^find/, function (next) {
-  //populate behide the scene its also create new query like: findById(user/tourID) get data and then it'll update this data to reviews
-  this.select('-__v -createdAt')
-    //! so we need sepecify for user with name and photo because we don't to leak the too much info for user posting this reviews to client, because someone can hits the API and get all reviews so we don't to leak the sentitive info of user posting this reviews so no one can know the private data about reviewer like email
-    //--> we only send the nessecary data about user: name and photo it's enough for this case
-    //* to populated with two collections or more we use 2 or more populate() methods
-    //! but you need be careful because when we have a populate() we also have one query and two or more populate() that's mean we have 2 or more query so it's will do performence down and time is slow, so you need avoid to use too much populate() on query
-    //! so with the project is big scale(quy mo) or certain scale you need to becareful when use populate() or don't use it and find another solutions
-    .populate({ path: 'user', select: 'name photo' }) //select: '-__v -passwordChangedAt' })
-    .populate({
-      path: 'tour',
-      select: 'name ', // duration maxGroupSize difficulty ratingAverage price summary description imageCover',
-    });
+  // this.select('-__v -createdAt')
+  //   .populate({ path: 'user', select: 'name photo' }) //select: '-__v -passwordChangedAt' })
+  //   .populate({
+  //     path: 'tour',
+  //     select: 'name ', // duration maxGroupSize difficulty ratingAverage price summary description imageCover',
+  //   });
+  //? so now we have problem we have tour being populated with reviews and the reviews also populated with the tour and populated with user, and in tour we also have populated with guide again it's not ideal at all so here we have chain 3 populate also performance is not ideal at all and data is so mixing and not good
+  //* solution here: we will turn of populating the reviews with the tour(tour has two chain populated data tour and guide right), but of course if in your application case it's always depend on how your application work in your sepecific case
+  //* and so in this our application that's logical when we have reviews available on tour and it's not that important having the tour available on the reviews so we comments this code populated tour to reviews because we don't need it
+  //* but it still parent refencing between review and tour but we don't populated data for it
+  this.select('-__v -createdAt').populate({ path: 'user', select: 'name photo' });
   next();
 });
 
