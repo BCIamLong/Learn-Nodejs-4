@@ -76,8 +76,7 @@ module.exports = (err, req, res, next) => {
     //?HANDLE ERRORS FROM MONGO: DB IDS INVALID
     //! some reason errProd.name  dont exist in error when we runcode so we can use err.reason.name
     //! you also can use errProd.name === 'CastError', you need to check where is error name is contain
-    if (errProd.reason && errProd.reason.name === 'BSONError')
-      errProd = handleCastErrorDB(errProd);
+    if (errProd.reason && errProd.reason.name === 'BSONError') errProd = handleCastErrorDB(errProd);
 
     //?HANDLE DUPLICATE DB FIELDs: WHEN YOU CREATE THE FIEALD IN THE SAME WITH UNIQUE THE FIELD
     if (errProd.code && errProd.code === 11000) errProd = handleDuplicateErrorDB(errProd);
@@ -86,8 +85,7 @@ module.exports = (err, req, res, next) => {
     //--> if you get two or more error in schema validation it's will send two or more object error => therefore we need to custom this
     // console.log(errProd);
     //!Because i can't use errProd.name in errProd so we can check errProd._message
-    if (errProd._message === 'Validation failed')
-      errProd = handleValidationErrorDB(errProd);
+    if (errProd._message === 'Validation failed') errProd = handleValidationErrorDB(errProd);
 
     // * NOW WE CAN DEFINED DIFFERENT ERROR SEVERRITY(NGHIEM TRONG CUA LOI) LEVELS
     //--> for example we can say this error is important or not important, or critical(nghiem trong), with critical error we can send message for admistrator about critical error

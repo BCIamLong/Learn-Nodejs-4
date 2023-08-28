@@ -1,21 +1,22 @@
 const Review = require('../models/reviewModel');
 const catchSync = require('../utils/catchSync');
 
-const getAllReviews = catchSync(async (req, res, next) => {
+const getAllReviewsOfTour = catchSync(async (req, res, next) => {
   const reviews = await Review.find({ tour: req.params.id });
   res.json({
     status: 'success',
+    results: reviews.length,
     data: {
       reviews,
     },
   });
 });
 
-const createReview = catchSync(async (req, res, next) => {
+const createReviewOfTour = catchSync(async (req, res, next) => {
   //   const idTour = req.params.id;
   //   const idUser = req.user.id;
   const { review, rating } = req.body;
-  const reviewed = await Review.create({
+  const newReview = await Review.create({
     tour: req.params.id,
     user: req.user.id,
     review,
@@ -25,9 +26,31 @@ const createReview = catchSync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
-      reviewed,
+      reviewe: newReview,
     },
   });
 });
 
-module.exports = { createReview, getAllReviews };
+const getAllReviews = catchSync(async (req, res, next) => {
+  const reviews = await Review.find();
+
+  res.json({
+    status: 'success',
+    results: reviews.length,
+    data: {
+      reviews,
+    },
+  });
+});
+const createReview = catchSync(async (req, res, next) => {
+  const { user, tour, rating, review } = req.body;
+  const newReview = await Review.create({ user, tour, rating, review });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      review: newReview,
+    },
+  });
+});
+module.exports = { createReview, getAllReviews, getAllReviewsOfTour, createReviewOfTour };

@@ -8,8 +8,13 @@ const reviewController = require('../controllers/reviewController');
 
 const router = express.Router();
 
-router.post('/:id/reviews', authController.protectManually, reviewController.createReview);
-router.get('/:id/reviews', reviewController.getAllReviews);
+router.route('/:id/reviews').get(reviewController.getAllReviewsOfTour).post(
+  authController.protectManually,
+  authController.restrictTo('user'), // !the admin and tour guides, lead guide don't reviews, if they want reviews maybe they need create new user account not admin and tour guide, lead guide accout because it's also belong the companny
+  reviewController.createReviewOfTour,
+);
+// router.post('/:id/reviews', authController.protectManually, reviewController.createReview);
+// router.get('/:id/reviews', reviewController.getAllReviews);
 
 router
   .route('/top-3-quality-cheap-tours')

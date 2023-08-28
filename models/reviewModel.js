@@ -40,11 +40,17 @@ const reviewSchema = new mongoose.Schema(
 );
 
 reviewSchema.pre(/^find/, function (next) {
+  //populate behide the scene its also create new query like: findById(user/tourID) get data and then it'll update this data to reviews
   this.select('-__v -createdAt')
-    .populate({ path: 'user', select: '-__v -passwordChangedAt' })
+    //! so we need sepecify for user with name and photo because we don't to leak the too much info for user posting this reviews to client, because someone can hits the API and get all reviews so we don't to leak the sentitive info of user posting this reviews so no one can know the private data about reviewer like email
+    //--> we only send the nessecary data about user: name and photo it's enough for this case
+    //* to populated with two collections or more we use 2 or more populate() methods
+    //! but you need be careful because when we have a populate() we also have one query and two or more populate() that's mean we have 2 or more query so it's will do performence down and time is slow, so you need avoid to use too much populate() on query
+    //! so with the project is big scale(quy mo) or certain scale you need to becareful when use populate() or don't use it and find another solutions
+    .populate({ path: 'user', select: 'name photo' }) //select: '-__v -passwordChangedAt' })
     .populate({
       path: 'tour',
-      select: 'name ',
+      select: 'name ', // duration maxGroupSize difficulty ratingAverage price summary description imageCover',
     });
   next();
 });
