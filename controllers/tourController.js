@@ -3,9 +3,19 @@ const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
 
+//?Refactory code: because we used this code two times and maybe in future we also need to use again and refactory to a function and reuse is good for this case
+//! but we also have a best way that's handle in middleware mongo that pre find hook(middleware) right
+// const populatedData = queryOb =>
+//   queryOb.populate({
+//     // two this data is not nesecarry for tour guides so we need filter them
+//     path: 'guides',
+//     select: '-__v -passwordChangedAt',
+//   });
+
 const getAllTours = catchAsync(async (req, res, next) => {
   console.log(req);
   const count = await Tour.estimatedDocumentCount();
+  //new APIFeatures(populatedData(Tour.find()), req.query)
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
     .sort()
@@ -45,9 +55,25 @@ const createTour = catchAsync(async (req, res, next) => {
   });
 });
 
+//?IMPLEMENTS POPULATE PROCESS FOR TOUR GUIDES
+//! https://mongoosejs.com/docs/populate.html
 const getTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const tour = await Tour.findById(id); //return an object
+  //* we user populate() method
+  // *the guides field in tour schema is only reference {id} not actually the real data so to get all data of guides we need to use populate() to get real guides data {id, name, role, email,...} => it's replace id reference with actual data
+  //! this is only query  and not in actual database
+  // * you can use {} to select the field you want for output of query(you want remove or format output)
+  // const tour = await Tour.findById(id).populate({
+  //   // two this data is not nesecarry for tour guides so we need filter them
+  //   path: 'guides',
+  //   select: '-__v -passwordChangedAt',
+  // });
+  //populatedData(Tour.findById(id));
+  const tour = await Tour.findById(id);
+  // * so this populate() function is an absolutely fundamental tool for working with data in mongoose and especially of course when there are relasionship between data
+  //! Behide the scene of populate is really create new query and so this might affect your performance so if you only use this for small project so it's small hit on performance is no big deal
+  //! But with huge application with tons of populates all over the place so that's sure effect to your performance
+  // ? But we also don't have other way to do it in mongoose, how else would mongoose be able to get data about tours and the users at the same time it needs to create new query to create connection
 
   //?HANDLER 404 ERROR
   //* We can throw this error and catch method in catchSync() will catch this error

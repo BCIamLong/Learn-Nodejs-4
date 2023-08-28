@@ -2,7 +2,7 @@
 // const { promisify } = require('util');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./userModel');
+// const User = require('./userModel');
 // const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
@@ -121,16 +121,13 @@ const tourSchema = new mongoose.Schema(
     //? after that when we build some features and need query to this locations data like find a tour near this location,....
     //? IMPLEMENTS MODELLING TOUR GUIDES DATA: REFERENCING/NOMARLIZING DATA
     //! https://mongoosejs.com/docs/populate.html   read this
-    // * the ideal: user and tour remain completely seperate entities in our database, when we save certain tour document is the IDs of users that are the tour guides for that sepecific tour
-    // * then when we query tour we also get access to tour guides but without tour guides save in document it's only id so exactly it's referencing
-    //* so now we will referencing with mongoose
+    //* so now we're going to use populate in order to basically replace the fields that we reference with the actual related data
+    //--> the result always look like embdded data but in fact we know it's refencing data and it's a completely different collection
+    //--- populate data set always happens in query
     guides: [
-      //decribes data for sub document so embedded document
       {
-        type: mongoose.Schema.ObjectId, //means that we expect a type id of  each of elements in the guides array to be a mongoDB ID, because the id here must to mongoDB id type, 64e60110b4989c0d39918107 is mongoDB id type
-        ref: 'User', // sepecific referencing to User and so that how we establish(thanh lap) references between different data set in mongoose, we don't need to import this User model in here
-        //! the id must in the user collections if id not in user collection => it'll return an error because we referencing to User model
-        //* so we will this referencing id to get data of guides we to show to out put when we show info of tour or more other actions
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
       },
     ],
   },
@@ -150,15 +147,30 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-tourSchema.pre(/^find/, function (next) {
-  this.find({ vip: { $ne: 'true' } });
+//!>>>>>>>>RECAP
+//1, FIRST WE CREATE A REFERENCE TO ANOTHER MODEL AND SO WITH  THIS YOU EFFECTIVELY CREATE THE RELATIONSHIP BETWEEN THESE TWO DATA SETS
+//2, WE POPULATED THAT FIELD THAT YOU JUST SEPECIFY BEFORE THAT'S GUIDES FIELD IN TOUR MODEL
 
+//?IMPLEMENTS POLULATE PROCESS FOR TOUR GUIDES DATA
+//!THIS POPULATE() IS VERY IMPORTANT IN MONGOOSE TOOL BOX
+tourSchema.pre(/^find/, function (next) {
+  // ! this pre /^find/ will effect to query method start with find likes: find(), findOne(), findById(), findByIdAndUpdate(),... basically we populated data for all find methods
+  //* Before we query we can chaining query with populdate and this pre find hooks is the best place to populated data
+  //? You should do it like this in model and use pre find hook(middleware) if you want to populdated for all documents
+  // pre hook we had query object data but still execute yet so we can chaining query object in here
+  // this keyword pointing to current query object, and it's simple we chaining queryOb before we really run query
+  this.find({ vip: { $ne: 'true' } }).populate({
+    // two this data is not nesecarry for tour guides so we need filter them
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
   this.start = Date.now();
   next();
 });
 
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Time to query to finish is: ${Date.now() - this.start} miliseconds`);
+
   next();
 });
 
