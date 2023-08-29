@@ -2,7 +2,7 @@ const Review = require('../models/reviewModel');
 const catchSync = require('../utils/catchSync');
 
 const getAllReviewsOfTour = catchSync(async (req, res, next) => {
-  const reviews = await Review.find({ tour: req.params.id });
+  const reviews = await Review.find({ tour: req.params.tourId });
   res.json({
     status: 'success',
     results: reviews.length,
@@ -17,7 +17,7 @@ const createReviewOfTour = catchSync(async (req, res, next) => {
   //   const idUser = req.user.id;
   const { review, rating } = req.body;
   const newReview = await Review.create({
-    tour: req.params.id,
+    tour: req.params.tourId,
     user: req.user.id,
     review,
     rating,
