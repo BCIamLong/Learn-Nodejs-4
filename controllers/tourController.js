@@ -2,6 +2,7 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
+const handlerFactory = require('./handlerFactory');
 
 //?Refactory code: because we used this code two times and maybe in future we also need to use again and refactory to a function and reuse is good for this case
 //! but we also have a best way that's handle in middleware mongo that pre find hook(middleware) right
@@ -111,15 +112,16 @@ const updateTour = catchAsync(async (req, res, next) => {
   });
 });
 
-const deleteTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findByIdAndDelete(id);
-  if (!tour) return next(new AppError(400, 'Id invalid'));
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+const deleteTour = handlerFactory.deleteOne(Tour); //* delete on will return function like this code bellow and it's also middleware function, so it'll run when middleware called
+//catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+//   const tour = await Tour.findByIdAndDelete(id);
+//   if (!tour) return next(new AppError(400, 'Id invalid'));
+//   res.status(204).json({
+//     status: 'success',
+//     data: null,
+//   });
+// });
 
 //>>>>>>HANDLE ALIAS ROUTE
 //we will add query needed to req.query and handle in getAllTours() that's good to apply middleware to chan req query

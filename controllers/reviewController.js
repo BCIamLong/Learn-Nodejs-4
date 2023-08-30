@@ -2,6 +2,7 @@ const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
+const handlerFactory = require('./handlerFactory');
 
 const getAllReviewsOfTour = catchSync(async (req, res, next) => {
   //* we need to do some logic when we get all review of review collection and when we get all review of sepecific tour, because now when we use nested router for tours/reviews so it's also run in review router
@@ -48,6 +49,8 @@ const createReviewOfTour = catchSync(async (req, res, next) => {
   });
 });
 
+const deleteReview = handlerFactory.deleteOne(Review);
+
 const getAllReviews = catchSync(async (req, res, next) => {
   const reviews = await Review.find();
 
@@ -70,4 +73,11 @@ const createReview = catchSync(async (req, res, next) => {
     },
   });
 });
-module.exports = { createReview, getAllReviews, getAllReviewsOfTour, createReviewOfTour };
+
+module.exports = {
+  createReview,
+  getAllReviews,
+  getAllReviewsOfTour,
+  createReviewOfTour,
+  deleteReview,
+};

@@ -14,4 +14,12 @@ router.route('/').get(reviewController.getAllReviewsOfTour).post(
   reviewController.createReviewOfTour,
 );
 
+router
+  .route('/:id')
+  .delete(
+    authController.protectManually,
+    authController.restrictTo('admin'),
+    reviewController.deleteReview,
+  );
+
 module.exports = router;

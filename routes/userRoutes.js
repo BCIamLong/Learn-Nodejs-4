@@ -36,8 +36,13 @@ router.patch(
 router.route('/').get(userController.getAllUsers);
 // * post(userController.createUser); for admin
 
-// router
-//   .route('/:id')
+router
+  .route('/:id')
+  .delete(
+    authController.protectManually,
+    authController.restrictTo('admin'),
+    userController.deleteUser,
+  );
 //   .get(userController.getUser)
 //   .patch(userController.updateUser)
 //   .delete(userController.deleteUser);

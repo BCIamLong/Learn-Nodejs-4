@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
+const handlerFactory = require('./handlerFactory');
 
 //<<<<<<<<<<<<<<<<<<<<<Functions of user
 const getAllUsers = catchSync(async (req, res, next) => {
@@ -108,6 +109,8 @@ const deleteMe = catchSync(async (req, res, next) => {
 const getUser = (req, res) => {};
 const createUser = (req, res) => {};
 const updateUser = (req, res) => {}; //! for admin can update all users
-const deleteUser = (req, res) => {};
+
+//!Only admin can delete user, and remember user can delete with himself but it's not really delete user this's only turn active to false right, so only Admin can delete user
+const deleteUser = handlerFactory.deleteOne(User);
 
 module.exports = { getAllUsers, getUser, createUser, updateUser, deleteUser, updateMe, deleteMe };
