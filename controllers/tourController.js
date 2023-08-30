@@ -45,16 +45,18 @@ const getAllTours = catchAsync(async (req, res, next) => {
 //!First this function will call by the express if has the request for this route, and the express expected the function(req, res, next), but this function return function(fn) so it's not type of express
 // *--> the solution we need return a function express expected: catchAsync return function(req, res, next)
 
-const createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
+const createTour = handlerFactory.createOne(Tour);
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
+// catchAsync(async (req, res, next) => {
+//   const newTour = await Tour.create(req.body);
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour: newTour,
+//     },
+//   });
+// });
 
 //?IMPLEMENTS POPULATE PROCESS FOR TOUR GUIDES
 //! https://mongoosejs.com/docs/populate.html
@@ -96,21 +98,23 @@ const getTour = catchAsync(async (req, res, next) => {
   });
 });
 
-const updateTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
+const updateTour = handlerFactory.updateOne(Tour);
 
-  const tourUpdate = await Tour.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true, //now the validator in schema enable and can check data
-  });
-  if (!tourUpdate) return next(new AppError(400, 'Update data invalid'));
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: tourUpdate,
-    },
-  });
-});
+// catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+
+//   const tourUpdate = await Tour.findByIdAndUpdate(id, req.body, {
+//     new: true,
+//     runValidators: true, //now the validator in schema enable and can check data
+//   });
+//   if (!tourUpdate) return next(new AppError(400, 'Update data invalid'));
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour: tourUpdate,
+//     },
+//   });
+// });
 
 const deleteTour = handlerFactory.deleteOne(Tour); //* delete on will return function like this code bellow and it's also middleware function, so it'll run when middleware called
 //catchAsync(async (req, res, next) => {

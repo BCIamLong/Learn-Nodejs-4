@@ -26,6 +26,12 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'Tour',
       required: [true, 'Review must to belong to a tour'],
+      // validate: {
+      //   validator: function (val) {
+      //     return mongoose.Types.ObjectId.isValid(val);
+      //   },
+      //   message: 'No tour found with this id ',
+      // },
     },
     createdAt: {
       type: Date,

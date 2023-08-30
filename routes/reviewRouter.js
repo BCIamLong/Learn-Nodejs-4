@@ -11,11 +11,17 @@ const router = express.Router({ mergeParams: true }); // mergeParams: true help 
 router.route('/').get(reviewController.getAllReviewsOfTour).post(
   authController.protectManually,
   authController.restrictTo('user'), // !the admin and tour guides, lead guide don't reviews, if they want reviews maybe they need create new user account not admin and tour guide, lead guide accout because it's also belong the companny
+  reviewController.setTourUserIds,
   reviewController.createReviewOfTour,
 );
 
 router
   .route('/:id')
+  .patch(
+    authController.protectManually,
+    authController.restrictTo('user'),
+    reviewController.updateReview,
+  )
   .delete(
     authController.protectManually,
     authController.restrictTo('admin'),

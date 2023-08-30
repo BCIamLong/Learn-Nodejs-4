@@ -107,8 +107,11 @@ const deleteMe = catchSync(async (req, res, next) => {
 });
 
 const getUser = (req, res) => {};
-const createUser = (req, res) => {};
-const updateUser = (req, res) => {}; //! for admin can update all users
+const createUser = handlerFactory.createOne(User);
+
+//!remember that admin doesn't change password right,he only changes infor of user and if he tries to change it's also not work because we user findByIdAndUpdate() to update so it's not run pre save hook(middleware) so password can't change in this case
+const updateUser = handlerFactory.updateOne(User); //* DO NOT UPDATE USER PASSWORD
+//! for admin can update all users
 
 //!Only admin can delete user, and remember user can delete with himself but it's not really delete user this's only turn active to false right, so only Admin can delete user
 const deleteUser = handlerFactory.deleteOne(User);
