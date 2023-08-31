@@ -2,31 +2,33 @@ const express = require('express');
 const reviewController = require('../controllers/reviewController');
 const authController = require('../controllers/authController');
 
-//* IMPLEMENTS nested router with avanced express feature called: merge params
-//! because we have code: router.use('/:tourId/reviews', reviewRouter); in tour route and by default each router obly has access to parameter of their sepecific routes
-//!--> so now how can we access to tourId param from review route because it's totaly different router
-//*--> so we will use merge params of Express to solve this problem
-const router = express.Router({ mergeParams: true }); // mergeParams: true help we can access param with different the router
-//get(reviewController.setTourIdForNestedReview, reviewController.getAllReviewsOfTour) use for //!WAY 1: get tour id with middleware
-router.route('/').get(reviewController.getAllReviewsOfTour).post(
-  authController.protectManually,
-  authController.restrictTo('user'), // !the admin and tour guides, lead guide don't reviews, if they want reviews maybe they need create new user account not admin and tour guide, lead guide accout because it's also belong the companny
-  reviewController.setTourUserIds,
-  reviewController.createReviewOfTour,
-);
+//* IMPLEMENTS MISSING AUTHETICATION AND AUTHORIZATION FOR REVIEW
+
+//! authetication is related to like check login,....
+//! authorization is related to  authorize for user or admin can perform any features
+const router = express.Router({ mergeParams: true });
+
+//* so we don't want anyone who is not autheticated to get, post, update, delete reviews
+router.use(authController.protectManually);
+//* so now if not autheticated wanna get access to watch review maybe they will go to getTour and getAllTour but in here they can watch some review if they want watch paticular review or all review they also need to login to autheticated
+
+//! admin, lead-guide and guide don't review tour why? because they is people in companny so it's wreid if they can review tour,(maybe if they can, they also reivew with good way, if bad way maybe they can be fired :))
+router
+  .route('/')
+  .get(reviewController.getAllReviewsOfTour)
+  .post(
+    authController.restrictTo('user'),
+    reviewController.setTourUserIds,
+    reviewController.createReviewOfTour,
+  );
+
+//* admin also can update and delete review because they need to control and manage the application, for example if someone review with rude way and not good the admin can edit or delete this review,...
+//?lead-guide and guide don't do this because their work is guides tour and don't manage the application it's only for admin
 
 router
   .route('/:id')
-  .get(reviewController.updateReview)
-  .patch(
-    authController.protectManually,
-    authController.restrictTo('user'),
-    reviewController.updateReview,
-  )
-  .delete(
-    authController.protectManually,
-    authController.restrictTo('admin'),
-    reviewController.deleteReview,
-  );
+  .get(reviewController.getReview)
+  .patch(authController.restrictTo('user', 'admin'), reviewController.updateReview)
+  .delete(authController.restrictTo('user', 'admin'), reviewController.deleteReview);
 
 module.exports = router;
