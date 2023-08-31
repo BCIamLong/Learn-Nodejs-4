@@ -45,6 +45,7 @@ router
 
 router
   .route('/:id')
+  .get(userController.getUser)
   .patch(
     authController.protectManually,
     authController.restrictTo('admin'),

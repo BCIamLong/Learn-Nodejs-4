@@ -1,7 +1,7 @@
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
+// const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
-const AppError = require('../utils/appError');
+// const AppError = require('../utils/appError');
 const handlerFactory = require('./handlerFactory');
 
 //?Refactory code: because we used this code two times and maybe in future we also need to use again and refactory to a function and reuse is good for this case
@@ -13,27 +13,25 @@ const handlerFactory = require('./handlerFactory');
 //     select: '-__v -passwordChangedAt',
 //   });
 
-const getAllTours = catchAsync(async (req, res, next) => {
-  console.log(req);
-  const count = await Tour.estimatedDocumentCount();
-  //new APIFeatures(populatedData(Tour.find()), req.query)
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .select()
-    .pagination(count);
-  const tours = await features.query;
-  //! WHY WE DON'T USE HANDLE 404 ERROR IN HERE AS WE DON'T FOUND ANY RESULT, OR FILTER NOT VALID, PAGE INVALID
-  //* --> Because the 0 results is also result and we can display some thing not result,... with 0 result filter is filter to 0 result and data request to DB and get 0 result from DB and we will send back 0 result with http 200
-  //?--> it really can't consider an error when the user request all the tours, unless mongoDB has some problem and occurs errors then mongo auto give an error and it'll catch by catchAsync function and send next(err) and the global handler will handle this
-  res.status(200).json({
-    status: 'Sucess',
-    result: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
+const getAllTours = handlerFactory.getAll(Tour);
+//  catchAsync(async (req, res, next) => {
+//   // console.log(req);
+//   const count = await Tour.estimatedDocumentCount();
+//   //new APIFeatures(populatedData(Tour.find()), req.query)
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .select()
+//     .pagination(count);
+//   const tours = await features.query;
+//   res.status(200).json({
+//     status: 'Sucess',
+//     result: tours.length,
+//     data: {
+//       tours,
+//     },
+//   });
+// });
 
 //?The try catch block is per functions and in catch we have similar code and now we need refactoring code and
 //*1,create the high level function wrapper the async function
@@ -58,45 +56,37 @@ const createTour = handlerFactory.createOne(Tour);
 //   });
 // });
 
-//?IMPLEMENTS POPULATE PROCESS FOR TOUR GUIDES
-//! https://mongoosejs.com/docs/populate.html
-const getTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  //* we user populate() method
-  // *the guides field in tour schema is only reference {id} not actually the real data so to get all data of guides we need to use populate() to get real guides data {id, name, role, email,...} => it's replace id reference with actual data
-  //! this is only query  and not in actual database
-  // * you can use {} to select the field you want for output of query(you want remove or format output)
-  // const tour = await Tour.findById(id).populate({
-  //   // two this data is not nesecarry for tour guides so we need filter them
-  //   path: 'guides',
-  //   select: '-__v -passwordChangedAt',
-  // });
-  //populatedData(Tour.findById(id));
-  //! so we will use populate('reviews) here in tourController because we only want apply this virtual populate for get one tour(getTour() method)
-  //? so now we have problem we have tour being populated with reviews and the reviews also populated with the tour and populated with user, and in tour we also have populated with guide again it's not ideal at all so here we have chain 3 populate also performance is not ideal at all and data is so mixing and not good
-  //* solution here: we will turn of populating the reviews with the tour, but of course if in your application case it's always depend on how your application work in your sepecific case
-  //* and so in this our application that's logical when we have reviews available on tour and it's not that important having the tour available on the reviews so we comments this code populated tour to reviews because we don't need it
+//?IMPLEMENTS GET ONE FACTORY HANDLER
 
-  const tour = await Tour.findById(id).populate('reviews');
-  // * so this populate() function is an absolutely fundamental tool for working with data in mongoose and especially of course when there are relasionship between data
-  //! Behide the scene of populate is really create new query and so this might affect your performance so if you only use this for small project so it's small hit on performance is no big deal
-  //! But with huge application with tons of populates all over the place so that's sure effect to your performance
-  // ? But we also don't have other way to do it in mongoose, how else would mongoose be able to get data about tours and the users at the same time it needs to create new query to create connection
+//* so why we need this middleware, well because in get tour we have populate() so we need set logic for getOne can use for this case, because in get user and review don't have this populate
+//!Way 1 to set logic for get tour with populate for getOne factory
+const setReivews = (req, res, next) => {
+  req.body.reviews = 'reviews';
 
-  //?HANDLER 404 ERROR
-  //* We can throw this error and catch method in catchSync() will catch this error
-  // if (!tour) throw new AppError(404, 'Id invalid');
-  // you also use:
-  if (!tour) return next(new AppError(404, 'Id invalid')); //! you need return here because next() not end process and if you haven't return well we have error that: Cannot set headers after they are sent to the client
-  //--> this way better because we dont need many work as throw: we throw (create new error) -> catch() catch error and send next(err), this way only send next(create new error)
+  next();
+};
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
+//! you can't use -user to remove user out of this result why? because we also populate user in reviewModel right so it uses to run populate() in review model so you can't remove it
+//* we don't need tour because we get tour and in this tour we have many reviews so the tour id now was exist we don't repeat data many time in per review
+const getTour = handlerFactory.getOne(Tour, {
+  path: 'reviews',
+  select: 'review rating -tour',
 });
+
+// catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+
+//   const tour = await Tour.findById(id).populate('reviews');
+
+//   if (!tour) return next(new AppError(404, 'Id invalid'));
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
 const updateTour = handlerFactory.updateOne(Tour);
 
@@ -225,4 +215,5 @@ module.exports = {
   getTourStats,
   getMonthlyPlan,
   // checkReqBody,
+  setReivews,
 };

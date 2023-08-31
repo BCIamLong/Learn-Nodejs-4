@@ -18,14 +18,11 @@ class APIFeatures {
   filter() {
     const obQuery = { ...this.queryStr };
     const excludedField = ['sort', 'page', 'limit', 'fields'];
-    excludedField.forEach((el) => delete obQuery[el]); //if obQuery[el] true => delete
+    excludedField.forEach(el => delete obQuery[el]); //if obQuery[el] true => delete
     //1B, AVANCED FILTER
     let obQueryStr = JSON.stringify(obQuery);
 
-    obQueryStr = obQueryStr.replace(
-      /\b(gte|lte|gt|lt)\b/g,
-      (match) => `$${match}`,
-    );
+    obQueryStr = obQueryStr.replace(/\b(gte|lte|gt|lt)\b/g, match => `$${match}`);
     // console.log(JSON.parse(obQueryStr));
     this.query = this.query.find(JSON.parse(obQueryStr));
     //!! APPLY THE ES6 FEATURE IS OBJECT CHAINING, YOU CAN CHANINNG METHODS IF METHODS RETURN THAT OBJECT CONTAINS THAT METHOD
@@ -34,7 +31,7 @@ class APIFeatures {
 
   sort() {
     if (this.queryStr.sort) {
-      const sortQuery = this.queryStr.sort.split(',').join(' ');
+      const sortQuery = this.queryStr.sort?.split(',').join(' ');
 
       // console.log(sortQuery);
       // console.log(req.query.sort.replaceAll(',', ' '));
@@ -48,7 +45,7 @@ class APIFeatures {
 
   select() {
     if (this.queryStr.fields) {
-      const queryFields = this.queryStr.fields.split(',').join(' ');
+      const queryFields = this.queryStr.fields?.split(',').join(' ');
       this.query = this.query.select(queryFields);
     }
 

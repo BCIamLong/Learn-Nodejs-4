@@ -47,7 +47,7 @@ router
 
 router
   .route('/:id')
-  .get(tourController.getTour)
+  .get(tourController.getTour) //.get(tourController.setReivews, tourController.getTour)
   .patch(
     authController.protectManually,
     authController.restrictTo('admin'),

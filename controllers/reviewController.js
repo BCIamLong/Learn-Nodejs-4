@@ -1,28 +1,49 @@
+// const mongoose = require('mongoose');
 const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
 
-const getAllReviewsOfTour = catchSync(async (req, res, next) => {
-  //* we need to do some logic when we get all review of review collection and when we get all review of sepecific tour, because now when we use nested router for tours/reviews so it's also run in review router
-  const filter = {};
-  if (req.params.tourId) {
-    const { tourId } = req.params;
+//* Because in the review we need tour id to get all review of this tour so it's special case so we need to set some logic to get tour id
+// ! use for WAY 1: get tour id by use middleware
+const setTourIdForNestedReview = catchSync(async (req, res, next) => {
+  const { tourId } = req.params;
+  if (tourId) {
     const checkTour = await Tour.findById(tourId);
-    if (!checkTour) return next(new AppError(400, 'Tour id invalid'));
-    filter.tour = tourId;
+    if (!checkTour) return next(new AppError(404, 'No tour found with this id'));
+    // const mongoId = new mongoose.Types.ObjectId(tourId);
+    // console.log(mongoId);
+    req.body.filter = { tour: tourId };
+    //  { tour: mongoose.Schema.ObjectId(tourId) };
+    return next();
   }
-
-  const reviews = await Review.find(filter);
-  res.json({
-    status: 'success',
-    results: reviews.length,
-    data: {
-      reviews,
-    },
-  });
+  req.body.filter = {};
+  next();
 });
+//handlerFactory.getAll(Tour);
+const getAllReviewsOfTour = handlerFactory.getAll(Review);
+// catchSync(async (req, res, next) => {
+//   //* we need to do some logic when we get all review of review collection and when we get all review of sepecific tour, because now when we use nested router for tours/reviews so it's also run in review router
+//   const filter = {};
+//   if (req.params.tourId) {
+//     const { tourId } = req.params;
+//     const checkTour = await Tour.findById(tourId);
+//     if (!checkTour) return next(new AppError(400, 'Tour id invalid'));
+//     filter.tour = tourId;
+//   }
+
+//   const reviews = await Review.find(filter);
+//   res.json({
+//     status: 'success',
+//     results: reviews.length,
+//     data: {
+//       reviews,
+//     },
+//   });
+// });
+
+const getReview = handlerFactory.getOne(Review);
 
 //* CHECK TOUR ID AND USER ID WHEN WE CREATE REVIEW BECAUSE WE USE FACTORY CREATE ONE SO IT'S LITTLE BIT DIFFERENT SO WE NEED USE MIDDLEWARE TO SUPPORT THIS
 // ? and this code also doesn't related to much to review
@@ -99,4 +120,6 @@ module.exports = {
   deleteReview,
   updateReview,
   setTourUserIds,
+  getReview,
+  setTourIdForNestedReview,
 };

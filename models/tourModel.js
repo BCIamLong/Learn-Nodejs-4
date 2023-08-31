@@ -150,6 +150,17 @@ tourSchema.pre('save', function (next) {
 //1, FIRST WE CREATE A REFERENCE TO ANOTHER MODEL AND SO WITH  THIS YOU EFFECTIVELY CREATE THE RELATIONSHIP BETWEEN THESE TWO DATA SETS
 //2, WE POPULATED THAT FIELD THAT YOU JUST SEPECIFY BEFORE THAT'S GUIDES FIELD IN TOUR MODEL
 
+// tourSchema.pre('findOne', function (next) {
+//   this.find({ vip: { $ne: 'true' } })
+//     .populate({
+//       // two this data is not nesecarry for tour guides so we need filter them
+//       path: 'guides',
+//       select: '-__v -passwordChangedAt',
+//     })
+//     .populate('reviews');
+//   next();
+// });
+
 //?IMPLEMENTS POLULATE PROCESS FOR TOUR GUIDES DATA
 //!THIS POPULATE() IS VERY IMPORTANT IN MONGOOSE TOOL BOX
 tourSchema.pre(/^find/, function (next) {

@@ -91,7 +91,7 @@ userSchema.methods.createResetPasswordToken = function () {
 };
 
 userSchema.pre(/^find/, function (next) {
-  this.find({ active: { $ne: false } });
+  this.find({ active: { $ne: false } }).select('-__v');
   next();
 });
 

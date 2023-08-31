@@ -4,16 +4,17 @@ const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
 
 //<<<<<<<<<<<<<<<<<<<<<Functions of user
-const getAllUsers = catchSync(async (req, res, next) => {
-  const users = await User.find(); //find({ active: true }); //! to filter all not active users but we should do all place we use find methods instead one in here, so to do that we use: query pre hooks find in user model
+const getAllUsers = handlerFactory.getAll(User);
+// catchSync(async (req, res, next) => {
+//   const users = await User.find(); //find({ active: true }); //! to filter all not active users but we should do all place we use find methods instead one in here, so to do that we use: query pre hooks find in user model
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-});
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       users,
+//     },
+//   });
+// });
 //?>>>>>>>>>>>>>>IMPLEMENTS UPDATE CURRENT USER DATA<<<<<<<<<<<<<<<<<
 // * udpateMe() only update for user(when user click on user profile and edit his profile)
 
@@ -106,7 +107,7 @@ const deleteMe = catchSync(async (req, res, next) => {
   //! --> so we don't really delete user from DB, but now user can't use to access anywhere, so it still fine to use DELETE http method here
 });
 
-const getUser = (req, res) => {};
+const getUser = handlerFactory.getOne(User);
 const createUser = handlerFactory.createOne(User);
 
 //!remember that admin doesn't change password right,he only changes infor of user and if he tries to change it's also not work because we user findByIdAndUpdate() to update so it's not run pre save hook(middleware) so password can't change in this case

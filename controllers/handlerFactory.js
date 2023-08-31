@@ -7,6 +7,8 @@
 //* USUALLY THIS FACTORY HANDLER USE FOR CRUD ACTION
 
 // const Tour = require('../models/tourModel');
+const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 
@@ -101,4 +103,103 @@ const createOne = Model =>
       },
     });
   });
-module.exports = { deleteOne, updateOne, createOne };
+
+//? IMPLEMENTS READING FACTORY HANDLER GETONE AND GETALL FUNCTIONS
+// const getTour = catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+
+//   const tour = await Tour.findById(id).populate('reviews');
+
+//   if (!tour) return next(new AppError(404, 'Id invalid'));
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
+//! Because in get tour function we have populate() so we need set some logic for getOne function can work for getTour
+//!*Way 1: to set logic  getTour  populate by use middleware you can set req.body.reviews in setReviews() middleware and in getOne you only pass this req.body.reviews to populate()
+//--! well if req.body.reviews not exist in other rss so it'll be set undefiend and populate(undefined) is not work and we can get all data normal so that's right
+//* Way 2: we will pass populateOption in parameter of getOne and set logic if populateOption exist we will set populate() and opposite
+const getOne = (Model, optionPopulate) =>
+  catchSync(async (req, res, next) => {
+    //! Way 2:
+    const { id } = req.params;
+    let query = await Model.findById(id);
+    if (optionPopulate) query = query.populate(optionPopulate);
+    const doc = await query;
+    //!Way 1:
+    // const doc = await Model.findById(id);.populate(req.body.reviews);
+
+    if (!doc) return next(new AppError(404, 'No document found with this id'));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        doc,
+      },
+    });
+  });
+
+// const getAllTours = catchAsync(async (req, res, next) => {
+//   // console.log(req);
+//   const count = await Tour.estimatedDocumentCount();
+//   //new APIFeatures(populatedData(Tour.find()), req.query)
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .select()
+//     .pagination(count);
+//   const tours = await features.query;
+//   res.status(200).json({
+//     status: 'Sucess',
+//     result: tours.length,
+//     data: {
+//       tours,
+//     },
+//   });
+// });
+
+//* WAY 1: use middleware to set the tour id to req.body and use this in getAll method and of course it's special case of review, but how with other rss? well if we don't pass this this simple is undefind and find() still working right
+//* WAY 2:  also like way 1 but this time we use code from way 1 directly inslide getAll so i perferct use middleware use way1
+const getAll = Model =>
+  catchSync(async (req, res, next) => {
+    // console.log(req);
+    //!WAY 2
+    //* Allow GET nested reviews on tour
+    // !  it's small hack here , but if you need to a lot code to set logic you should seperate and put it in other place like middleware,...
+    const filter = {};
+    const { tourId } = req.params;
+    if (tourId) {
+      const checkTour = await Tour.findById(tourId);
+      if (!checkTour) return next(new AppError(404, 'No tour found with this id'));
+      filter.tour = tourId;
+    }
+
+    const count = await Model.estimatedDocumentCount();
+    //new APIFeatures(populatedData(Tour.find()), req.query)
+    // console.log(req.body.id);
+    const features = new APIFeatures(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .select()
+      .pagination(count);
+    //!WAY 1
+    // const features = new APIFeatures(Model.find(req.body.id), req.query)
+    //   .filter()
+    //   .sort()
+    //   .select()
+    //   .pagination(count);
+    const docs = await features.query;
+    res.status(200).json({
+      status: 'Sucess',
+      result: docs.length,
+      data: {
+        docs,
+      },
+    });
+  });
+
+module.exports = { deleteOne, updateOne, createOne, getOne, getAll };
