@@ -127,7 +127,11 @@ const getOne = (Model, optionPopulate) =>
   catchSync(async (req, res, next) => {
     //! Way 2:
     const { id } = req.params;
-    let query = await Model.findById(id);
+    //! this code comment is way 2 to implements getMe function
+    // let query = Model.findById(req.user?.id);
+    // if (id) query = Model.findById(id);
+    // if (optionPopulate) query = query.populate(optionPopulate);
+    let query = Model.findById(id);
     if (optionPopulate) query = query.populate(optionPopulate);
     const doc = await query;
     //!Way 1:

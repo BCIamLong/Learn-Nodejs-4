@@ -3,6 +3,16 @@ const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
 
+//?IMPLEMENTS GET CURRENT USER
+//* so in this case we need the current id user form logged it not id from req.params.id so we need set some logic to do it but getOne function must to user for many resources
+//*Way 1: use middleware to do it, and use this middleware with getUser
+const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
+//*Way 2: do it inside getOne function and assign to getMe
+// const getMe = handlerFactory.getOne(User);
 //<<<<<<<<<<<<<<<<<<<<<Functions of user
 const getAllUsers = handlerFactory.getAll(User);
 // catchSync(async (req, res, next) => {
@@ -117,4 +127,13 @@ const updateUser = handlerFactory.updateOne(User); //* DO NOT UPDATE USER PASSWO
 //!Only admin can delete user, and remember user can delete with himself but it's not really delete user this's only turn active to false right, so only Admin can delete user
 const deleteUser = handlerFactory.deleteOne(User);
 
-module.exports = { getAllUsers, getUser, createUser, updateUser, deleteUser, updateMe, deleteMe };
+module.exports = {
+  getAllUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  updateMe,
+  deleteMe,
+  getMe,
+};
