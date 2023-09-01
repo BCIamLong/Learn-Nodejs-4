@@ -203,7 +203,7 @@ const restrictTo =
     //* remember this data we get from before middleware that's protect middeware we use  req.user = freshUser; to add user into req, req can travel in middleware cycle
 
     //!When we access to this function why we can access to roles, well that's closure and the first running was be snipshot and it's still in here and we can access
-    if (!roles.includes(req.user.roles))
+    if (!roles.includes(req.user.role))
       return next(
         //!403 is forbidden it's for authorization: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
         new AppError(403, 'You dont have permission to do access to this'),

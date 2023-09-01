@@ -41,12 +41,12 @@ const tourSchema = new mongoose.Schema(
     ratingsQuantity: {
       type: Number,
       default: 0,
-      validate: {
-        validator: function (val) {
-          return val < this.ratingAverage;
-        },
-        message: 'The rating quantity(VALUE) must to less than rating average',
-      },
+      // validate: {
+      //   validator: function (val) {
+      //     return val < this.ratingAverage;
+      //   },
+      //   message: 'The rating quantity(VALUE) must to less than rating average',
+      // },
     },
     //*Validator for number built-in
     price: {

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 
 //?IMPLEMENTS MODELLING REVIEWS DATA: PARENT REFERENCING
 //review, rating, createdAt, ref to tour, ref to user
@@ -69,6 +70,83 @@ reviewSchema.pre(/^find/, function (next) {
   //* but it still parent refencing between review and tour but we don't populated data for it
   this.select('-__v -createdAt').populate({ path: 'user', select: 'name photo' });
   next();
+});
+
+//* IMPLEMENT AVERAGE RATING CACULATE FUNCTION
+reviewSchema.methods.createAverageRating = async function (tourId, option) {
+  const tour = await Tour.findById(tourId);
+  const currentRatingsAverage = tour.ratingsAverage;
+  const currentRatingsQuantity = tour.ratingsQuantity;
+  if (option === 'create') {
+    tour.ratingsAverage = (
+      (currentRatingsAverage * currentRatingsQuantity + this.rating) /
+      (currentRatingsQuantity + 1)
+    ).toFixed(1);
+    tour.ratingsQuantity = currentRatingsQuantity + 1;
+  }
+  if (option === 'delete') {
+    tour.ratingsQuantity = currentRatingsQuantity - 1;
+    tour.ratingsAverage = (
+      (tour.ratingsAverage * currentRatingsQuantity - this.rating) /
+      currentRatingsQuantity
+    ).toFixed(1);
+  }
+  if (option === 'update') {
+    tour.ratingsAverage = (
+      currentRatingsAverage +
+      this.rating / (currentRatingsQuantity + 1)
+    ).toFixed(1);
+  }
+  await tour.save();
+};
+
+//* IMPLEMENT AVERAGE RATING CACULATE FUNCTION WITH STATIC METHODS
+//! this static method not like we have Scheman.methods.newMetod =function() this is instance of static method, but now we really create the real static method
+//?reviewSchema.statics.calcAverageRating <=> Review.calcAverageRating
+reviewSchema.statics.calcAverageRating = async function (tourId) {
+  //* this keyword point to current model there for we can use method like aggregate()
+  const stats = await this.aggregate([
+    //* so because we need use aggreaate on the model directly so that's why we using a static method
+    //! aggregate always call on model
+    // {
+    //   $unwind: { path: '$reviews' },
+    // },
+    // {
+    //   $group: {
+    //     _id: '$tour',
+    //     avgRating: { $avg: '$ratingsAverage' },
+    //     totalRating: { $sum: '$ratingsQuantity' },
+    //   },
+    // },
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        avgRating: { $avg: '$rating' },
+        nRating: { $sum: 1 }, //nRating: { $sum: '$ratingsQuantity' } we want numbers of rate not sum of rates
+      },
+    },
+  ]);
+
+  //! Update the stats ratingsAverage ratingsQuantity into tour collection
+  // console.log(stats);
+  await Tour.findByIdAndUpdate(tourId, {
+    ratingsAverage: stats[0].avgRating,
+    ratingsQuantity: stats[0].nRating,
+  });
+};
+
+//! we should use post save hook(middleware) why? because in the pre save hook the review is available in our code but not  in our collection, so it's still save yet and we're using aggregate with Review model and it's interact with collection so in here we should use post save hook that time data is stored in DB
+reviewSchema.post('save', async function (docs, next) {
+  // const stats = await Review.calcAverageRating(this.tour);
+  //? so the problem here is Review model is not created in this time, so how to solve this issue?
+  //* simple think maybe we move this code bellow const Review = mongoose.model('Review', reviewSchema); but it'll not work because like in Express this code here basically runs in the sequence it is declared, if you do it the reviewSchema don't have this pre save hook(middleware) cuz model was created
+  //! the solve is use this.constructor <=> Review model, this is current doccument and constructor is basically the model created that document
+  await this.constructor.calcAverageRating(this.tour);
+
+  next(); // we don't need use next function if after this post hook we don't have any thing middleware
 });
 
 const Review = mongoose.model('Review', reviewSchema);

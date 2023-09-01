@@ -70,7 +70,7 @@ const setReivews = (req, res, next) => {
 //* we don't need tour because we get tour and in this tour we have many reviews so the tour id now was exist we don't repeat data many time in per review
 const getTour = handlerFactory.getOne(Tour, {
   path: 'reviews',
-  select: 'review rating -tour',
+  select: 'review rating ',
 });
 
 // catchAsync(async (req, res, next) => {
