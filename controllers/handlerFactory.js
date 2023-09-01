@@ -41,7 +41,7 @@ const createOne = Model =>
     // if (req.user.id) req.body.user = req.user.id;
 
     const newDoc = await Model.create(req.body);
-    if (newDoc.review) await newDoc.createAverageRating(req.body.tour);
+    // if (newDoc.review) await newDoc.createAverageRating(req.body.tour);
 
     res.status(201).json({
       status: 'success',

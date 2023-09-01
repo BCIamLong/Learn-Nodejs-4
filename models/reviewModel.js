@@ -129,12 +129,12 @@ reviewSchema.statics.calcAverageRating = async function (tourId) {
       },
     },
   ]);
-
   //! Update the stats ratingsAverage ratingsQuantity into tour collection
   // console.log(stats);
   await Tour.findByIdAndUpdate(tourId, {
-    ratingsAverage: stats[0].avgRating,
-    ratingsQuantity: stats[0].nRating,
+    //* This solution for error delete the last review when we update to tour that's because this stats array is empty [] and [][0] is error cuz it's undefined right
+    ratingsAverage: stats[0]?.avgRating || 4.5,
+    ratingsQuantity: stats[0]?.nRating || 0,
   });
 };
 
@@ -148,6 +148,42 @@ reviewSchema.post('save', async function (docs, next) {
 
   next(); // we don't need use next function if after this post hook we don't have any thing middleware
 });
+
+//*IMPLEMENTS  CACULATE AVERAGE RATING FOR DELETE AND UPDATE
+//? so because delete and update use findByIdAndDelete, findByIdAndUpdate it's also behind is findOneAndDelete, findOneAndUpdate so we can't use document middleware function which work with only create and save so there fore we need use query document => so let do with two way bellow, but remember the way 1 not working right now, it's only work for old version of mongoose
+//* So let use all thing mongoose provide to solve problem, bussiness problem, ... and that reason read mongoose document is also important because we can find something can help solve problem right
+//!https://mongoosejs.com/docs/middleware.html
+//!Way 1: is only work for old version of mongoose like 5,4,... it's not work now new version now and we have better way to do it with new improve from mongoose
+// reviewSchema.pre(/^findOneAnd/, async function (next) {
+//   const review = await this.findOne(); //this is a trick to execute this without error
+//   //* so now we get review document and tour id so that enough to do next step
+//   //! but we have problem now the data not updated, so we need to pass this review document to query object and pass this to post hook and use this
+//   this.r = review;
+//   //* and we will use this in post hook(middleware) because that time data was updated
+//   //? this trick is called pass data via query object
+//   console.log(review);
+//   // await review.constructor.calcAverageRating(review.tour);
+//   next();
+// });
+
+// reviewSchema.post(/^findOneAnd/, async (doc, next) => {
+//   // await this.findOne() is not work here because query has already executed
+//   await this.r.constructor.calcAverageRating(this.r.tour);
+//   next();
+// });
+
+//! Way 2: this is better way mongoose provide some feature to we can do it
+reviewSchema.post(/^findOneAnd/, async (doc, next) => {
+  await doc.constructor.calcAverageRating(doc.tour);
+  next();
+});
+//? now we have problem with delete because when delete the last element, we will get error because it's review now is a undefined value so we need to fix it and consvert it to 0 review
+
+//! we shouldn't repeat the code and we have best way to do it is use the regex start with findOneAnd so that's good
+// reviewSchema.post('findOneAndDelete', async (doc, next) => {
+//   await doc.constructor.calcAverageRating(doc.tour);
+//   next();
+// });
 
 const Review = mongoose.model('Review', reviewSchema);
 
