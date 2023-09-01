@@ -33,12 +33,12 @@ const tourSchema = new mongoose.Schema(
         message: 'Difficult either: easy, difficult, medium',
       },
     },
-    ratingAverage: {
+    ratingsAverage: {
       type: Number,
       default: 4.5,
       max: 5,
     },
-    ratingQuantity: {
+    ratingsQuantity: {
       type: Number,
       default: 0,
       validate: {
@@ -136,6 +136,22 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true }, // to display based on object type
   },
 );
+
+//?IMPLEMENTING INDEXES DATA
+//!https://mongoosejs.com/docs/guide.html#indexes
+
+// tourSchema.index({ price: 1 }); // *value can be 1 or -1, 1 mean that we're sorting the price index in an ascending order while -1 stands for descending order
+//* there are also have other type of indexes like for text or for geospatial data
+
+//*implements compound indexes
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+// *So know we don’t need to create indexes for one field price and rating right when you had compund field for two this field
+// !But if you still create indexes for fields was in compound indexes it’s maybe create some conflick and it’s maybe not work so you should avoid this
+
+//* We will set index for slug field why? because  slug is frienly name of tour we use on url and it’s replace for id tour so it’s also unique and because we always query tour to watch info so it’s the most queries field so it’s should be indexes
+tourSchema.index({ slug: 1 }); //!most time the 1 or -1 is not that important
+
+//! and the indexes do our application much much read performance, so don't never ignore this when build application
 
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, {
