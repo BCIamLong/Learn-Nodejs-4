@@ -37,6 +37,10 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       max: 5,
+      //* A small feature mongoose provide
+      //!--> setter function, this function willl be run each time that a new value is set for this field, and it's callback function call each time the new value is set for ratingsAverage field
+      set: val => val.toFixed(1), //or Math.round(val * 10)/ 10, we use this function to set ratingsAverage to number like 4.5, 4.6 ... not 4.111111,4.55555,... like this
+      //! so in real time we don't to format data to display because it's work of front-end and back end only return data and front-end will format this and display for client
     },
     ratingsQuantity: {
       type: Number,
