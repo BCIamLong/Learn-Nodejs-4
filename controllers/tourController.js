@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const AppError = require('../utils/appError');
 // const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
 // const AppError = require('../utils/appError');
@@ -204,6 +205,53 @@ const getMonthlyPlan = catchAsync(async (req, res, next) => {
     data: { plan },
   });
 });
+//* /tours-within/:distance/center/:latlng/unit/:unit
+//* /tours-within/300/center/-34,45/unit/km
+//--! latlng format is: lat,lng is also format from google map 16.215226, 107.815158 when you click point in google map it's also lat,lng point
+
+const getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  //* we need format distance to special unit is called radians, and to get it we need to divide it by the radius of the Earth
+  //! if you use mi: the Earth radius is 3963.2 and if you use km: the Earth radius is 6378.1
+  //? because the mongodb expect the radius of our sphere to be in radians
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng)
+    return next(new AppError(400, 'Please choose center point to find tours within'));
+
+  // console.log(distance, lat, lng, unit);
+  //* Query geospatial:
+  //--! so we basically query for start location, because it holds the geospatial where each tour starts and so that's exactly what we're searching for
+  //! https://www.mongodb.com/docs/v7.0/geospatial-queries/#geospatial-indexes
+  //! https://www.mongodb.com/docs/v7.0/reference/operator/query/geoWithin/
+  //! https://www.mongodb.com/docs/v7.0/reference/operator/query/centerSphere/
+  //* so now to execute geospatial query we need to first attribute an index to the field where the geospatial data that we're searching for is stored
+  //* in this case we need to add index to startLocation
+  const tours = await Tour.find({
+    startLocation: {
+      $geoWithin: {
+        // *geoWithin is geospatial operator: mean find documents within a certain geometry(hinh hoc) and that geometry we need to defined where we actually find document
+        // *well we want to find them inside of sphere that start at this point(latlng) and have radius(distance)(ban kinh) with this point
+        //--! For example: when we find tours in Da nang in place have distance 300 km => you want find all tours document withit a sphere that has a radius of 300 km
+        // * $center is operator specifies a circle: [[lng, lat], radius] we will find with circel have center point [lng, lat] in distance radius
+        //! [lng, lat] is standard format for geospatial point in MongoDB GeoJson and it might cause some confuse because normal we usually use  [lat, lng] right
+        //! radius mongo expect distance with special unit is called radians unit
+        $centerSphere: [[lng, lat], radius],
+      },
+    },
+  });
+  //! when we get results and so how can we know is this true or not? well we will use compass to check it: read use compass to check map in geoSpatialQueriesFidingTourWithinRadius.doc
+  //* all thing we did here find the documments located  within a sphere with radius center(starting point) [lng, lat] and radius(calc by distance)
+
+  res.json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
 
 module.exports = {
   getAllTours,
@@ -216,4 +264,5 @@ module.exports = {
   getMonthlyPlan,
   // checkReqBody,
   setReivews,
+  getToursWithin,
 };

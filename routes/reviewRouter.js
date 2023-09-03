@@ -22,13 +22,12 @@ router
     reviewController.createReviewOfTour,
   );
 
+router.route('/:id').get(reviewController.getReview);
+
 //* admin also can update and delete review because they need to control and manage the application, for example if someone review with rude way and not good the admin can edit or delete this review,...
 //?lead-guide and guide don't do this because their work is guides tour and don't manage the application it's only for admin
+router.use(authController.restrictTo('user', 'admin'));
 
-router
-  .route('/:id')
-  .get(reviewController.getReview)
-  .patch(authController.restrictTo('user', 'admin'), reviewController.updateReview)
-  .delete(authController.restrictTo('user', 'admin'), reviewController.deleteReview);
+router.route('/:id').patch(reviewController.updateReview).delete(reviewController.deleteReview);
 
 module.exports = router;

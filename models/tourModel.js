@@ -141,21 +141,17 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-//?IMPLEMENTING INDEXES DATA
-//!https://mongoosejs.com/docs/guide.html#indexes
+//?IMPLEMENTS CREATE INDEX FOR GEOSPATIAL
+//!https://www.mongodb.com/docs/v7.0/geospatial-queries/#geospatial-indexes
 
-// tourSchema.index({ price: 1 }); // *value can be 1 or -1, 1 mean that we're sorting the price index in an ascending order while -1 stands for descending order
-//* there are also have other type of indexes like for text or for geospatial data
+//* so this time we don't use 1 or -1 because this is GeoSpatial data so this index needs to be a 2dsphere index if data decribes real points on a Earth-like sphere or instead we can also use a 2d index if we using just fictional(hu cau) point on a simple two-dimensional plane(mat phang 2 chieu)
+// * so this case we talk about the real point on the Earth surface(be mat) so that we will use 2dsphere index
+// --> so now we telling mongo DB that this start location here should be indexed to a 2d sphere so an Earth-like sphere where all our data are located
+tourSchema.index({ startLocation: '2dsphere' });
 
-//*implements compound indexes
 tourSchema.index({ price: 1, ratingsAverage: -1 });
-// *So know we don’t need to create indexes for one field price and rating right when you had compund field for two this field
-// !But if you still create indexes for fields was in compound indexes it’s maybe create some conflick and it’s maybe not work so you should avoid this
 
-//* We will set index for slug field why? because  slug is frienly name of tour we use on url and it’s replace for id tour so it’s also unique and because we always query tour to watch info so it’s the most queries field so it’s should be indexes
-tourSchema.index({ slug: 1 }); //!most time the 1 or -1 is not that important
-
-//! and the indexes do our application much much read performance, so don't never ignore this when build application
+tourSchema.index({ slug: 1 });
 
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, {

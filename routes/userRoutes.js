@@ -40,7 +40,7 @@ router.patch(
 );
 
 //? Check for only Admin router
-router.use(authController.restrictTo('admin')); //!uthorization admin: only admin can perform all routers after this middleware
+router.use(authController.restrictTo('admin')); //!authorization admin: only admin can perform all routers after this middleware
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 // * post(userController.createUser); for admin
