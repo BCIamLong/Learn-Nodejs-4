@@ -29,6 +29,11 @@ router
   .route('/tours-within/:distance/center/:latlng/unit/:unit')
   .get(tourController.getToursWithin);
 
+//* IMPLEMENTS GEOSPATIAL AGGREGATION CACULATING DISTANCE
+// --! now we're not searching for certain radius, we're really calculate the distance from a certain point to all the tours that we have in collenction in DB
+//!https://www.mongodb.com/docs/manual/reference/operator/aggregation/geoNear/
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
 router.use('/:tourId/reviews', reviewRouter);
 
 // router.post('/:id/reviews', authController.protectManually, reviewController.createReview);

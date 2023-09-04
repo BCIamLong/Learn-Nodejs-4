@@ -253,6 +253,49 @@ const getToursWithin = catchAsync(async (req, res, next) => {
   });
 });
 
+//*IMPLEMENTS GEOSPATIAL AGGREGATION CACULATING DISTANCE
+//!https://www.mongodb.com/docs/manual/reference/operator/aggregation/geoNear/
+const getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  if (!lat || !lng) return next(new AppError(400, 'Please choose your point to caculate distance'));
+  // 3963.2 : distance / 6378.1;
+  //! so we need to consvert the unit in the distanceMultiplier because default it's meter and it's really not good for readable right so we need to consvert to mi or km it's good to read
+  //---!: 1 mi = 1609.34 meters, 1 km = 1000 meters
+  const multiplier = unit === 'mi' ? 1 / 1609.34 : 1 / 1000; // 1 / (3963.2 * 1609.34) : 1 / (6378.1 * 1000);
+  // console.log(+lng, +lat);
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        //!https://www.mongodb.com/docs/manual/reference/operator/aggregation/geoNear/#behavior
+        //* in geospatial aggregation we only have $geoNear operator
+        //* it's always in first in stages if it's not it'll not work
+        //* it requires that at least one of our fields contains a geospatial index
+        near: { type: 'Point', coordinates: [+lng, +lat] }, //! notice: lng and lat must number type
+        //--> near is the point [lng, lat] from which to caculate the distances, all distances is caculate from this point to all the startLocation on tours
+        distanceField: 'distance',
+        //-->distanceField is the name of the field that will be created and where all the calculated distances will be stored
+        distanceMultiplier: multiplier,
+        //!https://www.mongodb.com/docs/manual/reference/operator/aggregation/geoNear/#definition
+        // --> you use this distanceMultiplier to multiply with certain number if you want to consvert this to radians you can multiply with 1/3963.2 (mi) or consvert all distances to km you can multiply to  1/1000,....
+        query: {}, //{ ratingsAverage: { $gt: 4.8 } },//! we also can query in $geoNear stages it's maybe helpful in some certain situations
+      },
+    },
+    //!https://www.mongodb.com/docs/manual/reference/operator/aggregation/project/
+    {
+      $project: { name: 1, distance: 1 },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: distances.length,
+    data: {
+      data: distances,
+    },
+  });
+});
+
 module.exports = {
   getAllTours,
   getTour,
@@ -265,4 +308,5 @@ module.exports = {
   // checkReqBody,
   setReivews,
   getToursWithin,
+  getDistances,
 };

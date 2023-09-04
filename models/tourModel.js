@@ -204,6 +204,7 @@ tourSchema.post(/^find/, function (docs, next) {
 //!!AGGREGATION MIDDLEWARE
 //?Read this: https://mongoosejs.com/docs/middleware.html#notes
 tourSchema.pre('aggregate', function (next) {
+  if (JSON.stringify(this.pipeline()).includes('$geoNear')) return next(); //! use for $geoNear stages because it must to be first stages to can work
   this.pipeline().unshift({
     //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
     //*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
