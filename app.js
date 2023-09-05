@@ -1,3 +1,5 @@
+//!https://nodejs.org/api/path.html
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -16,6 +18,22 @@ const globalErrorsHandler = require('./controllers/errorController');
 
 const app = express();
 
+//?IMPLEMENTS SETTING TEMPLATE ENGINE(PUG)
+//!WE ACTUALLY NEED TO INSTALL PUB, EXPRESS WILL STILL LOAD IT BEHIND THE SCENES AUTOMATICALLY BUT IT DOESN'T COME WITH ALL OF THESE TEMPLATE ENGINE INSTALLED ALL THE BOX BUT WE DON'T NEED REQUIRE CUZ EXPRESS AUTO DO THAT ALL RIGHT
+//* 1: Telling express what's template we using(definded template engine)
+//--> so express automatically supports the most common engines out of the box and pug is one of them and so we don't event install pug and we also don't need to require it anywhere all of this happens behind the scenes internally in express
+app.set('view engine', 'pug');
+//--! now we also need to defined where these views are actually located in our file system, so our pack templates are actually called views in Express and that because these template  are in fact the views in the model view controller architecture (MVC) which we are using in this project
+// --> so we had controllers and models folder now we will create views folder, so now we have three components of MVC architecture
+//--- so now we will defined which folder or views are actually located in all
+//!https://nodejs.org/api/path.html#pathjoinpaths
+app.set('views', path.join(__dirname, 'views')); //'./views'); //! ./views is not ideal, because the path we provide here is always relative to the directory from where we launched the node application and that usually is the root project folder but it might not be, so instead use ./views we should use __dirname variable so to do it in set() method we use path core modules nodejs which use to manipulate path names basically
+//app.set('views', path.join(__dirname, 'views')); --> behind the scene create the path joining the directory name with views  C://..../natours/views like this
+//--! so you can see this might seem here a bit overkill(qua muc can thiet) to use this path.join() but we don't always know whether a path that we receive from somewhere already has a slash or not(if we use ./views => if has slash: //views so it's bug and will create error) so you will see this function use all the times in order to prevent this kind of bug and so we will use this function to create correct path
+app.use(express.static(path.join(__dirname, 'public'))); //! it's also a middleware but we should put it in here because it works together with our views engine
+
+//? so now we finished set up our pug engine, now we can create template in views folder
+
 //*SECURITY HTTP HEADERS
 //* Implements setting security HTTP headers with helmet packages
 app.use(helmet());
@@ -26,7 +44,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 //?LIMIT REQUEST FROM SAME API
-//!rateLimit() return the middleware function like(req, res, next)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 15, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
@@ -84,7 +101,8 @@ app.use(
 //! In validator modules from npm we also have some functions can validator and sanitization data and we can apply them to our schema but if you use mongoose it's not really necessary because mongoose implemented a strict schema so if it's feel data is something like bad, dammage it'll auto create error and our work is custom this error especially in production process
 
 //*SERVING STATIC FILE: use to development dynamic website
-app.use(express.static(`${__dirname}/public`));
+//! so we also should use path.join() for this set static root
+// app.use(express.static(path.join(__dirname, 'public'))); //`${__dirname}/public`));
 
 //?CREATE THE PLACE TO STORAGE AND WE WILL CHECK IT
 //---1, We can use the packages from npm to support create cookie
@@ -100,6 +118,16 @@ app.use((req, res, next) => {
   //-->Authorization -> Bearer asgsghhsfafaggs(value of token)
   //--!the key name will be auto lower case by express
   next();
+});
+
+//*IMPLEMENT RENDER TEMPLATE ENGINE
+app.get('/', (req, res) => {
+  //--! instead use json() we use render() to render template engine and you only pass the name of template
+  //--! if you need you can pass some option
+  //!https://expressjs.com/en/api.html#app.render
+  //--> so we don't even specify pug extension cuz express will automatically know that is the file what we're looking for, it'll look for this file inside of the folder that we specified app.set('views', path.join(__dirname, 'views')); in here right and it'll come to here and look for the name base, and take it then render and then basically send it as response to browser
+  res.status(200).render('base');
+  //! now we can get access to this route so as we access this route we now get access to a dynamically rendered website based on our base.pug template
 });
 
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
