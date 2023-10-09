@@ -1,41 +1,51 @@
-//- Fundamentals of working with pug
-//- Essence(ban chat) pug is a simple white space sentitive syntax for writing HTML that’s really the gist(y chinh) of what it’s, now what it mean is that all we use to write HTML elements is their name and indentation(thut le) in our code
-
-//- * so how can we use style css in pug: in html <link rel="stylesheet", type="text/css", href="style.css"/>
-//- --> pug: link(rel="stylesheet", type="text/css", href="style.css")
-//- * this how we can defined attribute with pug
-
-//-! one thing notice that's we actually use a regular HTML as well in pug so if you wanted you can code regular HTML code right here and pug will still understand it just fine
 doctype html
 html
-    head 
-        title Natours - #{tour}
-        //- ? so how can we get the file style.css and favicon.png we only define it like this?
-        //- * first these link will trigged it's own HTTP request
-        link(rel="stylesheet", href="css/style.css", type="text/css")
-        link(rel="shortcut icon", type="image/png", href="img/favicon.png")
-    body
-        header 
-            //- * so to inject the data into HTML other word read variable we passed when we render to this file we will use the syntax: = variable(remember = then space then variable)
-            h1= tour
-            //- ! the code h1= tour we wrote here it's called buffered(dem) code
-            //- * we also can use javascript code in pug template
-            h2= user.toUpperCase()
-            //- ! we have buffered code => so we also have unbuffered code which is basically the code that's not going to add anything to output and
-            //- * and to write unbuffered code we use: - code...(remember - then our unbuffered code)
-            - const x = 2
-            h2= 30*x
-            //- ! we also have the third way to write code in pug that's called: interpolation(noi suy)
-            //- * and it's working like the es6 template strings
-            //- * we use: #{variable}
-            //- * example: #{tour}, we can also write js code like template string: #{user.length}
-            h2 #{tour.length}
-            //- ! remember that  h2 #{tour.length} we don't use h2= why?
-            //- * because now it's only string or number, not Javascript code, variable... and we can use it because #(tour.length) is 16 and number right, like we use h2 16 and it's normal not h1 const x, x.length... 
-            //- * so if we want to manipulate with string like we use ES6 template string we can use interpolation syntax code to do that
-            h1(style="color:red") The base page
-        main 
-             div 
-                 p Hello i'm from pug
-        footer 
-            h2 End hello
+   head 
+      meta(charset="UTF-8")
+      meta(name="viewport" content="width=device-width, initial-scale=1.0")
+      link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
+      link(rel="stylesheet", href="css/style.css", type="text/css")
+      link(rel="shortcut icon", type="image/png", href="img/favicon.png")
+      title Natours | Exciting tours for adventurous people
+   body
+      // Header
+      //- * so in pug if we want write class we can use element.className or element.className1className2.classNameN(if we have more classes)
+      //- * The CSS code here is code by the BEM architecture in CSS: block element modifier
+      //- * nav--tours is modifier class(reuse class)
+      //- * nav__el is block element __ represent block in this case
+      header.header 
+         nav.nav.nav--tours
+            a.nav__el(href="#") All tours
+            form.nav__search
+               button.nav__search-btn
+                  svg 
+                     use(xlink:href="img/icons.svg#icon-search")
+               input.nav__search-input( type="text" placeholder="Search tours")
+            //- * div is stander block element in HTML so we can don't need to write it 
+            //- * like  div.header__logo instead we can write .header__logo so it'll automatically create div element
+         .header__logo
+            img(src="img/logo-white.png" alt="Natours logo")
+         nav.nav.nav--user 
+            //- a.nav__el( href="#") My bookings
+            //- a.nav__el( href="#")
+            //-    img.nav__user-img(src="img/users/default.jpg" alt="User photo")
+            //-    span LongHoang
+            button.nav__el Log in
+            button.nav__el.nav__el--cta Sign up
+      main.main 
+         h1= tour 
+
+      footer.footer 
+         .footer__logo 
+            img(src="img/logo-green.png" alt="Natours logo")
+         ul.footer__nav 
+            li: a(href="#") About us
+            //- * so in this case we write li then a but li we don't have any attribute or class
+            //- * therefore we can write it by use colon notation(:) li: a(href="#")(li: then space then code)
+            //- ! but remember it might work if li not have anything like class, attributes...
+            //- ! like li.li: a(href="#") => it's still working but we should use it in case li don't have anything and it's clearer
+            li: a(href="#") Download apps
+            li: a(href="#") Become a guide
+            li: a(href="#") Careers
+            li: a(href="#") Contact
+         p.footer__copyright &copy; by Jonas Schmedtmann. All rights reserved.
