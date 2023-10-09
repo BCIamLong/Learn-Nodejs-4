@@ -1,4 +1,41 @@
-//-  so in pug file we can write HTML code but not really like HTML format code
-h1 The base page 
-//- so it's will behind consvert to html code and run: <h1>The base page</h1>
-//- it also allow us to put all kinds of variables in here so that we can really inject our data in to these template
+//- Fundamentals of working with pug
+//- Essence(ban chat) pug is a simple white space sentitive syntax for writing HTML that’s really the gist(y chinh) of what it’s, now what it mean is that all we use to write HTML elements is their name and indentation(thut le) in our code
+
+//- * so how can we use style css in pug: in html <link rel="stylesheet", type="text/css", href="style.css"/>
+//- --> pug: link(rel="stylesheet", type="text/css", href="style.css")
+//- * this how we can defined attribute with pug
+
+//-! one thing notice that's we actually use a regular HTML as well in pug so if you wanted you can code regular HTML code right here and pug will still understand it just fine
+doctype html
+html
+    head 
+        title Natours - #{tour}
+        //- ? so how can we get the file style.css and favicon.png we only define it like this?
+        //- * first these link will trigged it's own HTTP request
+        link(rel="stylesheet", href="css/style.css", type="text/css")
+        link(rel="shortcut icon", type="image/png", href="img/favicon.png")
+    body
+        header 
+            //- * so to inject the data into HTML other word read variable we passed when we render to this file we will use the syntax: = variable(remember = then space then variable)
+            h1= tour
+            //- ! the code h1= tour we wrote here it's called buffered(dem) code
+            //- * we also can use javascript code in pug template
+            h2= user.toUpperCase()
+            //- ! we have buffered code => so we also have unbuffered code which is basically the code that's not going to add anything to output and
+            //- * and to write unbuffered code we use: - code...(remember - then our unbuffered code)
+            - const x = 2
+            h2= 30*x
+            //- ! we also have the third way to write code in pug that's called: interpolation(noi suy)
+            //- * and it's working like the es6 template strings
+            //- * we use: #{variable}
+            //- * example: #{tour}, we can also write js code like template string: #{user.length}
+            h2 #{tour.length}
+            //- ! remember that  h2 #{tour.length} we don't use h2= why?
+            //- * because now it's only string or number, not Javascript code, variable... and we can use it because #(tour.length) is 16 and number right, like we use h2 16 and it's normal not h1 const x, x.length... 
+            //- * so if we want to manipulate with string like we use ES6 template string we can use interpolation syntax code to do that
+            h1(style="color:red") The base page
+        main 
+             div 
+                 p Hello i'm from pug
+        footer 
+            h2 End hello

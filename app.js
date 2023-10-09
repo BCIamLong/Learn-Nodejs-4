@@ -122,12 +122,13 @@ app.use((req, res, next) => {
 
 //*IMPLEMENT RENDER TEMPLATE ENGINE
 app.get('/', (req, res) => {
-  //--! instead use json() we use render() to render template engine and you only pass the name of template
-  //--! if you need you can pass some option
-  //!https://expressjs.com/en/api.html#app.render
-  //--> so we don't even specify pug extension cuz express will automatically know that is the file what we're looking for, it'll look for this file inside of the folder that we specified app.set('views', path.join(__dirname, 'views')); in here right and it'll come to here and look for the name base, and take it then render and then basically send it as response to browser
-  res.status(200).render('base');
-  //! now we can get access to this route so as we access this route we now get access to a dynamically rendered website based on our base.pug template
+  // * to move data into our pug file we can use the second parameter in render() which is object contain data we want
+  // * and these variables that we passed in here then called locals in the Pug
+  // * and now we can use these data in our pug file(in this case base.pug file)
+  res.status(200).render('base', {
+    tour: 'The Amazing tour',
+    user: 'longhoang',
+  });
 });
 
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
