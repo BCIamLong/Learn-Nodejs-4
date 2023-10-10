@@ -6,13 +6,20 @@ html
       link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
       link(rel="stylesheet", href="css/style.css", type="text/css")
       link(rel="shortcut icon", type="image/png", href="img/favicon.png")
-      title Natours | Exciting tours for adventurous people
+      title Natours | #{title}
    body
       // Header
       include _header
+      
       // CONTENT
-      main.main 
-         h1= tour 
+      //- * so to extend the first step we need define block
+      block content
+         h1 This is a placeholder heading
+         //- ! keep in mind that we can use data we passed in overview and tour page in this base template
+         //- * because we extends base in two these pages files right so the base template still have access to local and it can get all data
+         h2= title 
+         h2 #{tour}
+         //- ! this content here only display if in overview and tour page we do not custom this block content
 
       // FOOTER
       include _footer

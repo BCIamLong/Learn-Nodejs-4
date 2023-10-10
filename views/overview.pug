@@ -1,0 +1,11 @@
+//- * then we will go to the overview(or other view) page and extend base template
+extends base
+
+//- * so what's exactly we extend from base template
+//- * well it's entire base template, header, footer... and we will only manipulate with block content and change it with overview page content
+//- * and with this feature we do not include header, footer... not change part in all the other page because it's not clean, take a lot code, hard to maintain ...  right
+//- * what we only do that's related only this content of this page so it's very nice feature
+//- * we can also custom many block, like if we define block in head element we can also custom it
+block content 
+  //- * then we will custom this block content with overview page content
+  h1= title 

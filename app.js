@@ -131,6 +131,14 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/overview', (req, res) => {
+  res.status(200).render('overview', { title: 'All tours' });
+});
+
+app.get('/tour', (req, res) => {
+  res.status(200).render('tour', { tour: 'The Amazing tour', price: 100 });
+});
+
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 app.use('/api/v1/reviews', reviewRouter);
