@@ -14,6 +14,7 @@ const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRouter');
+const viewRouter = require('./routes/viewRouter');
 const globalErrorsHandler = require('./controllers/errorController');
 
 const app = express();
@@ -120,25 +121,7 @@ app.use((req, res, next) => {
   next();
 });
 
-//*IMPLEMENT RENDER TEMPLATE ENGINE
-app.get('/', (req, res) => {
-  // * to move data into our pug file we can use the second parameter in render() which is object contain data we want
-  // * and these variables that we passed in here then called locals in the Pug
-  // * and now we can use these data in our pug file(in this case base.pug file)
-  res.status(200).render('base', {
-    tour: 'The Amazing tour',
-    user: 'longhoang',
-  });
-});
-
-app.get('/overview', (req, res) => {
-  res.status(200).render('overview', { title: 'All tours' });
-});
-
-app.get('/tour', (req, res) => {
-  res.status(200).render('tour', { tour: 'The Amazing tour', price: 100 });
-});
-
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 app.use('/api/v1/reviews', reviewRouter);
