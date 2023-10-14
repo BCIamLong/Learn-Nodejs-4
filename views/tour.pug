@@ -1,5 +1,147 @@
 extends base
+//- ! code mixin in other file then include it to use(useful in case we have many code, mixins)
+include mixins/_mixinsTour
+
+//- * we also should custom this tittle because the tittle from tours are different with overview page
+block tittle 
+  title Natours | #{tour.name}
+
+//- * we can create mixin in pug like a function then call this function run and it's reuseable code right
+//- mixin overviewBox(label,text,icon)
+//-   .overview-box__detail
+//-     svg.overview-box__icon
+//-       use(xlink:href=`/img/icons.svg#icon-${icon}`)
+//-     span.overview-box__label= label
+//-     span.overview-box__text= text
 
 block content
-  h1= tour 
-  h2= price
+  section.section-header
+    .header__hero
+      .header__hero-overlay &nbsp;
+        img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+
+    .heading-box
+      h1.heading-primary
+        span= tour.name
+      .heading-box__group
+        .heading-box__detail
+          svg.heading-box__icon
+            use(xlink:href='/img/icons.svg#icon-clock')
+          span.heading-box__text #{tour.duration} days
+        .heading-box__detail
+          svg.heading-box__icon
+            use(xlink:href='/img/icons.svg#icon-map-pin')
+          span.heading-box__text= tour.startLocation.description
+  section.section-description
+    .overview-box
+      div
+        .overview-box__group
+          h2.heading-secondary.ma-bt-lg Quick facts
+          //- * in here we can see the code of .overview-box__detail is repeat many times right but it's different data 
+          //-  * however we can also use mixins feature of pug to basically reuseable piece of code that we can pass arguments into, so bit like a function and also it exactly like mixins in SAS(CSS pre processor)
+          //- .overview-box__detail
+          //-   svg.overview-box__icon
+          //-     use(xlink:href='/img/icons.svg#icon-calendar')
+          //-   span.overview-box__label Next date
+          //-   span.overview-box__text= tour.startDates[0].toLocaleString("en-US", { month: "long", year: "numeric"})
+          //- .overview-box__detail
+          //-   svg.overview-box__icon
+          //-     use(xlink:href='/img/icons.svg#icon-trending-up')
+          //-   span.overview-box__label Difficulty
+          //-   span.overview-box__text tour.difficulty
+          //- .overview-box__detail
+          //-   svg.overview-box__icon
+          //-     use(xlink:href='/img/icons.svg#icon-user')
+          //-   span.overview-box__label Participants
+          //-   span.overview-box__text #{tour.maxGroupSize} people
+          //- .overview-box__detail
+          //-   svg.overview-box__icon
+          //-     use(xlink:href='/img/icons.svg#icon-star')
+          //-   span.overview-box__label Rating
+          //-   span.overview-box__text #{tour.ratingsAverage} / #{tour.ratingsQuantity}
+          //- ! to use mixin we use + notation and () like function and pass required route
+          - const nextDate = tour.startDates[0].toLocaleString("en-US", { month: "long", year: "numeric"})
+          +overviewBox("Next date",nextDate,"calendar")
+          +overviewBox("Difficulty",tour.difficulty,"trending-up")
+          +overviewBox("Participants",tour.maxGroupSize,"user")
+          +overviewBox("Rating",`${tour.ratingsAverage} / 5`,"star")
+
+        .overview-box__group
+          h2.heading-secondary.ma-bt-lg Your tour guides
+          each guide in tour.guides
+            .overview-box__detail
+              img.overview-box__img(src=`/img/users/${guide.photo}`, alt=`${guide.role}`)
+              //- * pug support conditional like if/else: but it's very simple we even don't check equality between values
+              //- * however we can use Javascript to do it
+              //- !notice that - notation is for unbuffered code which don't have output 
+              - const role = guide.role === "guide" ? "Tour guide" : "Lead guide"
+              //- * we can also mixing the pug code and JS code like these code bellow
+              - if(guide.role === "guide")
+                span.overview-box__label Tour Guide
+              - else 
+                span.overview-box__label Lead Guide
+              span.overview-box__text= guide.name
+
+    .description-box
+      h2.heading-secondary.ma-bt-lg About #{tour.name} tour
+      - const descriptions = tour.description.split("\n") //- \n is stand for new line
+      each des in descriptions
+        p.description__text= des
+      //- p.description__text= description[1]
+  section.section-pictures
+    //- -let i = 1;
+    //- * in pug we can use loop each val, index in array to use index we don't need to create i and set   i++
+    each img, index in tour.images
+      .picture-box
+        //- * so now we want picture-box__img--1 change to 2, 3... and how can we do that? we can't use the syntax right
+        //- * well we will put it like a class in attributes(class=``) and then use literal syntax JS ok
+        //- img.picture-box__img.picture-box__img--1(src=`/img/tours/${img}`, alt=`${tour.name} ${index+1}`)
+        img.picture-box__img(src=`/img/tours/${img}`, alt=`${tour.name} ${index+1}`, class=`picture-box__img--${index+1}`)
+      //- - i++
+
+  section.section-map
+    #map
+  section.section-reviews
+    .reviews
+      each review in tour.reviews
+        //- * Because this code here too long and so we can create mixin to do the code easy to maintain
+        +reviewsCard(review.user.name, review.user.photo, review.review, review.rating)
+        //- .reviews__card
+        //-   .reviews__avatar
+        //-     img.reviews__avatar-img(src=`/img/users/${review.user.photo}`, alt=`${review.user.name}`)
+        //-     h6.reviews__user= review.user.name
+        //-   p.reviews__text= review.review
+        //-   .reviews__rating
+        //-     //- - const arr = []
+        //-     //- - for(let i=1;i<= review.rating;i++) arr.push(i)
+        //-     //- each num in arr
+        //-     //- * we also can mixing the pug code and JS for loop code
+        //-     - for(let i = 1; i <= review.rating; i++)
+        //-       svg.reviews__star.reviews__star--active
+        //-         use(xlink:href='/img/icons.svg#icon-star')
+        //-     - let check = 5 - review.rating
+        //-     //- - console.log((5 - arr.length))
+        //-     - let c = 0;
+        //-     //- * pug support while loop(but we also can use JS for loop here)
+        //-     while c >= 0 && c < check
+        //-       svg.reviews__star.reviews__star--inactive
+        //-         use(xlink:href='/img/icons.svg#icon-star')
+        //-       - c++
+
+  section.section-cta
+    .cta
+      .cta__img.cta__img--logo
+        img(src='/img/logo-white.png', alt='Natours logo')
+      - let a = 1;
+      each img in tour.images
+        #a 
+          if a === 1
+            img.cta__img.cta__img--1(src=`/img/tours/${img}`, alt=`${tour.name} ${a}`)
+          else if a === 2
+            img.cta__img.cta__img--2(src=`/img/tours/${img}`, alt=`${tour.name} ${a}`)
+          - a++
+
+      .cta__content
+        h2.heading-secondary What are you waiting for?
+        p.cta__text #{tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
+        button.btn.btn--green.span-all-rows Book tour now!

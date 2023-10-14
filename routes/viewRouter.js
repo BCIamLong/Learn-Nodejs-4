@@ -11,6 +11,6 @@ const router = express.Router();
 // * usually overview page is homepage '/'
 router.get('/', viewController.getOverview);
 
-router.get('/tour', viewController.getTour);
+router.get('/tours/:slug', viewController.getTour);
 
 module.exports = router;
