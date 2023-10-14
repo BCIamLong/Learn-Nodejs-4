@@ -68,7 +68,12 @@ locationsData.forEach(loc => {
   // * add popup
   // !https://docs.maptiler.com/sdk-js/api/markers/#popup
   // * we can specify some options to config this popup it's on document
-  new maptilersdk.Popup({ offset: 30, closeOnClick: false, focusAfterOpen: false })
+  new maptilersdk.Popup({
+    offset: 30,
+    closeOnClick: false,
+    focusAfterOpen: false,
+    closeButton: false,
+  })
     .setLngLat(loc.coordinates)
     .setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`)
     .addTo(map);
