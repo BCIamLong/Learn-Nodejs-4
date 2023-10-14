@@ -2,17 +2,20 @@ extends base
 //- ! code mixin in other file then include it to use(useful in case we have many code, mixins)
 include mixins/_mixinsTour
 
-//- * we also should custom this tittle because the tittle from tours are different with overview page
-block tittle 
-  title Natours | #{tour.name}
+//- * we only want include mapbox library in tour page because we only want it display in here
+//- block script 
+//-   script(src="/js/mapbox.js" defer) 
 
-//- * we can create mixin in pug like a function then call this function run and it's reuseable code right
-//- mixin overviewBox(label,text,icon)
-//-   .overview-box__detail
-//-     svg.overview-box__icon
-//-       use(xlink:href=`/img/icons.svg#icon-${icon}`)
-//-     span.overview-box__label= label
-//-     span.overview-box__text= text
+//- ! but we have other way to do it that create block head and add script in the end of this block by use block append, if we want to add in the start of this block we can use block prepend
+block append head 
+  script(src="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.umd.min.js")
+  link(href="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.css" rel="stylesheet")
+  //- ! if we don't have defer so the script will load before the page finish loaded so we might lost some element need to manipulate in JS file in client and it'll lead some errors
+  //- * so to solve that we need to put defer if we put this script in head, if we put it in end of body then it's not problem
+  script(src="/js/mapbox.js" defer) 
+
+block tittle 
+  title Natours | #{tour.name} Tour
 
 block content
   section.section-header
@@ -100,7 +103,11 @@ block content
       //- - i++
 
   section.section-map
-    #map
+    //- * we can put the data into data-locations attribute then in JS file client we can get this value 
+    //- ! remember that we need convert this to string but we also need to convert it to the original type is array(objects) so use JSON.stringify to convert it to string is good
+    //- * and we will use JSON.parse() to parse to array(objects)
+    #map(data-locations=`${JSON.stringify(tour.locations)}`)
+
   section.section-reviews
     .reviews
       each review in tour.reviews

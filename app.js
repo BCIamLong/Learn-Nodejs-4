@@ -37,7 +37,11 @@ app.use(express.static(path.join(__dirname, 'public'))); //! it's also a middlew
 
 //*SECURITY HTTP HEADERS
 //* Implements setting security HTTP headers with helmet packages
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  }),
+);
 
 //development logging
 if (process.env.NODE_ENV === 'development') {
