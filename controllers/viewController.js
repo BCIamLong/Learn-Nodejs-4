@@ -36,7 +36,7 @@ const getTour = catchSync(async (req, res, next) => {
   //   path: 'reviews',
   //   fields: 'review rating user',
   // });
-  console.log(req.cookies);
+  // console.log(req.cookies);
   res.status(200).render('tour', { tour });
 });
 

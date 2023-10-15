@@ -1,8 +1,10 @@
 extends base
 
+//- ! we don't use the library from internet because it's not available when we offline right
+//- * instead we will install this library by use npm
 block append head 
   script(src="https://unpkg.com/axios/dist/axios.min.js" defer)
-  script(src="js/login.js" defer)
+  
 
 block title 
   title Natours | Login

@@ -1,9 +1,7 @@
-/* eslint-disable*/
-'use strict';
+/* eslint-disable */
+import { showAlert } from './alert';
 
-const formEl = document.querySelector('.form');
-
-const login = async (email, password) => {
+export const login = async (email, password) => {
   // const url = 'http://127.0.0.1:3000/api/v1/users/login';
   // const data = {
   //   email,
@@ -40,7 +38,8 @@ const login = async (email, password) => {
     .then(res => {
       // console.log(res);
       if (res.data.status === 'success') {
-        alert('Login successfully');
+        // alert('Login successfully');
+        showAlert('success', 'Login successfully');
         window.setTimeout(() => {
           // window.location.href = '/';
           // * we can use 1 of two way to redirect to other page
@@ -50,15 +49,7 @@ const login = async (email, password) => {
     })
     .catch(err => {
       // console.log(err.response.data);
-      alert(err.response.data.message);
+      // alert(err.response.data.message);
+      showAlert('error', err.response.data.message);
     });
 };
-
-formEl.addEventListener('submit', function (e) {
-  e.preventDefault();
-  // * with input element we can use .value to get value we enter in inputs
-  const email = document.querySelector('#email').value;
-  const password = document.querySelector('#password').value;
-  // console.log(email, password);
-  login(email, password);
-});

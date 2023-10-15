@@ -12,7 +12,6 @@ block append head
   link(href="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.css" rel="stylesheet")
   //- ! if we don't have defer so the script will load before the page finish loaded so we might lost some element need to manipulate in JS file in client and it'll lead some errors
   //- * so to solve that we need to put defer if we put this script in head, if we put it in end of body then it's not problem
-  script(src="/js/mapbox.js" defer) 
 
 block title 
   title Natours | #{tour.name} Tour
