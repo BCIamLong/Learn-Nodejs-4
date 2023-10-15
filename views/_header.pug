@@ -4,6 +4,8 @@
 //- * nav--tours is modifier class(reuse class)
 //- * nav__el is block element __ represent block in this case
 header.header 
+  //- - const x  = browser.cookies.get('access_token')
+  //- - console.log(x)
   nav.nav.nav--tours
     //- * / is the current root link so it's 127.0.0.1:3000/ and it's link of our overview page
     a.nav__el(href="/") All tours
@@ -21,5 +23,12 @@ header.header
     //- a.nav__el( href="#")
     //-    img.nav__user-img(src="img/users/default.jpg" alt="User photo")
     //-    span LongHoang
-    a.nav__el(href="/login") Log in
-    a.nav__el.nav__el--cta(href="/signup") Sign up
+    if user
+      a.nav__el( href="#") My bookings
+      a.nav__el.nav__el--logout(href="#") Log out
+      a.nav__el( href="#")
+        img.nav__user-img(src=`img/users/${user.photo}` alt=`${user.name} photo`)
+        span= user.name.split(' ')[0]
+    else
+      a.nav__el(href="/login") Log in
+      a.nav__el.nav__el--cta(href="/signup") Sign up

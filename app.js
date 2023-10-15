@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-// const cookieparse = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
@@ -72,8 +72,8 @@ app.use(limiter);
 //you can also implemts limit data
 // app.use(express.json({ limit: '10kb' })); //data come into req.body not greater than 10kb if it's greater than well it's not accepted
 //! use body parser package instead user express.json()
-app.use(bodyParser.json({ limit: '90kb' }));
-// app.use(cookieparse());
+app.use(bodyParser.json({ limit: '90kb' })); // * parse data from body
+app.use(cookieParser()); // * parse data from cookie
 
 //?IMPLEMENTS DATA SANITIZATION: the good place to do it is after we parse json body request
 //Data sanitization against NoSQL query injection: implemens this is very important

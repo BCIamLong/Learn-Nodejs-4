@@ -1,5 +1,6 @@
 const express = require('express');
 const viewController = require('../controllers/viewController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -9,9 +10,9 @@ const router = express.Router();
 // router.get('/', viewController.getHomepage);
 
 // * usually overview page is homepage '/'
-router.get('/', viewController.getOverview);
+router.get('/', authController.isLoggedIn, viewController.getOverview);
 
-router.get('/tours/:slug', viewController.getTour);
+router.get('/tours/:slug', authController.protectManually, viewController.getTour);
 
 router.get('/login', viewController.getLoginForm);
 router.get('/signup', viewController.getSignupForm);

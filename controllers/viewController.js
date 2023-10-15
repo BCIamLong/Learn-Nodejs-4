@@ -1,5 +1,7 @@
 const Tour = require('../models/tourModel');
+// const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
+// const jwt = require('jsonwebtoken');
 
 const getLoginForm = (req, res) => {
   res.status(200).render('login');
@@ -22,6 +24,9 @@ const getOverview = catchSync(async (req, res, next) => {
   // console.log(tours);
   //2 building template for tour card
   //3 render tour card template with tour data
+  // const decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET);
+  // const user = await User.findById(decoded.id);
+  // console.log(user);
   res.status(200).render('overview', { title: 'All tours', tours });
 });
 
@@ -31,7 +36,7 @@ const getTour = catchSync(async (req, res, next) => {
   //   path: 'reviews',
   //   fields: 'review rating user',
   // });
-
+  console.log(req.cookies);
   res.status(200).render('tour', { tour });
 });
 

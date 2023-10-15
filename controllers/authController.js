@@ -68,19 +68,20 @@ const login = catchSync(async (req, res, next) => {
   const correct = await user?.passwordCorrect(password, user.password);
   if (!correct || !user) return next(new AppError(401, 'Email or password not correct'));
 
-  const token = createToken(user);
+  // const token = createToken(user);
 
+  sendJWT(res, 200, user);
   //* Storage the token on cookie
-  return res
-    .cookie('access_token', token, {
-      httpOnly: true, //http using during the development
-      secure: process.env.NODE_ENV === 'production', //use using during the production
-    })
-    .status(200)
-    .json({
-      status: 'success',
-      token,
-    });
+  // return res
+  //   .cookie('access_token', token, {
+  //     httpOnly: true, //http using during the development
+  //     secure: process.env.NODE_ENV === 'production', //use using during the production
+  //   })
+  //   .status(200)
+  //   .json({
+  //     status: 'success',
+  //     token,
+  //   });
 });
 
 //?IMPLEMENTS THE PROTECTED MIDDLEWARE
@@ -125,12 +126,16 @@ const logout = (req, res, next) =>
 
 const protectManually = catchSync(async (req, res, next) => {
   //! 1, check token
-  if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer'))
-    return next(new AppError(401, 'You are not logged in, please login to get access'));
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer'))
+    token = req.headers.authorization.split(' ')[1];
+
+  // * Get token when we manipulate with browser
+  if (req.cookies.jwt) token = req.cookies.jwt;
+
   //401 is http status code: means data is sent and request is correct but you must to login to use data(resoures)
   //-->https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401#:~:text=The%20HyperText%20Transfer%20Protocol%20(HTTP,credentials%20for%20the%20requested%20resource.
 
-  const token = req.headers.authorization.split(' ')[1];
   // console.log(token);
   if (!token) return next(new AppError(401, 'You are not logged in, please login to get access'));
   //!2, verifitication token: token of user not valid(someone edit payload,...), token of user expiresed => logout and login again to have a new token to use
@@ -190,6 +195,36 @@ const protectManually = catchSync(async (req, res, next) => {
   //!So the id ussually add to json wen token it's make then know whether the user that's trying to perform the action in the user or if the admin, leading guide or whatever
   //! we have id we can get user from DB via id => we pass data to req.user and after middleware use this data to perfrom something like authoriztion, ....
   req.user = freshUser;
+  next();
+});
+
+// * function is logged in only for render and it's using for the page like overview,... page which we not protected, (remember that we need the user data to display for header so we need this function)
+const isLoggedIn = catchSync(async (req, res, next) => {
+  //! 1, check token
+  const token = req.cookies.jwt;
+  if (!token) return next();
+
+  //!2, verification token: token of user not valid(someone edit payload,...), token of user expiresed
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  //!3, check if user still exits
+
+  const freshUser = await User.findById(decoded.id);
+  if (!freshUser) {
+    decoded.iat += decoded.exp / 100; // with we will do decode.iat > decode.exp => token was expires
+    return next();
+  }
+
+  //!4, check if user changed password after the token was issued(dc cap)
+
+  if (freshUser.checkPasswordChangeAfter(decoded.iat)) {
+    return next();
+  }
+  // *GRANT ACCESS TO PROTECTED ROUTE
+  // req.user = freshUser;
+  // ! we do not need to pass the user data then pass this data to render() and use in pug template
+  // * instead we will put it in res.locals and every pug templates can access to res.locals and in pug template we can use user variable, just like when we pass data to render() method
+  res.locals.user = freshUser;
   next();
 });
 
@@ -355,4 +390,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updatePassword,
+  isLoggedIn,
 };
