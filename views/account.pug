@@ -67,13 +67,20 @@ block content
       .user-view__content
         .user-view__form-container
           h2.heading-secondary.ma-bt-md Your account settings
-          form.form.form-user-data
+          //- * we will use the form event to submit data
+          //- * to do it:
+          //- ! 1, we need to specify method and action for form
+          //- ? and what place data send, i know that send to submit-user-data but exactly where?
+          //- * well we have many way to manipulate to get this data but one of them which we will use is called URL encoded, => we will encoded data from sent on URL and get it
+          //- * it looks like a little bit with query string
+          //- ! 2, we need specify the name of property data we want to send
+          form.form.form-user-data(method= 'POST' action='/submit-user-data')
             .form__group
               label.form__label(for='name') Name
-              input#name.form__input(type='text', value=`${user.name}`, required)
+              input#name.form__input(type='text', value=`${user.name}`, name="name", required)
             .form__group.ma-bt-md
               label.form__label(for='email') Email address
-              input#email.form__input(type='email', value=`${user.email}`, required)
+              input#email.form__input(type='email', value=`${user.email}`, name="email", required)
             .form__group.form__photo-upload
               img.form__user-photo(src=`/img/users/${user.photo}`, alt=`${user.name} photo`)
               a.btn-text(href='') Choose new photo

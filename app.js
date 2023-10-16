@@ -73,6 +73,10 @@ app.use(limiter);
 // app.use(express.json({ limit: '10kb' })); //data come into req.body not greater than 10kb if it's greater than well it's not accepted
 //! use body parser package instead user express.json()
 app.use(bodyParser.json({ limit: '90kb' })); // * parse data from body
+// * parse data from form event by use URL encoded
+// * extended: true is for to pass some complex data
+// app.use(express.urlencoded({ extended: true, limit: '90kb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '90kb' }));
 app.use(cookieParser()); // * parse data from cookie
 
 //?IMPLEMENTS DATA SANITIZATION: the good place to do it is after we parse json body request

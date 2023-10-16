@@ -155,7 +155,7 @@ const $bf251e7bf12e920b$export$4c5dd147b21b9176 = (locations)=>{
 };
 
 
-const $8c8a31b747da3402$var$formEl = document.querySelector(".form");
+const $8c8a31b747da3402$var$formEl = document.querySelector(".login-form .form");
 const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
 const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
 $8c8a31b747da3402$var$formEl?.addEventListener("submit", function(e) {

@@ -1,8 +1,25 @@
 const Tour = require('../models/tourModel');
+const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 // const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
+
+const updateUserData = catchSync(async (req, res, next) => {
+  // console.log(req.body);
+  const { email, name } = req.body;
+  // * we can also use findByIdAndUpdate with req.user.id
+  const user = await User.findOne({ email });
+  if (!user) return next(new AppError(400, 'Please enter the correct data'));
+
+  user.email = email;
+  user.name = name;
+  await user.save({ validateBeforeSave: false });
+
+  // * we can use render or redirect
+  // res.status(200).render('account', { user });
+  res.redirect('me');
+});
 
 const getAccount = (req, res) => {
   res.status(200).render('account');
@@ -46,4 +63,12 @@ const getTour = catchSync(async (req, res, next) => {
   res.status(200).render('tour', { tour });
 });
 
-module.exports = { getHomepage, getOverview, getTour, getLoginForm, getSignupForm, getAccount };
+module.exports = {
+  getHomepage,
+  getOverview,
+  getTour,
+  getLoginForm,
+  getSignupForm,
+  getAccount,
+  updateUserData,
+};
