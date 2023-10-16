@@ -53,3 +53,26 @@ export const login = async (email, password) => {
       showAlert('error', err.response.data.message);
     });
 };
+
+// * we will logout with our logout from API
+export const logout = async () => {
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: 'http://127.0.0.1:3000/api/v1/users/logout',
+    });
+    // console.log(res);
+    // * we also need to reload page why? because we are codding  in front-end so we can't use render in here right, and reload page will send request with the empty the cookie to server and isLoginIn router will take it and not return user => in this time user is undefined and then the login in our pug file will check and display login and signup buttons
+    if (res.data?.status === 'success') {
+      showAlert('success', 'Logout successfully');
+      window.setTimeout(() => {
+        // * we can use reload page here with: location.reload(true), set option true to also force reload server, if we don't have this it's only reload with the cache which it's storage in the first time run and of course the page will not change and so it's important to set option true here
+        location.assign('/');
+      }, 1000);
+    }
+  } catch (err) {
+    // * usually we don't have error when we logout but to ensure like in the case we don't have the internet we also want to show nice notification for user
+    // console.log(err);
+    showAlert('error', err.response?.data.message);
+  }
+};

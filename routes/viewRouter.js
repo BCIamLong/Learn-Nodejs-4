@@ -9,11 +9,13 @@ const router = express.Router();
 
 // router.get('/', viewController.getHomepage);
 
-// * usually overview page is homepage '/'
-router.get('/', authController.isLoggedIn, viewController.getOverview);
-
-router.get('/tours/:slug', authController.protectManually, viewController.getTour);
-
 router.get('/login', viewController.getLoginForm);
 router.get('/signup', viewController.getSignupForm);
+// * usually overview page is homepage '/'
+
+router.use(authController.isLoggedIn);
+
+router.get('/', viewController.getOverview);
+router.get('/tours/:slug', authController.protectManually, viewController.getTour);
+// router.get('/logout', authController.isLogout, viewController.getOverview);
 module.exports = router;

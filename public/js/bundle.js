@@ -75,6 +75,27 @@ const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
         (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
     });
 };
+const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
+    try {
+        const res = await axios({
+            method: "GET",
+            url: "http://127.0.0.1:3000/api/v1/users/logout"
+        });
+        // console.log(res);
+        // * we also need to reload page why? because we are codding  in front-end so we can't use render in here right, and reload page will send request with the empty the cookie to server and isLoginIn router will take it and not return user => in this time user is undefined and then the login in our pug file will check and display login and signup buttons
+        if (res.data?.status === "success") {
+            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Logout successfully");
+            window.setTimeout(()=>{
+                // * we can use reload page here with: location.reload(true), set option true to also force reload server, if we don't have this it's only reload with the cache which it's storage in the first time run and of course the page will not change and so it's important to set option true here
+                location.assign("/");
+            }, 1000);
+        }
+    } catch (err) {
+        // * usually we don't have error when we logout but to ensure like in the case we don't have the internet we also want to show nice notification for user
+        // console.log(err);
+        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response?.data.message);
+    }
+};
 
 
 /* eslint-disable */ // ! we need to turn off eslint here because it's setup for nodejs, so some variable in normal js in JS DOM like document not have in nodejs right so it'll catch err if we use eslint here
@@ -135,6 +156,8 @@ const $bf251e7bf12e920b$export$4c5dd147b21b9176 = (locations)=>{
 
 
 const $8c8a31b747da3402$var$formEl = document.querySelector(".form");
+const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
+const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
 $8c8a31b747da3402$var$formEl?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * with input element we can use .value to get value we enter in inputs
@@ -143,7 +166,10 @@ $8c8a31b747da3402$var$formEl?.addEventListener("submit", function(e) {
     // console.log(email, password);
     (0, $11e8083818df8389$export$596d806903d1f59e)(email, password);
 });
-const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
+$8c8a31b747da3402$var$navLogoutBtn?.addEventListener("click", function(e) {
+    e.preventDefault();
+    (0, $11e8083818df8389$export$a0973bcfe11b05c9)();
+});
 // const locationsData = JSON.parse(mapEl.getAttribute('data-locations'));
 // * we have other way better to get data from data-locations attribute, that's technique use dataset
 // * data-locations => dataset.locations(set is represent for dash -)

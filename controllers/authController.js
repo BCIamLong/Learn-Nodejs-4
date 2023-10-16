@@ -118,11 +118,19 @@ const protect = catchSync(async (req, res, next) => {
   next();
 });
 
-const logout = (req, res, next) =>
-  res.clearCookie('access_token').status(200).json({
+const logout = (req, res) => {
+  //  * send back cookie with exactly the same name but the value is empty
+  res.cookie('jwt', '', {
+    // * with this cookie the expires time is short because it's not make any sense, we only check for logout
+    // ! if the cookie expires the browser will automatically remove it, and when we reload it so it lost right
+    expires: new Date(Date.now() + 1000),
+    httpOnly: true,
+  });
+  res.clearCookie('jwt').status(200).json({
     status: 'success',
     message: 'Successfully logged out',
   });
+};
 
 const protectManually = catchSync(async (req, res, next) => {
   //! 1, check token
@@ -199,32 +207,50 @@ const protectManually = catchSync(async (req, res, next) => {
 });
 
 // * function is logged in only for render and it's using for the page like overview,... page which we not protected, (remember that we need the user data to display for header so we need this function)
-const isLoggedIn = catchSync(async (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
+  // * so why we need catch in here because this is middleware for render views, for server side not API
+  // * and if we use Global error to catch error it's for API right so it'll return res.json()
+  // * and therefore we need to custom this for local and manipulate this error with server side
   //! 1, check token
   const token = req.cookies.jwt;
   if (!token) return next();
+  try {
+    //!2, verification token: token of user not valid(someone edit payload,...), token of user expiresed
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  //!2, verification token: token of user not valid(someone edit payload,...), token of user expiresed
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    //!3, check if user still exits
 
-  //!3, check if user still exits
+    const freshUser = await User.findById(decoded.id);
+    if (!freshUser) {
+      decoded.iat += decoded.exp / 100; // with we will do decode.iat > decode.exp => token was expires
+      return next();
+    }
 
-  const freshUser = await User.findById(decoded.id);
-  if (!freshUser) {
-    decoded.iat += decoded.exp / 100; // with we will do decode.iat > decode.exp => token was expires
+    //!4, check if user changed password after the token was issued(dc cap)
+
+    if (freshUser.checkPasswordChangeAfter(decoded.iat)) {
+      return next();
+    }
+    // *GRANT ACCESS TO PROTECTED ROUTE
+    // req.user = freshUser;
+    // ! we do not need to pass the user data then pass this data to render() and use in pug template
+    // * instead we will put it in res.locals and every pug templates can access to res.locals and in pug template we can use user variable, just like when we pass data to render() method
+    res.locals.user = freshUser;
+    next();
+  } catch (err) {
+    // throw new Error('Logout successfully');
     return next();
   }
+};
 
-  //!4, check if user changed password after the token was issued(dc cap)
-
-  if (freshUser.checkPasswordChangeAfter(decoded.iat)) {
-    return next();
-  }
-  // *GRANT ACCESS TO PROTECTED ROUTE
-  // req.user = freshUser;
-  // ! we do not need to pass the user data then pass this data to render() and use in pug template
-  // * instead we will put it in res.locals and every pug templates can access to res.locals and in pug template we can use user variable, just like when we pass data to render() method
-  res.locals.user = freshUser;
+const isLogout = catchSync(async (req, res, next) => {
+  //  * send back cookie with exactly the same name but the value is empty
+  res.cookie('jwt', '', {
+    // * with this cookie the expires time is short because it's not make any sense, we only check for logout
+    expires: new Date(Date.now() + 1000),
+    httpOnly: true,
+  });
+  res.locals.user = undefined;
   next();
 });
 
@@ -391,4 +417,5 @@ module.exports = {
   resetPassword,
   updatePassword,
   isLoggedIn,
+  isLogout,
 };

@@ -1,10 +1,13 @@
 /* eslint-disable */
 // * so in index.js file we will import all files from other file in this folder
 // * and then when we build parcel it will take all code from all files into one
-import { login } from './login';
+import { login, logout } from './login';
 import { displayMap } from './mapbox';
 
 const formEl = document.querySelector('.form');
+const mapEl = document.querySelector('#map');
+const navLogoutBtn = document.querySelector('.nav__el--logout');
+
 formEl?.addEventListener('submit', function (e) {
   e.preventDefault();
   // * with input element we can use .value to get value we enter in inputs
@@ -14,7 +17,11 @@ formEl?.addEventListener('submit', function (e) {
   login(email, password);
 });
 
-const mapEl = document.querySelector('#map');
+navLogoutBtn?.addEventListener('click', function (e) {
+  e.preventDefault();
+  logout();
+});
+
 // const locationsData = JSON.parse(mapEl.getAttribute('data-locations'));
 // * we have other way better to get data from data-locations attribute, that's technique use dataset
 // * data-locations => dataset.locations(set is represent for dash -)
