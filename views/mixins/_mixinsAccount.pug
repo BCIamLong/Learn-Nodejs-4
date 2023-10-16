@@ -1,0 +1,22 @@
+
+//- mixin navItem(link,icon,text,active)
+//-   if active
+//-     li.side-nav--active
+//-       a(href=`${link}`)
+//-         svg
+//-           use(xlink:href=`img/icons.svg#icon-${icon}`)
+//-         | #{text}
+//-   else 
+//-     li
+//-       a(href=`${link}`)
+//-         svg
+//-           use(xlink:href=`img/icons.svg#icon-${icon}`)
+//-         | #{text}
+
+//- ! remember we can use class .class => (class=``) with this we can manipulate with JS code with literal template
+mixin navItem(link,icon,text,active)
+  li(class=`${active ? 'side-nav--active' : '' }`)
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`img/icons.svg#icon-${icon}`)
+      | #{text}

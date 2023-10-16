@@ -4,6 +4,10 @@ const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
 
+const getAccount = (req, res) => {
+  res.status(200).render('account');
+};
+
 const getLoginForm = (req, res) => {
   res.status(200).render('login');
 };
@@ -42,4 +46,4 @@ const getTour = catchSync(async (req, res, next) => {
   res.status(200).render('tour', { tour });
 });
 
-module.exports = { getHomepage, getOverview, getTour, getLoginForm, getSignupForm };
+module.exports = { getHomepage, getOverview, getTour, getLoginForm, getSignupForm, getAccount };

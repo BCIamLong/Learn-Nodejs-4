@@ -243,6 +243,11 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
+const passUserDataIntoView = (req, res, next) => {
+  res.locals.user = req.user;
+  next();
+};
+
 const isLogout = catchSync(async (req, res, next) => {
   //  * send back cookie with exactly the same name but the value is empty
   res.cookie('jwt', '', {
@@ -418,4 +423,5 @@ module.exports = {
   updatePassword,
   isLoggedIn,
   isLogout,
+  passUserDataIntoView,
 };
