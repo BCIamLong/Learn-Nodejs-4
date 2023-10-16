@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const AppError = require('../utils/appError');
 // const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
@@ -37,6 +38,7 @@ const getTour = catchSync(async (req, res, next) => {
   //   fields: 'review rating user',
   // });
   // console.log(req.cookies);
+  if (!tour) return next(new AppError(404, 'No tour found'));
   res.status(200).render('tour', { tour });
 });
 

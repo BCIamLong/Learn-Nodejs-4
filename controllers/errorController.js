@@ -1,31 +1,52 @@
 //!HANDLE ERROR WIHT DEVELOPMENT AND PRODUCTION ENVIROMENT: error handling mechanism(co che)
+// const _ = require('lodash');
 const AppError = require('../utils/appError');
 
-const sendErrorDev = (err, res) => {
+const sendErrorDev = (err, req, res) => {
+  // * API
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-
-const sendErrorProd = (err, res) => {
-  // console.error(`ERROR: ${err}`);
-  if (err.isOperational)
+  //  ! we don't use /api/v1 why? because our API has many version v1, v2 , v3... right
+  // !https://nodejs.org/dist/latest-v20.x/docs/api/all.html#all_http2_requesturl
+  if (req.originalUrl.startsWith('/api')) {
     return res.status(err.statusCode).json({
       status: err.status,
+      error: err,
       message: err.message,
+      stack: err.stack,
     });
-  console.error(`ERROR: ${err}`);
+  }
+  // * RENDERED WEBSITE
+  const error = {
+    statusCode: err.statusCode,
+    message: err.message,
+  };
+  res.status(err.statusCode).render('error', { error });
+};
 
-  res.status(500).json({
-    status: 'Error',
-    message: 'Something went wrong',
-  });
+const sendErrorProd = (err, req, res) => {
+  // console.error(`ERROR: ${err}`);
 
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational)
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    console.error(`ERROR: ${err}`);
+
+    return res.status(500).json({
+      status: 'Error',
+      message: 'Something went wrong',
+    });
+  }
+  const error = {
+    statusCode: err.statusCode ? err.statusCode : 500,
+    message: err.message ? err.message : 'Something went to wrong',
+  };
+
+  if (err.isOperational) return res.status(err.statusCode).render('error', { error });
+  res.status(500).render('error', { error });
   // next(); cuz this middleware function is a last one so we don't need use next()
 };
 const handleCastErrorDB = err => {
@@ -61,13 +82,18 @@ const handleJWTExpiresError = () =>
   new AppError(401, 'Your login turn was expires, please login again ');
 
 module.exports = (err, req, res, next) => {
-  if (process.env.NODE_ENV === 'development') sendErrorDev(err, res);
+  if (process.env.NODE_ENV === 'development') sendErrorDev(err, req, res);
 
   if (process.env.NODE_ENV === 'production') {
     //?HANDLE MONGODB ERROR AND SEN MEANINGFUL ERROR FOR CLIENT IN PRODUCTION
     //* we can watch the error object and from that we can use some property to set condition and some property to create a good message
     //--> so we need create hard coppy of err because we need overwrite this error
     let errProd = { ...err };
+    // * because some reason when we deconstruct object the message property is also lost so we need to assign it again(usually we will install the library like lodash which support many JS functions support for us like clone object,....)
+    errProd.message = err.message;
+    // let errProd = _.cloneDeep(err);
+    // console.log(errProd, typeof err);
+
     // console.log(err);
     // console.log(errProd);
     // ! we shouldn't overwrite the arguments of a function
@@ -95,6 +121,6 @@ module.exports = (err, req, res, next) => {
     if (errProd.name === 'TokenExpiredError') errProd = handleJWTExpiresError();
 
     //! AND IF YOU FIND AN ERRORS SIMILAR WITH ERRORS ABOUT YOU CAN ADD ERRORS AS THE CODE ABOVE, AND IDEAL IS MARK ERRORS AS ERROR ISOPERATIONA (CUSTEM ERRORS)
-    sendErrorProd(errProd, res); //--> SEND ERROR IN HERE
+    sendErrorProd(errProd, req, res); //--> SEND ERROR IN HERE
   }
 };
