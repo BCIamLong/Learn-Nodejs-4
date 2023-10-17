@@ -3,18 +3,37 @@
 // * and then when we build parcel it will take all code from all files into one
 import { login, logout } from './login'; // eslint-disable-line
 import { displayMap } from './mapbox';
-import { updateUserData } from './updateSettings';
+import { updateUserDataSettings } from './updateSettings';
+// import { showAlert } from './alert';
 
 const formEl = document.querySelector('.login-form .form');
 const mapEl = document.querySelector('#map');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
+const userPwdForm = document.querySelector('.form-user-settings');
 
 userDataForm?.addEventListener('submit', function (e) {
   e.preventDefault();
   const email = document.querySelector('#email').value;
   const name = document.querySelector('#name').value;
-  updateUserData(name, email);
+  updateUserDataSettings({ type: 'data', data: { name, email } });
+});
+
+userPwdForm?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const currentPassword = document.querySelector('#password-current').value;
+  const password = document.querySelector('#password').value;
+  const passwordConfirm = document.querySelector('#password-confirm').value;
+  // * because update lost some time so we can show some notify meaningful in this case like loading icon, loading message....
+  // showAlert('success', `Update your PASSWORD loading...`);
+  // document.querySelector('.btn').setAttribute('disable');
+
+  updateUserDataSettings({
+    type: 'password',
+    data: { currentPassword, password, passwordConfirm },
+  });
+
+  // document.querySelector('.btn').removeAttribute('disable');
 });
 
 formEl?.addEventListener('submit', function (e) {
