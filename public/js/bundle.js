@@ -155,9 +155,37 @@ const $bf251e7bf12e920b$export$4c5dd147b21b9176 = (locations)=>{
 };
 
 
+/* eslint-disable */ 
+const $e079f8ee36e6c5b5$export$ca89bc660948fd97 = async (name, email)=>{
+    try {
+        const res = await axios({
+            method: "PATCH",
+            url: "http://127.0.0.1:3000/api/v1/users/me",
+            data: {
+                name: name,
+                email: email
+            }
+        });
+        if (res.data.status === "success") {
+            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Update your data successfully");
+            window.setTimeout(()=>location.reload(true), 1000);
+        }
+    } catch (err) {
+        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+
+
 const $8c8a31b747da3402$var$formEl = document.querySelector(".login-form .form");
 const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
 const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
+const $8c8a31b747da3402$var$userDataForm = document.querySelector(".form-user-data");
+$8c8a31b747da3402$var$userDataForm?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.querySelector("#email").value;
+    const name = document.querySelector("#name").value;
+    (0, $e079f8ee36e6c5b5$export$ca89bc660948fd97)(name, email);
+});
 $8c8a31b747da3402$var$formEl?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * with input element we can use .value to get value we enter in inputs

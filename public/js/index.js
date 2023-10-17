@@ -1,12 +1,21 @@
 /* eslint-disable */
 // * so in index.js file we will import all files from other file in this folder
 // * and then when we build parcel it will take all code from all files into one
-import { login, logout } from './login';
+import { login, logout } from './login'; // eslint-disable-line
 import { displayMap } from './mapbox';
+import { updateUserData } from './updateSettings';
 
 const formEl = document.querySelector('.login-form .form');
 const mapEl = document.querySelector('#map');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
+const userDataForm = document.querySelector('.form-user-data');
+
+userDataForm?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const email = document.querySelector('#email').value;
+  const name = document.querySelector('#name').value;
+  updateUserData(name, email);
+});
 
 formEl?.addEventListener('submit', function (e) {
   e.preventDefault();

@@ -74,7 +74,8 @@ block content
           //- * well we have many way to manipulate to get this data but one of them which we will use is called URL encoded, => we will encoded data from sent on URL and get it
           //- * it looks like a little bit with query string
           //- ! 2, we need specify the name of property data we want to send
-          form.form.form-user-data(method= 'POST' action='/submit-user-data')
+          form.form.form-user-data 
+            //- (method= 'POST' action='/submit-user-data')
             .form__group
               label.form__label(for='name') Name
               input#name.form__input(type='text', value=`${user.name}`, name="name", required)
