@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { showAlert } from './alert';
 
+const loginForm = document.querySelector('.login-form .form');
 export const login = async (email, password) => {
   // const url = 'http://127.0.0.1:3000/api/v1/users/login';
   // const data = {
@@ -36,6 +37,7 @@ export const login = async (email, password) => {
   })
     // .then(res => res.json())
     .then(res => {
+      loginForm.classList.add('form--inactive');
       // console.log(res);
       if (res.data.status === 'success') {
         // alert('Login successfully');
@@ -44,7 +46,10 @@ export const login = async (email, password) => {
           // window.location.href = '/';
           // * we can use 1 of two way to redirect to other page
           location.assign('/');
-        }, 1500);
+        }, 1000);
+        window.setTimeout(() => {
+          loginForm.classList.remove('form--inactive');
+        }, 3000);
       }
     })
     .catch(err => {

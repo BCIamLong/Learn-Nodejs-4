@@ -22,6 +22,7 @@ const $4c528c06674349f5$var$hideAlert = ()=>{
 };
 
 
+const $11e8083818df8389$var$loginForm = document.querySelector(".login-form .form");
 const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
     // const url = 'http://127.0.0.1:3000/api/v1/users/login';
     // const data = {
@@ -59,6 +60,7 @@ const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
         }
     })// .then(res => res.json())
     .then((res)=>{
+        $11e8083818df8389$var$loginForm.classList.add("form--inactive");
         // console.log(res);
         if (res.data.status === "success") {
             // alert('Login successfully');
@@ -67,7 +69,10 @@ const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
                 // window.location.href = '/';
                 // * we can use 1 of two way to redirect to other page
                 location.assign("/");
-            }, 1500);
+            }, 1000);
+            window.setTimeout(()=>{
+                $11e8083818df8389$var$loginForm.classList.remove("form--inactive");
+            }, 3000);
         }
     }).catch((err)=>{
         // console.log(err.response.data);
@@ -94,6 +99,31 @@ const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
         // * usually we don't have error when we logout but to ensure like in the case we don't have the internet we also want to show nice notification for user
         // console.log(err);
         (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response?.data.message);
+    }
+};
+
+
+/* eslint-disable */ 
+const $369874bb068f1ff5$var$signupForm = document.querySelector(".signup-form .form");
+const $369874bb068f1ff5$export$7200a869094fec36 = async (data)=>{
+    try {
+        const res = await axios({
+            method: "POST",
+            url: "http://127.0.0.1:3000/api/v1/users/signup",
+            data: data
+        });
+        $369874bb068f1ff5$var$signupForm.classList.add("form--inactive");
+        if (res.data.status === "success") {
+            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Sign up account successfully");
+            window.setTimeout(()=>{
+                location.assign("/");
+            }, 1000);
+            window.setTimeout(()=>{
+                $369874bb068f1ff5$var$signupForm.classList.remove("form--inactive");
+            }, 3000);
+        }
+    } catch (err) {
+        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
     }
 };
 
@@ -226,7 +256,8 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
 
 
 // import { showAlert } from './alert';
-const $8c8a31b747da3402$var$formEl = document.querySelector(".login-form .form");
+const $8c8a31b747da3402$var$loginForm = document.querySelector(".login-form .form");
+const $8c8a31b747da3402$var$signupForm = document.querySelector(".signup-form .form");
 const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
 const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
 const $8c8a31b747da3402$var$userDataForm = document.querySelector(".form-user-data");
@@ -261,7 +292,21 @@ $8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
     });
 // document.querySelector('.btn').removeAttribute('disable');
 });
-$8c8a31b747da3402$var$formEl?.addEventListener("submit", function(e) {
+$8c8a31b747da3402$var$signupForm?.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const name = document.querySelector("#name").value;
+    const email = document.querySelector("#email").value;
+    const password = document.querySelector("#password").value;
+    const passwordConfirm = document.querySelector("#passwordConfirm").value;
+    // console.log(email, password);
+    await (0, $369874bb068f1ff5$export$7200a869094fec36)({
+        name: name,
+        email: email,
+        password: password,
+        passwordConfirm: passwordConfirm
+    });
+});
+$8c8a31b747da3402$var$loginForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * with input element we can use .value to get value we enter in inputs
     const email = document.querySelector("#email").value;
