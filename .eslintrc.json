@@ -17,7 +17,8 @@
       "error",
       {
         // default the eslint consider(true) the devDependencies, optionalDependencies, peerDependencies are no-extraneous-dependencies so to fix it you need to set it to false
-        "devDependencies": false,
+        // "dependencies": false,
+        "devDependencies": true,
         "optionalDependencies": false,
         "peerDependencies": false
       }

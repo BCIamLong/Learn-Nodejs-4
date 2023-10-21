@@ -1,6 +1,18 @@
+const multer = require('multer');
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
+
+// !https://www.npmjs.com/package/multer
+// * we will config multer upload with couple settings
+const upload = multer({ dest: 'public/img/users' }); //* dest stand for destination(diem den)
+// * destination is the folder where we want to save all the images that are being uploaded
+// * and public/img/users is place contain all images from our users in DB right
+// ! we can also config complex like for many upload images not only for user like for tour images...
+// ? we also can use multer() without any options then the upload images would simply be stored in memory and not saved anywhere to the disk => that's not what we want
+// * so therefore we need to specify the destination to upload images can be storage in our file system
+// ! the images are not directly uploaded into the database we just upload them into out file system and then in the database we put the link to that image
+// * so in this case in each user document we will have the name of the uploaded file
 
 const router = express.Router(); // router is also mini app(app = express()) so it's also use app.use()
 
@@ -21,10 +33,15 @@ router.patch('/reset-password/:token', authController.resetPassword);
 router.use(authController.protectManually); //! check logged in, protec all router after this middleware
 //? so all the router bellow since here must to logged in to get access
 
+// * now we will use upload multer to create middleware and add this middleware to stack endpoint we want to upload image in this case that's update me right
 router
   .route('/me')
   .get(userController.getMe, userController.getUser) //.get(authController.protectManually, userController.getMe)
-  .patch(userController.updateMe)
+  // * why we use single() well that because we only want to update one single image, then in this method we will pass the name of the field that is going to hold the image to upload
+  // ! notice that the field here must be in the same name with the field we have in the form we upload the image like photo..., and if it's different then upload file will fail
+  // * so now this middleware will take care of taking the file and basically copying it to the destination that we specified, then will run the after middleware in stack as normal
+  // * and this middleware also will put the file or at least some information about the file on the request object
+  .patch(upload.single('photo'), userController.updateMe)
   .delete(userController.deleteMe);
 
 router.delete('/delete-me', userController.deleteMe);
