@@ -88,8 +88,8 @@ const filterObject = (ob, ...allowFields) => {
 };
 
 const updateMe = catchSync(async (req, res, next) => {
-  console.log(req.file);
-  console.log(req.body);
+  // console.log(req.file);
+  // console.log(req.body);
 
   //--! so we update user data in different route and different with updating the current user password
   //--> because usually that's what typical web application always does so you usually have one place where you can update your password and then another place where you can update infomation data about user or account itself. So this is popular pattern
@@ -114,6 +114,7 @@ const updateMe = catchSync(async (req, res, next) => {
   //   photo: req.body.photo,
   // };
   //* filter not allow fields in request body
+  if (req.file) req.body.photo = req.file.filename;
   const filterBody = filterObject(req.body, 'name', 'email', 'photo');
 
   const user = await User.findByIdAndUpdate(
