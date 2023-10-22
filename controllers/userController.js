@@ -1,7 +1,50 @@
+const multer = require('multer');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
+
+// const upload = multer({ dest: 'public/img/users' });
+
+// * create multer storage
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // cb is callback function it looks like a little bit with next() but it doesn't come from express
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    // ! this file here is also like the req.file it contains all things in req.file so we can get that infos and manipulate
+    // ! null is stand for none error in this case, the first parameter of cb function is error
+    // * we can give the filename with any way we want but it must be unique
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  },
+});
+
+// * create multer filter
+const multerFilter = (req, file, cb) => {
+  // * the goal of this function is basically to test if the uploaded is an image
+  // * if it is file we return true, and if it's false we return false along with error
+  // ? we can also use this for check CSV, docx, PDF,... all the type of files we allow users uploaded
+  if (file.mimetype.startsWith('image')) return cb(null, true);
+
+  cb(new AppError(400, 'Please only upload image file!'), false);
+};
+
+// ! now we have multer storage and multer filter now the time we will us them in order to create upload
+
+const upload = multer({
+  // * we also can put all the code in here but it's not good we need to separate for our code clean
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+// * we can also choose storage files in memory as buffer, then use it later by use process
+// * but now we will storage it in our file system
+
+// * we should put the multer upload function in here for our code clean and nice
+const uploadUserPhoto = upload.single('photo');
+// * and to to configure multer upload to our need we need to create one multer storage and one multer filter and then we will use that storage and a filter to then create the upload from uploadUserPhoto()
 
 //?IMPLEMENTS GET CURRENT USER
 //* so in this case we need the current id user form logged it not id from req.params.id so we need set some logic to do it but getOne function must to user for many resources
@@ -139,4 +182,5 @@ module.exports = {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
 };

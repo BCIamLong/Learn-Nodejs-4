@@ -1,11 +1,10 @@
-const multer = require('multer');
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
 // !https://www.npmjs.com/package/multer
 // * we will config multer upload with couple settings
-const upload = multer({ dest: 'public/img/users' }); //* dest stand for destination(diem den)
+// const upload = multer({ dest: 'public/img/users' }); //* dest stand for destination(diem den)
 // * destination is the folder where we want to save all the images that are being uploaded
 // * and public/img/users is place contain all images from our users in DB right
 // ! we can also config complex like for many upload images not only for user like for tour images...
@@ -41,7 +40,7 @@ router
   // ! notice that the field here must be in the same name with the field we have in the form we upload the image like photo..., and if it's different then upload file will fail
   // * so now this middleware will take care of taking the file and basically copying it to the destination that we specified, then will run the after middleware in stack as normal
   // * and this middleware also will put the file or at least some information about the file on the request object
-  .patch(upload.single('photo'), userController.updateMe)
+  .patch(userController.uploadUserPhoto, userController.updateMe)
   .delete(userController.deleteMe);
 
 router.delete('/delete-me', userController.deleteMe);
