@@ -40,7 +40,7 @@ router
   // ! notice that the field here must be in the same name with the field we have in the form we upload the image like photo..., and if it's different then upload file will fail
   // * so now this middleware will take care of taking the file and basically copying it to the destination that we specified, then will run the after middleware in stack as normal
   // * and this middleware also will put the file or at least some information about the file on the request object
-  .patch(userController.uploadUserPhoto, userController.updateMe)
+  .patch(userController.uploadUserPhoto, userController.resizeUserPhoto, userController.updateMe)
   .delete(userController.deleteMe);
 
 router.delete('/delete-me', userController.deleteMe);

@@ -1,4 +1,5 @@
 const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
@@ -7,19 +8,19 @@ const handlerFactory = require('./handlerFactory');
 // const upload = multer({ dest: 'public/img/users' });
 
 // * create multer storage
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // cb is callback function it looks like a little bit with next() but it doesn't come from express
-    cb(null, 'public/img/users');
-  },
-  filename: (req, file, cb) => {
-    // ! this file here is also like the req.file it contains all things in req.file so we can get that infos and manipulate
-    // ! null is stand for none error in this case, the first parameter of cb function is error
-    // * we can give the filename with any way we want but it must be unique
-    const ext = file.mimetype.split('/')[1];
-    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-  },
-});
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+
+// ! edit config multer storage to memory storage not disk storage because after that we need to resize the image
+// * and now this image will storage as buffer
+const multerStorage = multer.memoryStorage();
 
 // * create multer filter
 const multerFilter = (req, file, cb) => {
@@ -45,6 +46,32 @@ const upload = multer({
 // * we should put the multer upload function in here for our code clean and nice
 const uploadUserPhoto = upload.single('photo');
 // * and to to configure multer upload to our need we need to create one multer storage and one multer filter and then we will use that storage and a filter to then create the upload from uploadUserPhoto()
+
+// * create resize image middleware to handle when user upload image not square
+const resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+  // * now to resize image we will use the sharp package
+  //  * when doing this image processing like this right uploading the file then it always best to not even save the file to the disk but instead save it in memory
+  // * and to do that we need to change something in multer storage configuration
+  // * with this way it'll more efficient, instead write the file in the disk and then in here we read it again
+  // * we simply keep the image basically in memory and then here we can read that
+  // * sharp method return object so therefore we can chaining method() to perform image processing
+  // ! https://sharp.pixelplumbing.com/api-resize
+  // * then we will specify the type of image we will convert
+  // * then we can compress the image file with decrease the quality
+  // * then we will write the file to the disk with toFile() and usually we need include the entire file in this function
+  // req.file.filename = `user-${req.user.id}-${Date.now()}.${req.file.mimetype.split('/')[1]}`;
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`; //! we don't need to use the code above because now the image we define is jpeg toFormat('jpeg') so we don't need it
+  // ? so why we need to do it like this?
+  // * well now we storage in memory as buffer and the file name would not get set like we did when we storage in disk so therefore we need to storage in here, because after we need to use this req.file.filename for other middleware
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
 
 //?IMPLEMENTS GET CURRENT USER
 //* so in this case we need the current id user form logged it not id from req.params.id so we need set some logic to do it but getOne function must to user for many resources
@@ -184,4 +211,5 @@ module.exports = {
   deleteMe,
   getMe,
   uploadUserPhoto,
+  resizeUserPhoto,
 };
