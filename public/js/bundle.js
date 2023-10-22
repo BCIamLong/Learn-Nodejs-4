@@ -264,14 +264,20 @@ const $8c8a31b747da3402$var$userDataForm = document.querySelector(".form-user-da
 const $8c8a31b747da3402$var$userPwdForm = document.querySelector(".form-user-settings");
 $8c8a31b747da3402$var$userDataForm?.addEventListener("submit", function(e) {
     e.preventDefault();
-    const email = document.querySelector("#email").value;
-    const name = document.querySelector("#name").value;
+    // * because we don't use form event to pass data so we need to create form data with my own
+    // * with form event form data will automatically create by encrypt="multipart/form-data" right but now we use API and not form event
+    const form = new FormData();
+    form.append("name", document.querySelector("#name").value);
+    form.append("email", document.querySelector("#email").value);
+    // const email = document.querySelector('#email').value;
+    // const name = document.querySelector('#name').value;
+    // * the axios library will got this form data and send as normal way we did before
+    // * we will add new value that's photo and with file we use files to get value of file in this case it's array so we need use [0] ok
+    form.append("photo", document.querySelector("#photo").files[0]);
+    console.log(form);
     (0, $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2)({
         type: "data",
-        data: {
-            name: name,
-            email: email
-        }
+        data: form
     });
 });
 $8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
