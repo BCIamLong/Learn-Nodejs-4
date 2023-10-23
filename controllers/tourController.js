@@ -1,9 +1,82 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 // const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchSync');
 // const AppError = require('../utils/appError');
 const handlerFactory = require('./handlerFactory');
+
+const multerStorage = multer.memoryStorage();
+
+// * create multer filter
+const multerFilter = (req, file, cb) => {
+  // ? we can also use this for check CSV, docx, PDF,... all the type of files we allow users uploaded
+  if (file.mimetype.startsWith('image')) return cb(null, true);
+
+  cb(new AppError(400, 'Please only upload image file!'), false);
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+// * we will use fields() because we're manipulating with images array
+// * and in this method we will specify array [{name: "field_name", maxCount: num},...]
+// ! field_name must be in the same with the field name from form
+const uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+// * so if we have only one imageCover we can use single('imageCover')
+// * if we have many image in images: we can use array('images', 3)
+// ? and fields() is combine two these methods above, which we can specify for field have one value or have many values
+
+// * images processing: process images and save images to disk
+const resizeImage = (fileBuffer, filename) =>
+  sharp(fileBuffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${filename}`);
+
+const resizeTourImages = catchAsync(async (req, res, next) => {
+  // * so in case we upload many files it'll be req.files, if one it's req.file
+  // if (!req.files) return next();
+  if (!req.files.imageCover || !req.files.images) return next();
+  const tourId = req.params.id;
+  // console.log(req.files);
+  // req.filenames = [];
+  // * For cover image
+  req.body.imageCover = `tour-${tourId}-${Date.now()}-cover.jpeg`;
+  await resizeImage(req.files.imageCover[0].buffer, req.body.imageCover);
+
+  // sharp(req.files.imageCover[0].buffer)
+  //   * 2000x1333 is image size ratio popular for the most images
+  //   .resize(2000, 1333)
+  //   .toFormat('jpeg')
+  //   .jpeg({ quality: 90 })
+  //   .toFile(`public/img/tours/${req.body.imageCover}`);
+  // req.filenames.push(imageCoverFilename);
+
+  // * For images
+  req.body.images = [];
+  const imagesPro = req.files.images.map((file, i) => {
+    const filename = `tour-${tourId}-${Date.now()}-${i + 1}.jpeg`;
+    req.body.images.push(filename);
+    return resizeImage(file.buffer, filename);
+
+    // sharp(file.buffer)
+    //   .resize(2000, 1333)
+    //   .toFormat('jpeg')
+    //   .jpeg({ quality: 90 })
+    //   .toFile(`public/img/tours/${filename}`);
+  });
+  await Promise.all(imagesPro);
+  // sharp(req.fields);
+  next();
+});
 
 //?Refactory code: because we used this code two times and maybe in future we also need to use again and refactory to a function and reuse is good for this case
 //! but we also have a best way that's handle in middleware mongo that pre find hook(middleware) right
@@ -309,4 +382,6 @@ module.exports = {
   setReivews,
   getToursWithin,
   getDistances,
+  uploadTourImages,
+  resizeTourImages,
 };

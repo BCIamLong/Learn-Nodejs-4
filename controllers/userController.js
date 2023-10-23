@@ -48,7 +48,7 @@ const uploadUserPhoto = upload.single('photo');
 // * and to to configure multer upload to our need we need to create one multer storage and one multer filter and then we will use that storage and a filter to then create the upload from uploadUserPhoto()
 
 // * create resize image middleware to handle when user upload image not square
-const resizeUserPhoto = (req, res, next) => {
+const resizeUserPhoto = catchSync(async (req, res, next) => {
   if (!req.file) return next();
   // * now to resize image we will use the sharp package
   //  * when doing this image processing like this right uploading the file then it always best to not even save the file to the disk but instead save it in memory
@@ -64,14 +64,14 @@ const resizeUserPhoto = (req, res, next) => {
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`; //! we don't need to use the code above because now the image we define is jpeg toFormat('jpeg') so we don't need it
   // ? so why we need to do it like this?
   // * well now we storage in memory as buffer and the file name would not get set like we did when we storage in disk so therefore we need to storage in here, because after we need to use this req.file.filename for other middleware
-  sharp(req.file.buffer)
+  await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
     .toFile(`public/img/users/${req.file.filename}`);
 
   next();
-};
+});
 
 //?IMPLEMENTS GET CURRENT USER
 //* so in this case we need the current id user form logged it not id from req.params.id so we need set some logic to do it but getOne function must to user for many resources
