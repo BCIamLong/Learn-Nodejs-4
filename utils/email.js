@@ -40,6 +40,13 @@ class Email {
   //   };
   //   await transporter.sendEmail(emailOptions);
   // }
+
+  async sendPasswordReset() {
+    const subject = `Your password reset token (valid in 10 minutes)`;
+    const template = 'passwordReset';
+    await this.send(template, subject);
+  }
+
   async sendWelcome() {
     // * we can see that the sendWelcome() and sendPasswordReset() are the same mechanism right
     // * therefore that's reason we create send()
@@ -47,6 +54,7 @@ class Email {
     // * by do it we won't worry about things like details implementation(template and subject) like pass the parameters like sendWelcome(template, subject)
     const subject = `Welcome to natours application`;
     const template = `welcome`; // this is type of template we will use
+
     await this.send(template, subject);
   }
 

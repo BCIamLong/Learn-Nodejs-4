@@ -308,20 +308,17 @@ const forgotPassword = catchSync(async (req, res, next) => {
   //--> we will sen resetToken(original) to user and user click to this link and fill password then click confirm then we will conpare resetToken(original) with encrypted reset token in DB to know Is this user real? and confrim change password
 
   // we also create content for this mail
-  const message = `Forgot your password? submit a PATCH request with your new password and password confirm to ${resetURL}. \n If you didn't forgot your password, just ignore this email`;
+  // const message = `Forgot your password? submit a PATCH request with your new password and password confirm to ${resetURL}. \n If you didn't forgot your password, just ignore this email`;
 
   //* we need use try catch here because we need do more like send reset password token when the error occurs not only send error(if it's use catchSync())
   try {
-    await Email({
-      email,
-      subject: 'Your password reset token (valid in 10 minutes)',
-      message,
-    });
+    // * we can see that all things we do only call this method and then pass user and reset URL and don;t need pass things like message,... because it's abstraction by class Email right so it's huge effect and elegant of use class
+    await new Email(user, resetURL).sendPasswordReset();
 
     // ! so in here we assume email is security place to change your password
     res.status(200).json({
       status: 'success',
-      message: 'Token sent to your email',
+      message: 'Your rest password token sent to your email',
       //of course we don't sen reset token in here because someone can try to access and seed your tokem easy and get it change password and control your account
     });
   } catch (err) {
