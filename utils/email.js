@@ -105,13 +105,16 @@ class Email {
       // * now we will use send grid service in nodemailer
       // * and to do that we will use service option and set to send grid
       return nodemailer.createTransport({
-        service: 'SendGrid',
+        // service: 'SendGrid',
+        service: 'Gmail',
         // * so we do not need to specify host and port cuz nodemailer by default for send grid service and it knew port and host of send grid
         // host: process.env.EMAIL_HOST,
         // port: process.env.EMAIL_PORT,
         auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD,
+          // user: process.env.SENDGRID_USERNAME,
+          // pass: process.env.SENDGRID_PASSWORD,
+          user: process.env.GMAIL_USERNAME,
+          pass: process.env.GMAIL_PASSWORD,
         },
       });
 
