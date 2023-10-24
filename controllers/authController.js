@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 const createToken = user =>
   //*add password for check if user change password when the jwt issued
@@ -56,6 +56,12 @@ const signup = catchSync(async (req, res, next) => {
   // });
   //! we set password is select in schema but in here it's still available in output that's because this is create function so we can do like this:
   newUser.password = undefined; //cuz we only want edit in this when we send to client and not update in DB right so we don't use newUser.save()
+
+  //! const url = 'http://127.0.0.1:3000/account'; this url only work for development so we need config that to work for both production and development
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  console.log(url);
+  const email = new Email(newUser, url);
+  await email.sendWelcome();
   sendJWT(res, 200, newUser);
 });
 
@@ -306,7 +312,7 @@ const forgotPassword = catchSync(async (req, res, next) => {
 
   //* we need use try catch here because we need do more like send reset password token when the error occurs not only send error(if it's use catchSync())
   try {
-    await sendEmail({
+    await Email({
       email,
       subject: 'Your password reset token (valid in 10 minutes)',
       message,

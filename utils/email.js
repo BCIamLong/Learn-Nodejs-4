@@ -113,26 +113,7 @@ class Email {
   }
 }
 
-const sendEmail = async options => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-  const emailOptions = {
-    from: 'Lanh Hoa <lanhhoa21112002@gmail.com>',
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-  };
-  //!3,actually send email
-  await transporter.sendMail(emailOptions);
-};
-
-module.exports = sendEmail;
+module.exports = Email;
 
 //? IMPLEMENTS SEND EMAIL FUNCTION
 //* Because we can send email in many place in project so we should create it as helpers in utils

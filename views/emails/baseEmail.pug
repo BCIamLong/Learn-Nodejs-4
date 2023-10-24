@@ -1,0 +1,34 @@
+//- Email template adapted from https://github.com/leemunroe/responsive-html-email-template
+//- Converted from HTML using https://html2pug.now.sh/
+
+doctype html
+html
+  head
+    meta(name='viewport', content='width=device-width')
+    meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+    title= subject
+    //- ! notice that when we build email template we need to use inline CSS style, cuz we only send HTML not send CSS file to email right
+    //- * but we can this style with pug code in other file then include it in here
+    include _style
+  body
+    //- * so with email when we code HTML we always use <table> to code because a lot email only understand the table formatting
+    //- * in the real project we need to divide this code to header, footer,... part and create layout for email like base layout and then reuse for many types of email with will change only the block content right
+    table.body(role='presentation', border='0', cellpadding='0', cellspacing='0')
+      tbody
+        tr
+          td
+          td.container
+            .content
+              // START CENTERED WHITE CONTAINER
+              table.main(role='presentation')
+
+                // START MAIN AREA
+                tbody
+                  tr
+                    td.wrapper
+                      table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+                        tbody
+                          tr
+                            td
+                              block content
+              include _footerEmail
