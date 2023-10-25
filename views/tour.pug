@@ -10,6 +10,8 @@ include mixins/_mixinsTour
 block append head 
   script(src="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.umd.min.js")
   link(href="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.css" rel="stylesheet")
+  script(src="https://js.stripe.com/v3/")
+  //- ! Stripe link will add the stripe object to global scope in browser and we can use that in front-end js
   //- ! if we don't have defer so the script will load before the page finish loaded so we might lost some element need to manipulate in JS file in client and it'll lead some errors
   //- * so to solve that we need to put defer if we put this script in head, if we put it in end of body then it's not problem
 
@@ -150,4 +152,9 @@ block content
       .cta__content
         h2.heading-secondary What are you waiting for?
         p.cta__text #{tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
-        button.btn.btn--green.span-all-rows Book tour now!
+        if user
+          //- ? why do we need tour id?
+          //- * well that because the checkout router need :tourId right therefore we need to put it in here and then in JS front-end we can easy to get it
+          button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+        else 
+          a.btn.btn--green.span-all-rows(href="/login") Login to book tour!

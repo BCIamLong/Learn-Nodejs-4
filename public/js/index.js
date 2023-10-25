@@ -5,11 +5,13 @@ import { login, logout } from './login'; // eslint-disable-line
 import { signup } from './signup';
 import { displayMap } from './mapbox';
 import { updateUserDataSettings } from './updateSettings';
+import { bookTour } from './stripe';
 // import { showAlert } from './alert';
 
 const loginForm = document.querySelector('.login-form .form');
 const signupForm = document.querySelector('.signup-form .form');
 const mapEl = document.querySelector('#map');
+const bookTourBtn = document.querySelector('#book-tour');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPwdForm = document.querySelector('.form-user-settings');
@@ -64,6 +66,13 @@ loginForm?.addEventListener('submit', function (e) {
   const password = document.querySelector('#password').value;
   // console.log(email, password);
   login(email, password);
+});
+
+bookTourBtn?.addEventListener('click', function (e) {
+  e.preventDefault();
+  // * data-tour-id in JS we get it with dataset.tourId okay it auto convert tour-id like this format to camel case
+  e.target.innerHTML = 'Processing...';
+  bookTour(e.target.dataset.tourId);
 });
 
 navLogoutBtn?.addEventListener('click', function (e) {

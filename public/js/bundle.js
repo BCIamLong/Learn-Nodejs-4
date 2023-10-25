@@ -255,10 +255,36 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
  // };
 
 
+/* eslint-disable */ 
+// ! now we will use public key because we're manipulating with front-end
+const $ebc247faa0b7e0bf$var$stripe = Stripe("pk_test_51O4mlfGiKCgw0SOr7qySjg73FIYgBmlM1hnRtxFMxFsvB60iYll2s6Vv5rCgkgZdHZBPZmRWV1NEzAuO0I1nYiF500mJJ6ZMHW");
+const $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2 = async (tourId)=>{
+    try {
+        // const url = `${window.location.protocol}://${window.location.host}/api/v1/tours/${tourId}`;
+        // ! 1 Get checkout session from API
+        const url = `${window.location.protocol}://${window.location.host}/api/v1/bookings/checkout-session/${tourId}`;
+        // const res = await axios({
+        //   method: 'GET',
+        //   url: `http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`,
+        // });
+        // * we can use axios simple if we use with get method only with url
+        const res = await axios(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+        // ! 2 create checkout form and use stripe to charge the credit card
+        // if (res.data.status === 'success') location.assign(`${res.data.session.url}`);
+        if (res.data.status === "success") await $ebc247faa0b7e0bf$var$stripe.redirectToCheckout({
+            sessionId: res.data.session.id
+        });
+    } catch (err) {
+        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+
+
 // import { showAlert } from './alert';
 const $8c8a31b747da3402$var$loginForm = document.querySelector(".login-form .form");
 const $8c8a31b747da3402$var$signupForm = document.querySelector(".signup-form .form");
 const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
+const $8c8a31b747da3402$var$bookTourBtn = document.querySelector("#book-tour");
 const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
 const $8c8a31b747da3402$var$userDataForm = document.querySelector(".form-user-data");
 const $8c8a31b747da3402$var$userPwdForm = document.querySelector(".form-user-settings");
@@ -319,6 +345,12 @@ $8c8a31b747da3402$var$loginForm?.addEventListener("submit", function(e) {
     const password = document.querySelector("#password").value;
     // console.log(email, password);
     (0, $11e8083818df8389$export$596d806903d1f59e)(email, password);
+});
+$8c8a31b747da3402$var$bookTourBtn?.addEventListener("click", function(e) {
+    e.preventDefault();
+    // * data-tour-id in JS we get it with dataset.tourId okay it auto convert tour-id like this format to camel case
+    e.target.innerHTML = "Processing...";
+    (0, $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2)(e.target.dataset.tourId);
 });
 $8c8a31b747da3402$var$navLogoutBtn?.addEventListener("click", function(e) {
     e.preventDefault();
