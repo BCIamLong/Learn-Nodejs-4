@@ -4,6 +4,13 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Booking = require('../models/bookingModel');
 const Tour = require('../models/tourModel');
 const catchSync = require('../utils/catchSync');
+const handlerFactory = require('./handlerFactory');
+
+const createBooking = handlerFactory.createOne(Booking);
+const getBooking = handlerFactory.getOne(Booking);
+const getAllBookings = handlerFactory.getAll(Booking);
+const updateBooking = handlerFactory.updateOne(Booking);
+const deleteBooking = handlerFactory.deleteOne(Booking);
 
 const createBookingCheckout = catchSync(async (req, res, next) => {
   // ?why we call it is bookingCheckout for payment customer because later on we will have createBooking for our Admin, Guides right
@@ -79,4 +86,12 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
   });
 });
 
-module.exports = { getCheckoutSession, createBookingCheckout };
+module.exports = {
+  getCheckoutSession,
+  createBookingCheckout,
+  createBooking,
+  getBooking,
+  getAllBookings,
+  updateBooking,
+  deleteBooking,
+};
