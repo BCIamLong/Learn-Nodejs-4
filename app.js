@@ -130,11 +130,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/', viewRouter);
 
 app.all('*', (req, res, next) => {
   const err = new AppError(404, `Route for this ${req.originalUrl} not defined on application`);

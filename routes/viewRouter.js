@@ -22,11 +22,10 @@ router.use(authController.isLoggedIn);
 router.get('/', bookingController.createBookingCheckout, viewController.getOverview);
 router.get('/tours/:slug', viewController.getTour);
 // router.get('/logout', authController.isLogout, viewController.getOverview);
-router.post('/submit-user-data', authController.protectManually, viewController.updateUserData);
-router.get(
-  '/me',
-  authController.protectManually,
-  authController.passUserDataIntoView,
-  viewController.getAccount,
-);
+
+router.use(authController.protectManually);
+
+router.get('/my-tours', viewController.getMyTours);
+router.post('/submit-user-data', viewController.updateUserData);
+router.get('/me', authController.passUserDataIntoView, viewController.getAccount);
 module.exports = router;

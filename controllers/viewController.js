@@ -1,9 +1,27 @@
+const Booking = require('../models/bookingModel');
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 // const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
+
+const getMyTours = catchSync(async (req, res, next) => {
+  const bookings = await Booking.find({ user: req.user });
+
+  // ! notice that we can use book.tour or book.tour.id, cuz with populate we can use the original value that's tourId and the populate value that tour{id...} okay
+  // * if we use book.tour like id value like in findById(), in map(), forEach() it will auto understand that tourId
+  // * way1:
+  // const tours = await Promise.all(bookings.map(book => Tour.findById(book.tour)));
+  // * way2:
+  const tourIds = bookings.map(book => book.tour);
+  // * so $in is option that find tour with _id has value in tourIds array
+  // !https://www.mongodb.com/docs/manual/reference/operator/query/in/
+  const tours = await Tour.find({ _id: { $in: tourIds } });
+
+  // * we also can create our page booking with cards contain some relevant information from this bookings
+  res.status(200).render('myTours', { tours });
+});
 
 const updateUserData = catchSync(async (req, res, next) => {
   // console.log(req.body);
@@ -71,4 +89,5 @@ module.exports = {
   getSignupForm,
   getAccount,
   updateUserData,
+  getMyTours,
 };
