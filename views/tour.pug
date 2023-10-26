@@ -10,7 +10,9 @@ include mixins/_mixinsTour
 block append head 
   script(src="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.umd.min.js")
   link(href="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.css" rel="stylesheet")
-  script(src="https://js.stripe.com/v3/")
+  //- * we should put this stripe library to base for all the page because we use parcel and parcel is put all the code in one file and when we go to any page this code will run and of course it will contain the stripe code and need to required this library
+  //- * if we only put it in here all pages will get error except this one
+  //- script(src="https://js.stripe.com/v3/")
   //- ! Stripe link will add the stripe object to global scope in browser and we can use that in front-end js
   //- ! if we don't have defer so the script will load before the page finish loaded so we might lost some element need to manipulate in JS file in client and it'll lead some errors
   //- * so to solve that we need to put defer if we put this script in head, if we put it in end of body then it's not problem

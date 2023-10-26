@@ -1,6 +1,7 @@
 const express = require('express');
 const viewController = require('../controllers/viewController');
 const authController = require('../controllers/authController');
+const bookingController = require('../controllers/bookingController');
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get('/signup', viewController.getSignupForm);
 // * but we need to still check for it because for display login, signup button or user image and name
 router.use(authController.isLoggedIn);
 // * so what we will do now is put it in each router needed
-router.get('/', viewController.getOverview);
+router.get('/', bookingController.createBookingCheckout, viewController.getOverview);
 router.get('/tours/:slug', viewController.getTour);
 // router.get('/logout', authController.isLogout, viewController.getOverview);
 router.post('/submit-user-data', authController.protectManually, viewController.updateUserData);
