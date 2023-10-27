@@ -21,6 +21,11 @@ const globalErrorsHandler = require('./controllers/errorController');
 
 const app = express();
 
+if (process.env.NODE_ENV === 'production')
+  app.set('trust proxy', ip => {
+    if (ip === '216.24.57.3' || ip === '216.24.57.253') return true; // trusted IPs
+    return false;
+  });
 //?IMPLEMENTS SETTING TEMPLATE ENGINE(PUG)
 //!WE ACTUALLY NEED TO INSTALL PUB, EXPRESS WILL STILL LOAD IT BEHIND THE SCENES AUTOMATICALLY BUT IT DOESN'T COME WITH ALL OF THESE TEMPLATE ENGINE INSTALLED ALL THE BOX BUT WE DON'T NEED REQUIRE CUZ EXPRESS AUTO DO THAT ALL RIGHT
 //* 1: Telling express what's template we using(definded template engine)
