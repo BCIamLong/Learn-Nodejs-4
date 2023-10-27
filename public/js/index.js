@@ -49,14 +49,14 @@ userPwdForm?.addEventListener('submit', function (e) {
   // document.querySelector('.btn').removeAttribute('disable');
 });
 
-signupForm?.addEventListener('submit', async function (e) {
+signupForm?.addEventListener('submit', function (e) {
   e.preventDefault();
   const name = document.querySelector('#name').value;
   const email = document.querySelector('#email').value;
   const password = document.querySelector('#password').value;
   const passwordConfirm = document.querySelector('#passwordConfirm').value;
   // console.log(email, password);
-  await signup({ name, email, password, passwordConfirm });
+  signup({ name, email, password, passwordConfirm });
 });
 
 loginForm?.addEventListener('submit', function (e) {

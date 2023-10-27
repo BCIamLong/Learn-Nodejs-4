@@ -99,3 +99,17 @@ process.on('unhandledRejection', err => {
 //     process.exit(1);
 //   });
 // });
+
+process.on('SIGTERM', () => {
+  // * the sigterm now like the event that can be emitted and that our application receives and can then response to like we did with unhandled rejection, uncaught exception
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+
+  // * implement way to shutting down gracefully
+  server.close(() => {
+    // * when server close that time all requests(pending, ready, sent...) will process until the end and then after that it's good to shut down application
+    console.log('💥 Process terminated');
+    // ? so why we don't use process.exit() in here
+    // * well that because SIGTERM itself will cause the application to shut down therefore we do not to do it manually like we did with unhandled rejection, uncaught exception
+    // * sigterm signal is that's used to cause a program to really stop running so like politely way to ask a program to terminate(cham dut)
+  });
+});

@@ -107,12 +107,12 @@ const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
 const $369874bb068f1ff5$var$signupForm = document.querySelector(".signup-form .form");
 const $369874bb068f1ff5$export$7200a869094fec36 = async (data)=>{
     try {
+        $369874bb068f1ff5$var$signupForm.classList.add("form--inactive");
         const res = await axios({
             method: "POST",
             url: "/api/v1/users/signup",
             data: data
         });
-        $369874bb068f1ff5$var$signupForm.classList.add("form--inactive");
         if (res.data.status === "success") {
             (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Sign up account successfully");
             window.setTimeout(()=>{
@@ -324,14 +324,14 @@ $8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
     });
 // document.querySelector('.btn').removeAttribute('disable');
 });
-$8c8a31b747da3402$var$signupForm?.addEventListener("submit", async function(e) {
+$8c8a31b747da3402$var$signupForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     const name = document.querySelector("#name").value;
     const email = document.querySelector("#email").value;
     const password = document.querySelector("#password").value;
     const passwordConfirm = document.querySelector("#passwordConfirm").value;
     // console.log(email, password);
-    await (0, $369874bb068f1ff5$export$7200a869094fec36)({
+    (0, $369874bb068f1ff5$export$7200a869094fec36)({
         name: name,
         email: email,
         password: password,

@@ -3,12 +3,12 @@ import { showAlert } from './alert';
 const signupForm = document.querySelector('.signup-form .form');
 export const signup = async data => {
   try {
+    signupForm.classList.add('form--inactive');
     const res = await axios({
       method: 'POST',
       url: '/api/v1/users/signup',
       data,
     });
-    signupForm.classList.add('form--inactive');
     if (res.data.status === 'success') {
       showAlert('success', 'Sign up account successfully');
       window.setTimeout(() => {
