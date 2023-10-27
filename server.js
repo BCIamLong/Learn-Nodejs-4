@@ -30,7 +30,7 @@ mongoose
     // console.log(con.connections);
     console.log('DB connect successful');
   })
-  .catch(() => console.log('ERROR')); //*We handle this unhadled error promise with catch
+  .catch(err => console.log('ERROR 🔥', err)); //*We handle this unhadled error promise with catch
 
 //! 4,START SERVER
 const port = process.env.PORT || 3000;
