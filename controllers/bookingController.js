@@ -17,7 +17,7 @@ const createBookingCheckout = catchSync(async (req, res, next) => {
   // console.log(req.query);
   // ! Remember that this is only temporary solution because it's unsecure and anyone can booking without paying
   const { tour, user, price } = req.query;
-  console.log(tour, user, price);
+  // console.log(tour, user, price);
   // * we should use && because we need all 3 of them tour, user, price to create booking if we lack one of them it's not allow
   if (!tour && !user && !price) return next();
 

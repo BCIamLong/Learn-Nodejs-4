@@ -28,7 +28,7 @@ userDataForm?.addEventListener('submit', function (e) {
   // * the axios library will got this form data and send as normal way we did before
   // * we will add new value that's photo and with file we use files to get value of file in this case it's array so we need use [0] ok
   form.append('photo', document.querySelector('#photo').files[0]);
-  console.log(form);
+  // console.log(form);
   updateUserDataSettings({ type: 'data', data: form });
 });
 

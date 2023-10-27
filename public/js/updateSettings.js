@@ -34,9 +34,7 @@ export const updateUserDataSettings = async options => {
     btn.setAttribute('disabled', '');
     btn.innerHTML = 'Updating';
     const url =
-      options.type === 'data'
-        ? 'http://127.0.0.1:3000/api/v1/users/me'
-        : 'http://127.0.0.1:3000/api/v1/users/update-current-password';
+      options.type === 'data' ? '/api/v1/users/me' : '/api/v1/users/update-current-password';
     const res = await axios({
       method: 'PATCH',
       url,

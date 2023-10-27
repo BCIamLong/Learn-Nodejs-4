@@ -10,7 +10,8 @@
     "import-data": "node dev-data/data/import-dev-data.js --import",
     "delete-data": "node dev-data/data/import-dev-data.js --delete",
     "debug": "ndb server.js",
-    "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/js"
+    "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/js",
+    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/js"
   },
   "author": "longhoang",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "axios": "^1.5.1",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
+    "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "core-js": "^3.33.0",
     "crypto-js": "^4.1.1",

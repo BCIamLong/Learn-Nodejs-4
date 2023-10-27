@@ -24,9 +24,7 @@ app.use(express.json()); // help us data can pass and send to request body to se
 
 //*readFileSyc to get tour data from file dev-data/data/tours-simple.json
 //data return is json so you need to parse to objects array
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`),
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>CREATE FUNCTION TO REFACTORY CODE
 
@@ -100,7 +98,7 @@ app.post('/api/v1/tours', (req, res) => {
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours), // because .json file want json type so u need consvert it
-    (err) => {
+    err => {
       if (err) {
         res.status(404).json({
           status: 'Faild',
@@ -128,7 +126,7 @@ app.post('/api/v1/tours', (req, res) => {
 // --- /api/v1/tours/1/2 and //?it's working and o is undefine
 app.get('/api/v1/tours/:id', (req, res) => {
   //:parameter is stardand of express to write id
-  console.log(req.params); // is object contain all parameter or variable we defined in url
+  // console.log(req.params); // is object contain all parameter or variable we defined in url
   //   if(!id) console.log("Do some thing");
   //   const id = req.params.id * 1; this is a way to chance string to number
   //! in the real project we need to check id and some thing logic? if not we need do some thing
@@ -141,7 +139,7 @@ app.get('/api/v1/tours/:id', (req, res) => {
       message: 'Tour not found',
     });
   }
-  const tour = tours.find((el) => el.id === id); // --> this way is good
+  const tour = tours.find(el => el.id === id); // --> this way is good
   //   if (!tour)
   // return res.status(404).json({
   //   status: 'Faild',
@@ -167,56 +165,48 @@ app.patch('/api/v1/tours/:id', (req, res) => {
       message: 'Invalid id',
     });
   }
-  const tour = tours.find((el) => el.id === id);
+  const tour = tours.find(el => el.id === id);
 
   Object.assign(tour, req.body);
   tours[tour.id] = tour;
 
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      if (err) {
-        res.status(404).json({
-          status: 'Faild',
-          message: 'File not found',
-        });
-      }
-      res.status(200).json({
-        status: 'Success',
-        data: {
-          // tour: '<Update here...>', // planholder
-          tour,
-        },
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+    if (err) {
+      res.status(404).json({
+        status: 'Faild',
+        message: 'File not found',
       });
-    },
-  );
+    }
+    res.status(200).json({
+      status: 'Success',
+      data: {
+        // tour: '<Update here...>', // planholder
+        tour,
+      },
+    });
+  });
 });
 
 //!!DELETE
 app.delete('/api/v1/tours/:id', (req, res) => {
   // * http code for delete is 204 mean is no content so this time our data is null
-  const tour = tours.find((el) => el.id === +req.params.id);
+  const tour = tours.find(el => el.id === +req.params.id);
   tours.splice(tour.id, 1);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      if (err) {
-        res.status(404).json({
-          status: 'Faild',
-          message: "Can't delete",
-        });
-      }
-      res.status(204).json({
-        status: 'Success',
-        data: null,
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+    if (err) {
+      res.status(404).json({
+        status: 'Faild',
+        message: "Can't delete",
       });
-    },
-  );
+    }
+    res.status(204).json({
+      status: 'Success',
+      data: null,
+    });
+  });
 });
 
 const port = 3000;
 app.listen(port, () => {
-  console.log(`App is listening port ${port}`);
+  // console.log(`App is listening port ${port}`);
 });

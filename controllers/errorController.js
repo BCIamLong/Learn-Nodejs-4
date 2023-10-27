@@ -17,6 +17,7 @@ const sendErrorDev = (err, req, res) => {
     });
   }
   // * RENDERED WEBSITE
+  console.log('ERROR 🔥', err);
   const error = {
     statusCode: err.statusCode,
     message: err.message,
@@ -33,7 +34,7 @@ const sendErrorProd = (err, req, res) => {
         status: err.status,
         message: err.message,
       });
-    console.error(`ERROR: ${err}`);
+    console.log('ERROR 🔥', err);
 
     return res.status(500).json({
       status: 'Error',

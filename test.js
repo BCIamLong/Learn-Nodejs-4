@@ -71,7 +71,7 @@
 //   .digest('hex');
 // console.log(token === 'cd70560863af8787e5050423d342f9ef90c0cf4c934344e4bef8c5e5ea55e0e6');
 
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
-const id = new mongoose.Types.ObjectId('5c88fa8cf4afda39709c295a');
-console.log(id);
+// const id = new mongoose.Types.ObjectId('5c88fa8cf4afda39709c295a');
+// console.log(id);

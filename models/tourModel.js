@@ -195,11 +195,11 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Time to query to finish is: ${Date.now() - this.start} miliseconds`);
+// tourSchema.post(/^find/, function (docs, next) {
+//   console.log(`Time to query to finish is: ${Date.now() - this.start} miliseconds`);
 
-  next();
-});
+//   next();
+// });
 
 //!!AGGREGATION MIDDLEWARE
 //?Read this: https://mongoosejs.com/docs/middleware.html#notes

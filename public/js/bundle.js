@@ -1,6 +1,6 @@
 /* eslint-disable */ // * so in index.js file we will import all files from other file in this folder
 // * and then when we build parcel it will take all code from all files into one
-/* eslint-disable */ /* eslint disable */ // * we need to config the alert because bt default from JS it look not good
+/* eslint-disable */ /* eslint-disable */ // * we need to config the alert because bt default from JS it look not good
 const $4c528c06674349f5$var$bodyEl = document.querySelector("body");
 const $4c528c06674349f5$export$de026b00723010c1 = (type, msg)=>{
     // * remove alert when we show other alert
@@ -53,7 +53,7 @@ const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
     // ! we can also us try catch here but it's only work for modern browser and if we want it's work for many browser especially for old browser we can use then() catch()
     await axios({
         method: "POST",
-        url: "http://127.0.0.1:3000/api/v1/users/login",
+        url: "/api/v1/users/login",
         data: {
             email: email,
             password: password
@@ -84,7 +84,7 @@ const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
     try {
         const res = await axios({
             method: "GET",
-            url: "http://127.0.0.1:3000/api/v1/users/logout"
+            url: "/api/v1/users/logout"
         });
         // console.log(res);
         // * we also need to reload page why? because we are codding  in front-end so we can't use render in here right, and reload page will send request with the empty the cookie to server and isLoginIn router will take it and not return user => in this time user is undefined and then the login in our pug file will check and display login and signup buttons
@@ -109,7 +109,7 @@ const $369874bb068f1ff5$export$7200a869094fec36 = async (data)=>{
     try {
         const res = await axios({
             method: "POST",
-            url: "http://127.0.0.1:3000/api/v1/users/signup",
+            url: "/api/v1/users/signup",
             data: data
         });
         $369874bb068f1ff5$var$signupForm.classList.add("form--inactive");
@@ -213,7 +213,7 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
         (0, $4c528c06674349f5$export$de026b00723010c1)("success", `Update ${options.type.toUpperCase()} loading...`);
         btn.setAttribute("disabled", "");
         btn.innerHTML = "Updating";
-        const url = options.type === "data" ? "http://127.0.0.1:3000/api/v1/users/me" : "http://127.0.0.1:3000/api/v1/users/update-current-password";
+        const url = options.type === "data" ? "/api/v1/users/me" : "/api/v1/users/update-current-password";
         const res = await axios({
             method: "PATCH",
             url: url,
@@ -268,7 +268,7 @@ const $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2 = async (tourId)=>{
         //   url: `http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`,
         // });
         // * we can use axios simple if we use with get method only with url
-        const res = await axios(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+        const res = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
         // ! 2 create checkout form and use stripe to charge the credit card
         // if (res.data.status === 'success') location.assign(`${res.data.session.url}`);
         if (res.data.status === "success") await $ebc247faa0b7e0bf$var$stripe.redirectToCheckout({
@@ -300,7 +300,7 @@ $8c8a31b747da3402$var$userDataForm?.addEventListener("submit", function(e) {
     // * the axios library will got this form data and send as normal way we did before
     // * we will add new value that's photo and with file we use files to get value of file in this case it's array so we need use [0] ok
     form.append("photo", document.querySelector("#photo").files[0]);
-    console.log(form);
+    // console.log(form);
     (0, $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2)({
         type: "data",
         data: form

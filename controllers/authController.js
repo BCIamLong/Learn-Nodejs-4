@@ -59,7 +59,7 @@ const signup = catchSync(async (req, res, next) => {
 
   //! const url = 'http://127.0.0.1:3000/account'; this url only work for development so we need config that to work for both production and development
   const url = `${req.protocol}://${req.get('host')}/me`;
-  console.log(url);
+  // console.log(url);
   const email = new Email(newUser, url);
   await email.sendWelcome();
   sendJWT(res, 200, newUser);

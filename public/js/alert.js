@@ -1,4 +1,4 @@
-/* eslint disable */
+/* eslint-disable */
 // * we need to config the alert because bt default from JS it look not good
 const bodyEl = document.querySelector('body');
 export const showAlert = (type, msg) => {

@@ -32,7 +32,7 @@ export const login = async (email, password) => {
   // ! we can also us try catch here but it's only work for modern browser and if we want it's work for many browser especially for old browser we can use then() catch()
   await axios({
     method: 'POST',
-    url: 'http://127.0.0.1:3000/api/v1/users/login',
+    url: '/api/v1/users/login',
     data: { email, password },
   })
     // .then(res => res.json())
@@ -64,7 +64,7 @@ export const logout = async () => {
   try {
     const res = await axios({
       method: 'GET',
-      url: 'http://127.0.0.1:3000/api/v1/users/logout',
+      url: '/api/v1/users/logout',
     });
     // console.log(res);
     // * we also need to reload page why? because we are codding  in front-end so we can't use render in here right, and reload page will send request with the empty the cookie to server and isLoginIn router will take it and not return user => in this time user is undefined and then the login in our pug file will check and display login and signup buttons

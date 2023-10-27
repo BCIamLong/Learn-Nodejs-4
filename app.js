@@ -9,6 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
@@ -109,6 +110,9 @@ app.use(
 ); // it's should use here because it only clear up the query String
 
 //! In validator modules from npm we also have some functions can validator and sanitization data and we can apply them to our schema but if you use mongoose it's not really necessary because mongoose implemented a strict schema so if it's feel data is something like bad, dammage it'll auto create error and our work is custom this error especially in production process
+
+//*usually we put it near the end and before our sign routers
+app.use(compression());
 
 //*SERVING STATIC FILE: use to development dynamic website
 //! so we also should use path.join() for this set static root

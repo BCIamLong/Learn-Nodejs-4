@@ -17,7 +17,7 @@ export const bookTour = async tourId => {
     //   url: `http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`,
     // });
     // * we can use axios simple if we use with get method only with url
-    const res = await axios(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+    const res = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
     // ! 2 create checkout form and use stripe to charge the credit card
 
     // if (res.data.status === 'success') location.assign(`${res.data.session.url}`);
