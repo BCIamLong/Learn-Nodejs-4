@@ -3,6 +3,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Booking = require('../models/bookingModel');
 const Tour = require('../models/tourModel');
+const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
 
@@ -12,7 +13,43 @@ const getAllBookings = handlerFactory.getAll(Booking);
 const updateBooking = handlerFactory.updateOne(Booking);
 const deleteBooking = handlerFactory.deleteOne(Booking);
 
-const createBookingCheckout = catchSync(async (req, res, next) => {
+const createBookingCheckout = async session => {
+  // * and now how we get the tour id? well we will use the  client_reference_id: tourId when we create the checkout session right, and now that's time to use it
+  // * and now how we get the user id? well we will use  customer_email: req.user.email to query the user then get the ID
+  const tour = session.client_reference_id;
+  // const userData = await User.findOne({ email: session.customer_email });
+  // const user = userData.id;
+  const user = (await User.findOne({ email: session.customer_email })).id;
+  const price = session.line_items[0].price_data.unit_amount / 100;
+  await Booking.create({ tour, user, price });
+};
+
+const webhookCheckout = catchSync(async (req, res, next) => {
+  // * now the webhook send session if payment successfully
+  // * the first thing we do that read the stripe signature from header
+  const signature = req.headers['stripe-signature'];
+  let event;
+  try {
+    // * so basically the stripe call our webhook it will add header to that request containing a special signature for our webhook
+
+    // * req.body is raw and it's format for this constructEvent() can consume so that reason why we need to put this route before bodyParser.json() right
+    // * And the event is also require the webhook secret
+    event = stripe.webhook.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
+    // * With this it will make payment process become super secure because we need signature from webhook send and the stripe webhook secret key to validate this data come from the body so no one can actually manipulate that
+    // * now during create this event they might create some errors for example if the signature or secret key are wrong so we should use try catch
+  } catch (err) {
+    // * and in this case if we get error we need to send back to stripe
+    // * and why don't we use catchAsync() to catch the error because this error will automatically create by stripe and this process request is also from stripe so we need  send back it to stripe right
+    return res.status(400).send(`Webhook error: ${err.message}`);
+  }
+
+  // * so why we need these code outside try catch and must use catchSync() well that because the code here is related our application and we need to handle these error if it occurs not for stripe right
+  if (event.type === 'checkout.session.completed') await createBookingCheckout(event.data.object);
+
+  res.status(200).json({ received: true });
+});
+
+const createBookingCheckout2 = catchSync(async (req, res, next) => {
   // ?why we call it is bookingCheckout for payment customer because later on we will have createBooking for our Admin, Guides right
   // console.log(req.query);
   // ! Remember that this is only temporary solution because it's unsecure and anyone can booking without paying
@@ -43,9 +80,10 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
     payment_method_types: ['card'],
     // * now we use the temporary way to do it but it's not secure because then customer don't need to payment process and they can have new booking by using this URL and they can create new booking without payment and that's huge problem right
     // * of course we can also hide this link but it's not good solution and we should never use this way
-    success_url: `${req.protocol}://${req.get('host')}?tour=${tourId}&user=${req.user.id}&price=${
-      tour.price
-    }`, //* when the purchase is successfully the user will redirect to this url(usually it's our homepage url)
+    success_url: `${req.protocol}://${req.get('host')}/my-tour`,
+    // success_url: `${req.protocol}://${req.get('host')}?tour=${tourId}&user=${req.user.id}&price=${
+    //   tour.price
+    // }`, //* when the purchase is successfully the user will redirect to this url(usually it's our homepage url)
     // * and it's time we will create new booking with this payment to our DB
     // * so basically we want to create new booking whenever successfully URL is access
     // * we can also create new page with show notification successfully for customer but now we're using stripe and we can use features of stripe
@@ -89,9 +127,11 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
 module.exports = {
   getCheckoutSession,
   createBookingCheckout,
+  createBookingCheckout2,
   createBooking,
   getBooking,
   getAllBookings,
   updateBooking,
   deleteBooking,
+  webhookCheckout,
 };

@@ -19,6 +19,7 @@ const reviewRouter = require('./routes/reviewRouter');
 const viewRouter = require('./routes/viewRouter');
 const bookingRouter = require('./routes/bookingRouter');
 const globalErrorsHandler = require('./controllers/errorController');
+const bookingController = require('./controllers/bookingController');
 
 const app = express();
 
@@ -106,6 +107,12 @@ app.use(limiter);
 //* but if you use in web dynamic web or the app like this, you need to sepecify for per router, if you want use for this api web you need
 // app.use('/api', limiter);
 // app.use('/createUser', limiter);
+
+app.post(
+  '/webhook-checkout',
+  bodyParser.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout,
+);
 
 //*>>>>>>>BODY PARSER: reading data from body into req.body
 //you can also implemts limit data
