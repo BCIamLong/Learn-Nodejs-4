@@ -10,6 +10,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
@@ -39,6 +40,37 @@ app.set('views', path.join(__dirname, 'views')); //'./views'); //! ./views is no
 //app.set('views', path.join(__dirname, 'views')); --> behind the scene create the path joining the directory name with views  C://..../natours/views like this
 //--! so you can see this might seem here a bit overkill(qua muc can thiet) to use this path.join() but we don't always know whether a path that we receive from somewhere already has a slash or not(if we use ./views => if has slash: //views so it's bug and will create error) so you will see this function use all the times in order to prevent this kind of bug and so we will use this function to create correct path
 app.use(express.static(path.join(__dirname, 'public'))); //! it's also a middleware but we should put it in here because it works together with our views engine
+
+// *IMPLEMENT CORS(CROSS-ORIGIN RESOURCES SHARING)
+// ?Step 1
+// cors() is return middleware like other package we did like this
+// and the middleware will set couple of different headers to our response like helmet()
+app.use(cors());
+// it will set access-control-allow-origin = * and * is everything and it's mean it will allow for all the requests access no matter where they coming from
+// and so this is ideal for allowing everyone to consume our API
+// but now image that we only want share API for certain domain or subdomain
+// example on our front-end application on a different domain
+// * api.natours.com(backend), natours.com(frontend)
+// * and what we will do it allows access from natours.come origin
+// app.use(cors({ origin: 'https://www.natours.com' })); //* with this we only allow this origin to access to our API
+// ?Step 2:
+// * now we setup cors in our app but not finish, because right now it's only work for so-called simple requests and simple requests are GET and POST requests
+// * and on the other hand we have so-called non-simple requests: PATCH, PUT, DELETE request or also request that send cookies or use nonstandard headers
+// * and these non-simple request they require a so-called preflight phase
+// * so whenever there is non-simple request the browser will then automatically issue(phat hanh) the preflight phase and this is how that work
+// * so before the real request actually happens, assume that DELETE request the browser first does an options request in order to figure out if the actual request is safe to send
+// * and that mean with us developers is that on our server we need do actually respond to that options request and options is really just another HTTP method like other method GET, POST, PUT....
+// * so when we get these options requests on our server then we need to send back the same Access-Control-Allow-Origin header
+// * and this way the browser will then know that the actual request and in this case the delete request, is safe to perform and then execute the delete request itself
+
+// * options is HTTP method like get(), post()... which we can response it
+// * in this case we need response to it, because browser will send options request when there is a preflight phase
+app.options('*', cors()); // handle for preflight phase
+
+// * we can also allow these complex requests on just a specific route
+// app.options('api/v1/tours/:id', cors()); // we only handle preflight phase(patch, put, delete) for this route for cross-origin requests
+
+// ? ===> and that is how we implement cors(cross origin resources sharing) for our application
 
 //? so now we finished set up our pug engine, now we can create template in views folder
 
