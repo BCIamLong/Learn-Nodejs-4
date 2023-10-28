@@ -6,6 +6,20 @@ const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
 
+const checkAlert = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === 'booking')
+    res.locals.alert = `Your ${alert} was successful, please check your email for a confirmation. If your booking doesn't show up here immediately, please come back later. `;
+  // * because the webhook check and post request to our endpoint maybe take the time longer the time redirect to the success URL
+  // * and when payment successful we will redirect to success URL and that time the checkout.session.completed is trigger this action might take a long time right because it post request then check and add data to DB
+  // * so therefore it might not complete immediately, and we need to tell our customer about that
+
+  // ! notice that we can also use this check for other endpoint by use other ? alert query, and we will create case when we needed
+  // if(alert === 'favorite') ....
+  // console.log(res.locals.alert);
+  next();
+};
+
 const getMyTours = catchSync(async (req, res, next) => {
   const bookings = await Booking.find({ user: req.user });
 
@@ -90,4 +104,5 @@ module.exports = {
   getAccount,
   updateUserData,
   getMyTours,
+  checkAlert,
 };

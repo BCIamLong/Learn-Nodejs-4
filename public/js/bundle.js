@@ -1,18 +1,18 @@
 /* eslint-disable */ // * so in index.js file we will import all files from other file in this folder
 // * and then when we build parcel it will take all code from all files into one
 /* eslint-disable */ /* eslint-disable */ // * we need to config the alert because bt default from JS it look not good
-const $4c528c06674349f5$var$bodyEl = document.querySelector("body");
-const $4c528c06674349f5$export$de026b00723010c1 = (type, msg)=>{
+const $fa3c8714c3f1b580$var$bodyEl = document.querySelector("body");
+const $fa3c8714c3f1b580$export$de026b00723010c1 = (type, msg, time = 7)=>{
     // * remove alert when we show other alert
-    $4c528c06674349f5$var$hideAlert();
+    $fa3c8714c3f1b580$var$hideAlert();
     //type is success or error
     // * of course that we need to create and style classes for alert in CSS and also HTML after that we add it via JS code
     const markup = `<div class="alert alert--${type}">${msg}</div>`;
-    $4c528c06674349f5$var$bodyEl.insertAdjacentHTML("afterbegin", markup);
+    $fa3c8714c3f1b580$var$bodyEl.insertAdjacentHTML("afterbegin", markup);
     // * remove alert in 3 seconds
-    window.setTimeout(()=>$4c528c06674349f5$var$hideAlert(), 3000);
+    window.setTimeout(()=>$fa3c8714c3f1b580$var$hideAlert(), time * 1000);
 };
-const $4c528c06674349f5$var$hideAlert = ()=>{
+const $fa3c8714c3f1b580$var$hideAlert = ()=>{
     const alertEl = document.querySelector(".alert");
     // ? so why we need to check this?
     // * because if we use alertEl.remove() so in the case we have many alert classes element in our HTML alertEl.remove() alway remove the first alert element
@@ -22,8 +22,8 @@ const $4c528c06674349f5$var$hideAlert = ()=>{
 };
 
 
-const $11e8083818df8389$var$loginForm = document.querySelector(".login-form .form");
-const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
+const $740edc1be548417a$var$loginForm = document.querySelector(".login-form .form");
+const $740edc1be548417a$export$596d806903d1f59e = async (email, password)=>{
     // const url = 'http://127.0.0.1:3000/api/v1/users/login';
     // const data = {
     //   email,
@@ -60,27 +60,27 @@ const $11e8083818df8389$export$596d806903d1f59e = async (email, password)=>{
         }
     })// .then(res => res.json())
     .then((res)=>{
-        $11e8083818df8389$var$loginForm.classList.add("form--inactive");
+        $740edc1be548417a$var$loginForm.classList.add("form--inactive");
         // console.log(res);
         if (res.data.status === "success") {
             // alert('Login successfully');
-            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Login successfully");
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", "Login successfully");
             window.setTimeout(()=>{
                 // window.location.href = '/';
                 // * we can use 1 of two way to redirect to other page
                 location.assign("/");
             }, 1000);
             window.setTimeout(()=>{
-                $11e8083818df8389$var$loginForm.classList.remove("form--inactive");
+                $740edc1be548417a$var$loginForm.classList.remove("form--inactive");
             }, 3000);
         }
     }).catch((err)=>{
         // console.log(err.response.data);
         // alert(err.response.data.message);
-        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
     });
 };
-const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
+const $740edc1be548417a$export$a0973bcfe11b05c9 = async ()=>{
     try {
         const res = await axios({
             method: "GET",
@@ -89,7 +89,7 @@ const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
         // console.log(res);
         // * we also need to reload page why? because we are codding  in front-end so we can't use render in here right, and reload page will send request with the empty the cookie to server and isLoginIn router will take it and not return user => in this time user is undefined and then the login in our pug file will check and display login and signup buttons
         if (res.data?.status === "success") {
-            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Logout successfully");
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", "Logout successfully");
             window.setTimeout(()=>{
                 // * we can use reload page here with: location.reload(true), set option true to also force reload server, if we don't have this it's only reload with the cache which it's storage in the first time run and of course the page will not change and so it's important to set option true here
                 location.assign("/");
@@ -98,39 +98,39 @@ const $11e8083818df8389$export$a0973bcfe11b05c9 = async ()=>{
     } catch (err) {
         // * usually we don't have error when we logout but to ensure like in the case we don't have the internet we also want to show nice notification for user
         // console.log(err);
-        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response?.data.message);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response?.data.message);
     }
 };
 
 
 /* eslint-disable */ 
-const $369874bb068f1ff5$var$signupForm = document.querySelector(".signup-form .form");
-const $369874bb068f1ff5$export$7200a869094fec36 = async (data)=>{
+const $8949a5cd0baaab58$var$signupForm = document.querySelector(".signup-form .form");
+const $8949a5cd0baaab58$export$7200a869094fec36 = async (data)=>{
     try {
-        $369874bb068f1ff5$var$signupForm.classList.add("form--inactive");
+        $8949a5cd0baaab58$var$signupForm.classList.add("form--inactive");
         const res = await axios({
             method: "POST",
             url: "/api/v1/users/signup",
             data: data
         });
         if (res.data.status === "success") {
-            (0, $4c528c06674349f5$export$de026b00723010c1)("success", "Sign up account successfully");
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", "Sign up account successfully");
             window.setTimeout(()=>{
                 location.assign("/");
             }, 1000);
             window.setTimeout(()=>{
-                $369874bb068f1ff5$var$signupForm.classList.remove("form--inactive");
+                $8949a5cd0baaab58$var$signupForm.classList.remove("form--inactive");
             }, 3000);
         }
     } catch (err) {
-        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
     }
 };
 
 
 /* eslint-disable */ // ! we need to turn off eslint here because it's setup for nodejs, so some variable in normal js in JS DOM like document not have in nodejs right so it'll catch err if we use eslint here
 "use strict";
-const $bf251e7bf12e920b$export$4c5dd147b21b9176 = (locations)=>{
+const $6954e231f70b5f48$export$4c5dd147b21b9176 = (locations)=>{
     // * so with map we don't use google map instead we use mapbox why because sometime the google map will require the credit to perform action so its not good for our because we only learn
     // * there for we will use mapbox: https://docs.maptiler.com
     // ! https://docs.maptiler.com/sdk-js/api/map/#map-options
@@ -186,7 +186,7 @@ const $bf251e7bf12e920b$export$4c5dd147b21b9176 = (locations)=>{
 
 
 /* eslint-disable */ 
-const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
+const $373a691a0b32f115$export$d88aa9b9d4bd90c2 = async (options)=>{
     // ! we can also use parameter likeL (type, data) it's handy more
     try {
         // let res;
@@ -210,7 +210,7 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
         // }
         // * because update lost some time so we can show some notify meaningful in this case like loading icon, loading message....
         const btn = document.querySelector(`.form-user-${options.type === "data" ? "data" : "settings"} .btn`);
-        (0, $4c528c06674349f5$export$de026b00723010c1)("success", `Update ${options.type.toUpperCase()} loading...`);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Update ${options.type.toUpperCase()} loading...`);
         btn.setAttribute("disabled", "");
         btn.innerHTML = "Updating";
         const url = options.type === "data" ? "/api/v1/users/me" : "/api/v1/users/update-current-password";
@@ -220,7 +220,7 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
             data: options.data
         });
         if (res.data.status === "success") {
-            (0, $4c528c06674349f5$export$de026b00723010c1)("success", `Update your ${options.type.toUpperCase()} successfully`);
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Update your ${options.type.toUpperCase()} successfully`);
             // window.setTimeout(() => location.reload(true), 1000);
             if (options.type === "data") return window.setTimeout(()=>location.reload(true), 1000);
             // * in this case when we update password we don't have anything to show user after we update password therefore we don't need to reload page to get data
@@ -236,7 +236,7 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
         const btn = document.querySelector(`.form-user-${options.type === "data" ? "data" : "settings"} .btn`);
         btn.innerHTML = `Save ${options.type === "data" ? "settings" : "password"}`;
         btn.removeAttribute("disabled");
-        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
     }
 }; // export const updateUserData = async (name, email) => {
  //   try {
@@ -257,8 +257,8 @@ const $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2 = async (options)=>{
 
 /* eslint-disable */ 
 // ! now we will use public key because we're manipulating with front-end
-const $ebc247faa0b7e0bf$var$stripe = Stripe("pk_test_51O4mlfGiKCgw0SOr7qySjg73FIYgBmlM1hnRtxFMxFsvB60iYll2s6Vv5rCgkgZdHZBPZmRWV1NEzAuO0I1nYiF500mJJ6ZMHW");
-const $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2 = async (tourId)=>{
+const $2114f23f0d97310e$var$stripe = Stripe("pk_test_51O4mlfGiKCgw0SOr7qySjg73FIYgBmlM1hnRtxFMxFsvB60iYll2s6Vv5rCgkgZdHZBPZmRWV1NEzAuO0I1nYiF500mJJ6ZMHW");
+const $2114f23f0d97310e$export$8d5bdbf26681c0c2 = async (tourId)=>{
     try {
         // const url = `${window.location.protocol}://${window.location.host}/api/v1/tours/${tourId}`;
         // ! 1 Get checkout session from API
@@ -271,24 +271,27 @@ const $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2 = async (tourId)=>{
         const res = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
         // ! 2 create checkout form and use stripe to charge the credit card
         // if (res.data.status === 'success') location.assign(`${res.data.session.url}`);
-        if (res.data.status === "success") await $ebc247faa0b7e0bf$var$stripe.redirectToCheckout({
+        if (res.data.status === "success") await $2114f23f0d97310e$var$stripe.redirectToCheckout({
             sessionId: res.data.session.id
         });
     } catch (err) {
-        (0, $4c528c06674349f5$export$de026b00723010c1)("error", err.response.data.message);
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
     }
 };
 
 
+
 // import { showAlert } from './alert';
-const $8c8a31b747da3402$var$loginForm = document.querySelector(".login-form .form");
-const $8c8a31b747da3402$var$signupForm = document.querySelector(".signup-form .form");
-const $8c8a31b747da3402$var$mapEl = document.querySelector("#map");
-const $8c8a31b747da3402$var$bookTourBtn = document.querySelector("#book-tour");
-const $8c8a31b747da3402$var$navLogoutBtn = document.querySelector(".nav__el--logout");
-const $8c8a31b747da3402$var$userDataForm = document.querySelector(".form-user-data");
-const $8c8a31b747da3402$var$userPwdForm = document.querySelector(".form-user-settings");
-$8c8a31b747da3402$var$userDataForm?.addEventListener("submit", function(e) {
+const $4c50ebc26330ccb1$var$loginForm = document.querySelector(".login-form .form");
+const $4c50ebc26330ccb1$var$signupForm = document.querySelector(".signup-form .form");
+const $4c50ebc26330ccb1$var$mapEl = document.querySelector("#map");
+const $4c50ebc26330ccb1$var$bodyEl = document.querySelector("body");
+const $4c50ebc26330ccb1$var$bookTourBtn = document.querySelector("#book-tour");
+const $4c50ebc26330ccb1$var$navLogoutBtn = document.querySelector(".nav__el--logout");
+const $4c50ebc26330ccb1$var$userDataForm = document.querySelector(".form-user-data");
+const $4c50ebc26330ccb1$var$userPwdForm = document.querySelector(".form-user-settings");
+if ($4c50ebc26330ccb1$var$bodyEl?.dataset.alert !== "") (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", $4c50ebc26330ccb1$var$bodyEl?.dataset.alert, 9);
+$4c50ebc26330ccb1$var$userDataForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * because we don't use form event to pass data so we need to create form data with my own
     // * with form event form data will automatically create by encrypt="multipart/form-data" right but now we use API and not form event
@@ -301,12 +304,12 @@ $8c8a31b747da3402$var$userDataForm?.addEventListener("submit", function(e) {
     // * we will add new value that's photo and with file we use files to get value of file in this case it's array so we need use [0] ok
     form.append("photo", document.querySelector("#photo").files[0]);
     // console.log(form);
-    (0, $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2)({
+    (0, $373a691a0b32f115$export$d88aa9b9d4bd90c2)({
         type: "data",
         data: form
     });
 });
-$8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
+$4c50ebc26330ccb1$var$userPwdForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     const currentPassword = document.querySelector("#password-current").value;
     const password = document.querySelector("#password").value;
@@ -314,7 +317,7 @@ $8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
     // * because update lost some time so we can show some notify meaningful in this case like loading icon, loading message....
     // showAlert('success', `Update your PASSWORD loading...`);
     // document.querySelector('.btn').setAttribute('disable');
-    (0, $e079f8ee36e6c5b5$export$d88aa9b9d4bd90c2)({
+    (0, $373a691a0b32f115$export$d88aa9b9d4bd90c2)({
         type: "password",
         data: {
             currentPassword: currentPassword,
@@ -324,44 +327,44 @@ $8c8a31b747da3402$var$userPwdForm?.addEventListener("submit", function(e) {
     });
 // document.querySelector('.btn').removeAttribute('disable');
 });
-$8c8a31b747da3402$var$signupForm?.addEventListener("submit", function(e) {
+$4c50ebc26330ccb1$var$signupForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     const name = document.querySelector("#name").value;
     const email = document.querySelector("#email").value;
     const password = document.querySelector("#password").value;
     const passwordConfirm = document.querySelector("#passwordConfirm").value;
     // console.log(email, password);
-    (0, $369874bb068f1ff5$export$7200a869094fec36)({
+    (0, $8949a5cd0baaab58$export$7200a869094fec36)({
         name: name,
         email: email,
         password: password,
         passwordConfirm: passwordConfirm
     });
 });
-$8c8a31b747da3402$var$loginForm?.addEventListener("submit", function(e) {
+$4c50ebc26330ccb1$var$loginForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * with input element we can use .value to get value we enter in inputs
     const email = document.querySelector("#email").value;
     const password = document.querySelector("#password").value;
     // console.log(email, password);
-    (0, $11e8083818df8389$export$596d806903d1f59e)(email, password);
+    (0, $740edc1be548417a$export$596d806903d1f59e)(email, password);
 });
-$8c8a31b747da3402$var$bookTourBtn?.addEventListener("click", function(e) {
+$4c50ebc26330ccb1$var$bookTourBtn?.addEventListener("click", function(e) {
     e.preventDefault();
     // * data-tour-id in JS we get it with dataset.tourId okay it auto convert tour-id like this format to camel case
     e.target.innerHTML = "Processing...";
-    (0, $ebc247faa0b7e0bf$export$8d5bdbf26681c0c2)(e.target.dataset.tourId);
+    (0, $2114f23f0d97310e$export$8d5bdbf26681c0c2)(e.target.dataset.tourId);
 });
-$8c8a31b747da3402$var$navLogoutBtn?.addEventListener("click", function(e) {
+$4c50ebc26330ccb1$var$navLogoutBtn?.addEventListener("click", function(e) {
     e.preventDefault();
-    (0, $11e8083818df8389$export$a0973bcfe11b05c9)();
+    (0, $740edc1be548417a$export$a0973bcfe11b05c9)();
 });
 // const locationsData = JSON.parse(mapEl.getAttribute('data-locations'));
 // * we have other way better to get data from data-locations attribute, that's technique use dataset
 // * data-locations => dataset.locations(set is represent for dash -)
-if ($8c8a31b747da3402$var$mapEl) {
-    const locationsData = JSON.parse($8c8a31b747da3402$var$mapEl.dataset?.locations);
-    (0, $bf251e7bf12e920b$export$4c5dd147b21b9176)(locationsData);
+if ($4c50ebc26330ccb1$var$mapEl) {
+    const locationsData = JSON.parse($4c50ebc26330ccb1$var$mapEl.dataset?.locations);
+    (0, $6954e231f70b5f48$export$4c5dd147b21b9176)(locationsData);
 } // console.log(locationsData);
 
 

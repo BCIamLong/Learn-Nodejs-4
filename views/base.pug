@@ -14,7 +14,7 @@ html
       //- block script
       block title
          title Natours | #{title}
-   body
+   body(data-alert=`${alert ? alert : ''}`)
       // Header
       include _header
       

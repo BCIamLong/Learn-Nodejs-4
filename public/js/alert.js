@@ -1,7 +1,7 @@
 /* eslint-disable */
 // * we need to config the alert because bt default from JS it look not good
 const bodyEl = document.querySelector('body');
-export const showAlert = (type, msg) => {
+export const showAlert = (type, msg, time = 7) => {
   // * remove alert when we show other alert
   hideAlert();
   //type is success or error
@@ -9,7 +9,7 @@ export const showAlert = (type, msg) => {
   const markup = `<div class="alert alert--${type}">${msg}</div>`;
   bodyEl.insertAdjacentHTML('afterbegin', markup);
   // * remove alert in 3 seconds
-  window.setTimeout(() => hideAlert(), 3000);
+  window.setTimeout(() => hideAlert(), time * 1000);
 };
 
 const hideAlert = () => {

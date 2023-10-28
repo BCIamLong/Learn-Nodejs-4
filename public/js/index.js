@@ -6,15 +6,19 @@ import { signup } from './signup';
 import { displayMap } from './mapbox';
 import { updateUserDataSettings } from './updateSettings';
 import { bookTour } from './stripe';
+import { showAlert } from './alert';
 // import { showAlert } from './alert';
 
 const loginForm = document.querySelector('.login-form .form');
 const signupForm = document.querySelector('.signup-form .form');
 const mapEl = document.querySelector('#map');
+const bodyEl = document.querySelector('body');
 const bookTourBtn = document.querySelector('#book-tour');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPwdForm = document.querySelector('.form-user-settings');
+
+if (bodyEl?.dataset.alert !== '') showAlert('success', bodyEl?.dataset.alert, 9);
 
 userDataForm?.addEventListener('submit', function (e) {
   e.preventDefault();

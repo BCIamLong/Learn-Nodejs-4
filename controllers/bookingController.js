@@ -80,7 +80,7 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
     payment_method_types: ['card'],
     // * now we use the temporary way to do it but it's not secure because then customer don't need to payment process and they can have new booking by using this URL and they can create new booking without payment and that's huge problem right
     // * of course we can also hide this link but it's not good solution and we should never use this way
-    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
     // success_url: `${req.protocol}://${req.get('host')}?tour=${tourId}&user=${req.user.id}&price=${
     //   tour.price
     // }`, //* when the purchase is successfully the user will redirect to this url(usually it's our homepage url)
