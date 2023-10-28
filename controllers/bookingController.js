@@ -34,7 +34,7 @@ const webhookCheckout = catchSync(async (req, res, next) => {
 
     // * req.body is raw and it's format for this constructEvent() can consume so that reason why we need to put this route before bodyParser.json() right
     // * And the event is also require the webhook secret
-    event = stripe.webhook.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
     // * With this it will make payment process become super secure because we need signature from webhook send and the stripe webhook secret key to validate this data come from the body so no one can actually manipulate that
     // * now during create this event they might create some errors for example if the signature or secret key are wrong so we should use try catch
   } catch (err) {
@@ -80,7 +80,7 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
     payment_method_types: ['card'],
     // * now we use the temporary way to do it but it's not secure because then customer don't need to payment process and they can have new booking by using this URL and they can create new booking without payment and that's huge problem right
     // * of course we can also hide this link but it's not good solution and we should never use this way
-    success_url: `${req.protocol}://${req.get('host')}/my-tour`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
     // success_url: `${req.protocol}://${req.get('host')}?tour=${tourId}&user=${req.user.id}&price=${
     //   tour.price
     // }`, //* when the purchase is successfully the user will redirect to this url(usually it's our homepage url)
@@ -109,7 +109,7 @@ const getCheckoutSession = catchSync(async (req, res, next) => {
             description: tour.summary,
             // * now with the images they need to be live images which are basically is hold on the internet, because stripe will actually upload this images to their own stripe
             // * now we will use temporary image then after that when we deploy we will implement hosted images
-            images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
+            images: [`${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`],
           },
         },
         quantity: 1,
