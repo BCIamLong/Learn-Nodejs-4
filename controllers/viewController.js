@@ -6,6 +6,10 @@ const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
 
+const getSignupVerify = (req, res) => {
+  res.render('signupVerify');
+};
+
 const checkAlert = (req, res, next) => {
   const { alert } = req.query;
   if (alert === 'booking')
@@ -72,6 +76,15 @@ const getHomepage = (req, res) => {
   });
 };
 
+const setVerifyEmail = catchSync(async (req, res, next) => {
+  if (!req.query.verifyEmail) return res.redirect('/');
+  const user = await User.findById(res.locals.user.id);
+  user.verifyEmail = true;
+  await user.save({ validateBeforeSave: false });
+
+  res.redirect('/');
+});
+
 const getOverview = catchSync(async (req, res, next) => {
   //1 get tours data from collection
   const tours = await Tour.find();
@@ -86,6 +99,8 @@ const getOverview = catchSync(async (req, res, next) => {
 
 const getTour = catchSync(async (req, res, next) => {
   const tour = await Tour.findOne({ slug: req.params.slug }).populate('reviews');
+  const booking = await Booking.findOne({ user: res.locals.user.id, tour: tour.id });
+  if (booking) res.locals.booked = true;
   // const tour = await Tour.findOne({ slug: req.params.slug }).populate({
   //   path: 'reviews',
   //   fields: 'review rating user',
@@ -105,4 +120,6 @@ module.exports = {
   updateUserData,
   getMyTours,
   checkAlert,
+  setVerifyEmail,
+  getSignupVerify,
 };

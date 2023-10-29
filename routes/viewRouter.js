@@ -9,7 +9,7 @@ const router = express.Router();
 // * so usually we use .route('url').get().post()... right but in this case we always manipulate with get to render view file so route() is not necessary
 
 // router.get('/', viewController.getHomepage);
-
+router.get('/signup-verify', viewController.getSignupVerify);
 router.get('/login', viewController.getLoginForm);
 router.get('/signup', viewController.getSignupForm);
 // * usually overview page is homepage '/'
@@ -18,6 +18,7 @@ router.get('/signup', viewController.getSignupForm);
 // ? so why we need isLogged of course to check and display for the page we do not need to protect free like overview page, get tours, get tour...
 // * but we need to still check for it because for display login, signup button or user image and name
 router.use(authController.isLoggedIn);
+// router.use(authController.checkVerifyEmail);
 router.use(viewController.checkAlert);
 // * so what we will do now is put it in each router needed
 // router.get('/', bookingController.createBookingCheckout, viewController.getOverview);

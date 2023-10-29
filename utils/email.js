@@ -41,6 +41,12 @@ class Email {
   //   await transporter.sendEmail(emailOptions);
   // }
 
+  // async sendVerifyEmail() {
+  //   const subject = `Your verify email for signup new account`;
+  //   const template = 'verifyEmail';
+  //   await this.send(template, subject);
+  // }
+
   async sendPasswordReset() {
     const subject = `Your password reset token (valid in 10 minutes)`;
     const template = 'passwordReset';

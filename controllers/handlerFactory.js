@@ -1,5 +1,5 @@
 // const Tour = require('../models/tourModel');
-const Tour = require('../models/tourModel');
+// const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
@@ -32,14 +32,6 @@ const updateOne = Model =>
 
 const createOne = Model =>
   catchSync(async (req, res, next) => {
-    // if (req.params.tourId) {
-    //   const { tourId } = req.params;
-    //   // const tour = await Tour.findById(tourId);
-    //   // if (!tour) return next(new AppError(404, 'No tour found with this id'));
-    //   req.body.tour = tourId;
-    // }
-    // if (req.user.id) req.body.user = req.user.id;
-
     const newDoc = await Model.create(req.body);
     // if (newDoc.review) await newDoc.createAverageRating(req.body.tour);
 
@@ -82,14 +74,12 @@ const getAll = Model =>
     //* Allow GET nested reviews on tour
     // !  it's small hack here , but if you need to a lot code to set logic you should seperate and put it in other place like middleware,...
     const filter = {};
-    const { tourId } = req.params;
-    if (tourId) {
-      const checkTour = await Tour.findById(tourId);
-      if (!checkTour) return next(new AppError(404, 'No tour found with this id'));
-      filter.tour = tourId;
-    }
+    const { tourId, userId } = req.params;
+    // * we don't need to check the tour or user exist why? because we use Mode.find() from mongoose and in case it occurs error it will automatically send for us
+    if (tourId) filter.tour = tourId;
+    if (userId) filter.user = userId;
 
-    const count = await Model.estimatedDocumentCount();
+    const count = await Model.estimatedDocumentCount(filter);
     //new APIFeatures(populatedData(Tour.find()), req.query)
     // console.log(req.body.id);
     const features = new APIFeatures(Model.find(filter), req.query)

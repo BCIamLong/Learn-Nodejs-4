@@ -66,7 +66,7 @@ block content
           //-   span.overview-box__label Rating
           //-   span.overview-box__text #{tour.ratingsAverage} / #{tour.ratingsQuantity}
           //- ! to use mixin we use + notation and () like function and pass required route
-          - const nextDate = tour.startDates[0].toLocaleString("en-US", { month: "long", year: "numeric"})
+          - const nextDate = tour.startDates[0].date.toLocaleString("en-US", { month: "long", year: "numeric"})
           +overviewBox("Next date",nextDate,"calendar")
           +overviewBox("Difficulty",tour.difficulty,"trending-up")
           +overviewBox("Participants",tour.maxGroupSize,"user")
@@ -157,6 +157,9 @@ block content
         if user
           //- ? why do we need tour id?
           //- * well that because the checkout router need :tourId right therefore we need to put it in here and then in JS front-end we can easy to get it
-          button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+          if booked
+            a.btn.btn--green.span-all-rows(href="/") Tour booked, You can watch other tours!
+          else 
+            button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
         else 
           a.btn.btn--green.span-all-rows(href="/login") Login to book tour!

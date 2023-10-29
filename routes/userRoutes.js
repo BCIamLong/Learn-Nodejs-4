@@ -1,7 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
-
+const bookingRouter = require('./bookingRouter');
 // !https://www.npmjs.com/package/multer
 // * we will config multer upload with couple settings
 // const upload = multer({ dest: 'public/img/users' }); //* dest stand for destination(diem den)
@@ -19,6 +19,8 @@ const router = express.Router(); // router is also mini app(app = express()) so 
 
 //! Every thing you write in routers part you need to confict all on postman, for example if you have authetication or authorization you also need turn on authorication part in postman
 //! And every thing you should do it on postman, why? Because later when we complete the API we can use this postman for write API so if postman be design good and conflict all thing to application it’s goo for write documents for API
+
+router.use('/:userId/bookings', bookingRouter);
 
 //* we will move all route don't need login or authorization to top
 router.post('/signup', authController.signup);

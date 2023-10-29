@@ -116,7 +116,7 @@ const $8949a5cd0baaab58$export$7200a869094fec36 = async (data)=>{
         if (res.data.status === "success") {
             (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", "Sign up account successfully");
             window.setTimeout(()=>{
-                location.assign("/");
+                location.assign("/signup-verify");
             }, 1000);
             window.setTimeout(()=>{
                 $8949a5cd0baaab58$var$signupForm.classList.remove("form--inactive");

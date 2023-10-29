@@ -6,6 +6,7 @@ const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
 // const reviewController = require('../controllers/reviewController');
 const reviewRouter = require('./reviewRouter');
+const bookingRouter = require('./bookingRouter');
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
 router.use('/:tourId/reviews', reviewRouter);
+router.use('/:tourId/bookings', bookingRouter);
 
 // router.post('/:id/reviews', authController.protectManually, reviewController.createReview);
 // router.get('/:id/reviews', reviewController.getAllReviews);

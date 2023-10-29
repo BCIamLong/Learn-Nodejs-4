@@ -27,7 +27,7 @@ block content
                 use(xlink:href="/img/icons.svg#icon-calendar")
               - const date = new Date(tour.startDates[0])
               //- span #{date.getMonth()} #{date.getFullYear()}
-              span= tour.startDates[0].toLocaleString('default', {month: 'long', year: 'numeric'})
+              span= tour.startDates[0].date.toLocaleString('default', {month: 'long', year: 'numeric'})
             .card__data 
               svg.card__icon 
                 use(xlink:href="/img/icons.svg#icon-flag")

@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
+const AppError = require('../utils/appError');
 
 const bookingSchema = new mongoose.Schema({
   tour: {
@@ -17,6 +19,7 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Booking must have a price'],
   },
+  startDate: Date,
   createdAt: {
     type: Date,
     default: Date.now(),
@@ -36,6 +39,49 @@ bookingSchema.pre(/^find/, function (next) {
   this.populate('tour'); //.populate({ path: 'user', select: 'name' });
   next();
 });
+
+bookingSchema.pre('save', async function (next) {
+  if (!this.startDate) return next();
+  if (!this.isNew) return next();
+  const tour = await Tour.findById(this.tour);
+  tour.startDates.forEach((date, i) => {
+    // console.log(
+    //   JSON.stringify(date.date) === JSON.stringify(new Date(req.body.startDate).toISOString()),
+    // );
+    if (JSON.stringify(date.date) === JSON.stringify(new Date(this.startDate).toISOString())) {
+      if (date.soldOut) return next(new AppError(400, 'Booking sold out'));
+      tour.startDates[i].participants += 1;
+    }
+    if (date.participants === tour.maxGroupSize) tour.startDates[i].soldOut = true;
+  });
+
+  await tour.save();
+  next();
+});
+
+bookingSchema.post('findOneAndDelete', async (doc, next) => {
+  const tour = await Tour.findById(doc.tour);
+  tour.startDates.forEach((date, i) => {
+    if (JSON.stringify(date.date) === JSON.stringify(new Date(doc.startDate).toISOString())) {
+      if (tour.startDates[i].participants === 0)
+        return next(new AppError(400, 'No booking to found to delete'));
+      if (date.soldOut) return next(new AppError(400, 'Booking sold out'));
+      tour.startDates[i].participants -= 1;
+    }
+    if (date.participants === tour.maxGroupSize) tour.startDates[i].soldOut = true;
+  });
+
+  await tour.save();
+  next();
+});
+
+// bookingSchema.statics.calcParticipants = async function (tourId, startDate) {
+//   const stat = await this.aggregate([
+//     {
+//       $match: { tour: tourId },
+//     },
+//   ]);
+// };
 
 const Booking = mongoose.model('Booking', bookingSchema);
 

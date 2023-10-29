@@ -1,9 +1,21 @@
 // const mongoose = require('mongoose');
 const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel');
 const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
+
+const checkUserBooking = catchSync(async (req, res, next) => {
+  const booking = await Booking.findOne({ user: req.user.id, tour: req.params.tourId });
+  // const checkDate = booking > Date.now();
+  if (!booking)
+    return next(
+      new AppError(400, 'You only review when you book this tour and complete visited this tour'),
+    );
+  // req.locals.booked = true;
+  next();
+});
 
 //* Because in the review we need tour id to get all review of this tour so it's special case so we need to set some logic to get tour id
 // ! use for WAY 1: get tour id by use middleware
@@ -48,13 +60,13 @@ const getReview = handlerFactory.getOne(Review);
 //* CHECK TOUR ID AND USER ID WHEN WE CREATE REVIEW BECAUSE WE USE FACTORY CREATE ONE SO IT'S LITTLE BIT DIFFERENT SO WE NEED USE MIDDLEWARE TO SUPPORT THIS
 // ? and this code also doesn't related to much to review
 const setTourUserIds = catchSync(async (req, res, next) => {
-  if (req.params.tourId) {
-    const { tourId } = req.params;
-    const tour = await Tour.findById(tourId);
-    if (!tour) return next(new AppError(404, 'No tour found with this id'));
-    req.body.tour = tourId;
-  }
-  if (req.user.id) req.body.user = req.user.id;
+  const { tourId } = req.params;
+  if (!tourId) return next();
+  const tour = await Tour.findById(tourId);
+  if (!tour) return next(new AppError(404, 'No tour found with this id'));
+  req.body.tour = tourId;
+
+  req.body.user = req.user.id;
   next();
 });
 
@@ -122,4 +134,5 @@ module.exports = {
   setTourUserIds,
   getReview,
   setTourIdForNestedReview,
+  checkUserBooking,
 };

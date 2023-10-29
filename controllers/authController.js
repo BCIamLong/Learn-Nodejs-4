@@ -58,7 +58,7 @@ const signup = catchSync(async (req, res, next) => {
   newUser.password = undefined; //cuz we only want edit in this when we send to client and not update in DB right so we don't use newUser.save()
 
   //! const url = 'http://127.0.0.1:3000/account'; this url only work for development so we need config that to work for both production and development
-  const url = `${req.protocol}://${req.get('host')}/me`;
+  const url = `${req.protocol}://${req.get('host')}?verifyEmail=true`;
   // console.log(url);
   const email = new Email(newUser, url);
   await email.sendWelcome();
@@ -73,6 +73,8 @@ const login = catchSync(async (req, res, next) => {
   const user = await User.findOne({ email }).select('+password');
   const correct = await user?.passwordCorrect(password, user.password);
   if (!correct || !user) return next(new AppError(401, 'Email or password not correct'));
+  if (!user.verifyEmail)
+    return next(new AppError(400, 'Please check your mail and verify email to login'));
 
   // const token = createToken(user);
 
@@ -241,6 +243,15 @@ const isLoggedIn = async (req, res, next) => {
     // req.user = freshUser;
     // ! we do not need to pass the user data then pass this data to render() and use in pug template
     // * instead we will put it in res.locals and every pug templates can access to res.locals and in pug template we can use user variable, just like when we pass data to render() method
+
+    // !CHECK VERIFY EMAIL
+    if (req.query.verifyEmail) {
+      freshUser.verifyEmail = true;
+      await freshUser.save({ validateBeforeSave: false });
+      return res.redirect('/');
+    }
+    if (!freshUser.verifyEmail) return next();
+    // req.user = freshUser;
     res.locals.user = freshUser;
     next();
   } catch (err) {
@@ -253,6 +264,17 @@ const passUserDataIntoView = (req, res, next) => {
   res.locals.user = req.user;
   next();
 };
+
+const checkVerifyEmail = catchSync(async (req, res, next) => {
+  const user = await User.findById(req.user?.id);
+  if (!user) return next();
+  if (!req.query.verifyEmail && !user.verifyEmail) return next();
+  user.verifyEmail = true;
+  await user.save({ validateBeforeSave: false });
+  res.locals.user = user;
+
+  next();
+});
 
 const isLogout = catchSync(async (req, res, next) => {
   //  * send back cookie with exactly the same name but the value is empty
@@ -427,4 +449,5 @@ module.exports = {
   isLoggedIn,
   isLogout,
   passUserDataIntoView,
+  checkVerifyEmail,
 };

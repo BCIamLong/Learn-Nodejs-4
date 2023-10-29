@@ -49,7 +49,10 @@ const userSchema = new mongoose.Schema({
   passwordResetToken: String,
 
   passwordResetExpires: Date,
-
+  verifyEmail: {
+    type: Boolean,
+    default: false,
+  },
   active: {
     type: Boolean,
     default: true,

@@ -12,7 +12,7 @@ export const signup = async data => {
     if (res.data.status === 'success') {
       showAlert('success', 'Sign up account successfully');
       window.setTimeout(() => {
-        location.assign('/');
+        location.assign('/signup-verify');
       }, 1000);
       window.setTimeout(() => {
         signupForm.classList.remove('form--inactive');

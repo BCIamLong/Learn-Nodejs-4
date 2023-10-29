@@ -2,7 +2,7 @@ const express = require('express');
 const bookingController = require('../controllers/bookingController');
 const authController = require('../controllers/authController');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.use(authController.protectManually);
 
@@ -14,10 +14,17 @@ router.get(
   bookingController.getCheckoutSession,
 );
 
+router.post(
+  '/',
+  authController.restrictTo('user'),
+  bookingController.setUserTourId,
+  bookingController.createBooking,
+);
+
 // * in this case we only allow the lead guide is watch tour is booking and the admin for watch, update and delete
 router.use(authController.restrictTo('admin', 'lead-guide'));
 
-router.route('/').get(bookingController.getAllBookings).post(bookingController.createBooking);
+router.route('/').get(bookingController.getAllBookings);
 router
   .route('/:id')
   .get(bookingController.getBooking)
