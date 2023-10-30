@@ -45,6 +45,7 @@ const server = app.listen(port, () => {
 //---When the unhanled error occurs it'll auto emit an object called unhandled rejection, and we can set the event for this error
 
 process.on('unhandledRejection', err => {
+  console.log(err);
   console.log(err.name, err.message);
 
   //!if we met the unhandledRejection error in this case the our apllication not work at all so the things we can do that's shutdown our project

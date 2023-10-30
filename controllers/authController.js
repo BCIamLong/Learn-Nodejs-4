@@ -3,21 +3,28 @@ const crypto = require('crypto');
 // const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+const UserToken = require('../models/userTokenModel');
 const catchSync = require('../utils/catchSync');
 const AppError = require('../utils/appError');
 const Email = require('../utils/email');
 
-const createToken = user =>
+const createToken = (type, user) => {
   //*add password for check if user change password when the jwt issued
-  jwt.sign({ id: user._id, password: user.password }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPRIES_IN, // add some data to additional payload
+  if (type === 'access-token')
+    return jwt.sign({ id: user._id, password: user.password }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN, // add some data to additional payload
+    });
+
+  return jwt.sign({ id: user._id, password: user.password }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN, // add some data to additional payload
   });
+};
 
 // console.log(process.env.JWT_COOKIE_EXPIRES_IN);
 //! we should create a cookie options object
 const cookieOptions = {
   //* if expires time of cookie is expired so that time browser or clien general auto delete this cookie
-  expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // it will format to Thu Aug 24 2023 19:06:02 GMT+0700 for browser can understand
+  // expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // it will format to Thu Aug 24 2023 19:06:02 GMT+0700 for browser can understand
   // secure: true, // set this cookie always be sent on an encrypted connection, so bassically we're using https
   //! now it's not work cuz secure not be created and not be sent to client so bassically we only actives this part here in production
   httpOnly: true, // set the cookie cannot be accessed or mordified in any way by browser and it's important to prevent cross-site scripting attacks
@@ -28,12 +35,25 @@ const cookieOptions = {
 if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
 //!Because we use this code is many times and it's repeat, so we need refactory this code
-const sendJWT = (res, statusCode, user) => {
-  const token = createToken(user);
-  res.cookie('jwt', token, cookieOptions);
+const sendJWT = async (res, statusCode, user) => {
+  const refreshToken = createToken('refresh-token', user);
+  const accessToken = createToken('access-token', user);
+
+  await UserToken.findOneAndDelete({ user: user.id });
+
+  await UserToken.create({ user: user.id, refreshToken });
+
+  res.cookie('accessToken', accessToken, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + process.env.ACCESS_COOKIE_EXPIRES_IN * 60 * 1000),
+  });
+  res.cookie('refreshToken', refreshToken, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+  });
   res.status(statusCode).json({
     status: 'success',
-    token,
+    token: accessToken,
   });
 };
 
@@ -128,13 +148,21 @@ const protect = catchSync(async (req, res, next) => {
 
 const logout = (req, res) => {
   //  * send back cookie with exactly the same name but the value is empty
-  res.cookie('jwt', '', {
+  res.cookie('accessToken', '', {
     // * with this cookie the expires time is short because it's not make any sense, we only check for logout
     // ! if the cookie expires the browser will automatically remove it, and when we reload it so it lost right
     expires: new Date(Date.now() + 1000),
     httpOnly: true,
   });
-  res.clearCookie('jwt').status(200).json({
+  res.cookie('refreshToken', '', {
+    // * with this cookie the expires time is short because it's not make any sense, we only check for logout
+    // ! if the cookie expires the browser will automatically remove it, and when we reload it so it lost right
+    expires: new Date(Date.now() + 1000),
+    httpOnly: true,
+  });
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+  res.status(200).json({
     status: 'success',
     message: 'Successfully logged out',
   });
@@ -145,9 +173,14 @@ const protectManually = catchSync(async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer'))
     token = req.headers.authorization.split(' ')[1];
-
   // * Get token when we manipulate with browser
-  if (req.cookies.jwt) token = req.cookies.jwt;
+  if (req.cookies.accessToken) token = req.cookies.accessToken;
+  if (!req.cookies.accessToken) {
+    token = req.cookies.refreshToken;
+    const checkToken = await UserToken.findOne({ refreshToken: token });
+    if (!checkToken)
+      return next(new AppError(401, 'You are not logged in, please login to get access'));
+  }
 
   //401 is http status code: means data is sent and request is correct but you must to login to use data(resoures)
   //-->https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401#:~:text=The%20HyperText%20Transfer%20Protocol%20(HTTP,credentials%20for%20the%20requested%20resource.
@@ -159,7 +192,11 @@ const protectManually = catchSync(async (req, res, next) => {
   //--> we will use util model from nodejs, this model constain the method called promisify()
   //--> promisify() consvert the sync function to async and return a promise
   //--> promisify(jwt.verify) === async (jwt.verify) => (token, process.env.JWT_EXPRIES_IN)
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  let decoded;
+  if (!req.cookies.accessToken)
+    decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  if (req.cookies.accessToken)
+    decoded = await promisify(jwt.verify)(token, process.env.ACCESS_TOKEN_SECRET);
   //?To check this verify() you can go to jwt.io and pass the token and edit payloads and get this token check if it's invalid => your verify is success
   // const decoded = jwt.verify(token, process.env.JWT_EXPRIES_IN);
 
@@ -220,11 +257,23 @@ const isLoggedIn = async (req, res, next) => {
   // * and if we use Global error to catch error it's for API right so it'll return res.json()
   // * and therefore we need to custom this for local and manipulate this error with server side
   //! 1, check token
-  const token = req.cookies.jwt;
+  let token;
+  if (req.cookies.accessToken) token = req.cookies.accessToken;
+  if (!req.cookies.accessToken) {
+    token = req.cookies.refreshToken;
+    // console.log(token);
+    const checkToken = await UserToken.findOne({ refreshToken: token });
+    if (!checkToken) return next();
+  }
   if (!token) return next();
   try {
     //!2, verification token: token of user not valid(someone edit payload,...), token of user expiresed
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    let decoded;
+    if (!req.cookies.accessToken)
+      decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    if (req.cookies.accessToken)
+      decoded = await promisify(jwt.verify)(token, process.env.ACCESS_TOKEN_SECRET);
 
     //!3, check if user still exits
 
@@ -256,6 +305,7 @@ const isLoggedIn = async (req, res, next) => {
     next();
   } catch (err) {
     // throw new Error('Logout successfully');
+    console.log(err);
     return next();
   }
 };
@@ -397,7 +447,7 @@ const resetPassword = catchSync(async (req, res, next) => {
   // user.passwordChangedAt = Date.now();
 
   //!4, log the user in, send JWT
-  const token = createToken(user); //we use this function in the login, signup and now it's in here maybe in future we will refactoting this as the better function
+  const token = createToken('refresh-token', user); //we use this function in the login, signup and now it's in here maybe in future we will refactoting this as the better function
 
   res.status(200).json({
     status: 'success',
