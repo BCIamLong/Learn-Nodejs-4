@@ -46,6 +46,11 @@ class Email {
   //   const template = 'verifyEmail';
   //   await this.send(template, subject);
   // }
+  async sendTwoFactorOTP() {
+    const subject = `Your two factor verification (valid in 1 minute)`;
+    const template = 'twoFactor';
+    await this.send(template, subject);
+  }
 
   async sendPasswordReset() {
     const subject = `Your password reset token (valid in 10 minutes)`;
@@ -81,6 +86,7 @@ class Email {
       firstName: this.firstName,
       subject: subject,
       url: this.url,
+      otp: this.user.otp ? this.user.otp : '',
     });
     //! 2 define email options
     const emailOptions = {

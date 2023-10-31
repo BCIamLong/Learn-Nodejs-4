@@ -34,6 +34,9 @@ router.patch('/reset-password/:token', authController.resetPassword);
 router.use(authController.protectManually); //! check logged in, protec all router after this middleware
 //? so all the router bellow since here must to logged in to get access
 
+router.get('/two-factor-generate', authController.generate2FA);
+router.post('/two-factor-verify', authController.verify2FA);
+
 // * now we will use upload multer to create middleware and add this middleware to stack endpoint we want to upload image in this case that's update me right
 router
   .route('/me')

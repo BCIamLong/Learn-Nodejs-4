@@ -99,7 +99,7 @@ const getOverview = catchSync(async (req, res, next) => {
 
 const getTour = catchSync(async (req, res, next) => {
   const tour = await Tour.findOne({ slug: req.params.slug }).populate('reviews');
-  const booking = await Booking.findOne({ user: res.locals.user.id, tour: tour.id });
+  const booking = await Booking.findOne({ user: res.locals.user?.id, tour: tour.id });
   if (booking) res.locals.booked = true;
   // const tour = await Tour.findOne({ slug: req.params.slug }).populate({
   //   path: 'reviews',

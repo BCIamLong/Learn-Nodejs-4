@@ -1,6 +1,7 @@
 const { promisify } = require('util');
 const crypto = require('crypto');
 // const bcrypt = require('bcrypt');
+const speakeasy = require('speakeasy');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const UserToken = require('../models/userTokenModel');
@@ -486,6 +487,45 @@ const updatePassword = catchSync(async (req, res, next) => {
   sendJWT(res, 201, user);
 });
 
+const generate2FA = catchSync(async (req, res, next) => {
+  const secret = speakeasy.generateSecret({ length: 20 });
+
+  const token = speakeasy.totp({
+    secret: secret.base32,
+    encoding: 'base32',
+  });
+  req.user.otp = token;
+
+  const email = new Email(req.user, '#');
+  await email.sendTwoFactorOTP();
+  res.cookie('secret', secret, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + 60 * 1000),
+  });
+  res.status(200).json({
+    status: 'success',
+    message: 'Sent the OTP code to your email',
+  });
+});
+
+const verify2FA = catchSync(async (req, res, next) => {
+  if (!req.cookies.secret) return next(new AppError(401, 'Your OTP code is expires'));
+  const verified = speakeasy.totp.verify({
+    secret: req.cookies.secret.base32,
+    encoding: 'base32',
+    token: req.body.otp,
+    window: 60 * 1000, //the range of time we want to check in 60s
+  });
+
+  if (!verified) return next(new AppError(401, 'Your OTP code is invalid'));
+
+  res.clearCookie('secret');
+  res.json({
+    status: 'success',
+  });
+  // next();
+});
+
 module.exports = {
   signup,
   login,
@@ -500,4 +540,6 @@ module.exports = {
   isLogout,
   passUserDataIntoView,
   checkVerifyEmail,
+  generate2FA,
+  verify2FA,
 };
