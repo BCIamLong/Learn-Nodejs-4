@@ -13,11 +13,11 @@ const createToken = (type, user) => {
   //*add password for check if user change password when the jwt issued
   if (type === 'access-token')
     return jwt.sign({ id: user._id, password: user.password }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN, // add some data to additional payload
+      expiresIn: process.env.ACCESS_COOKIE_EXPIRES_IN * 60 * 1000, // add some data to additional payload
     });
 
   return jwt.sign({ id: user._id, password: user.password }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN, // add some data to additional payload
+    expiresIn: process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000, // add some data to additional payload
   });
 };
 
