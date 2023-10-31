@@ -1,6 +1,7 @@
 const express = require('express');
 const bookingController = require('../controllers/bookingController');
 const authController = require('../controllers/authController');
+const handlerFactory = require('../controllers/handlerFactory');
 
 const router = express.Router({ mergeParams: true });
 
@@ -17,7 +18,7 @@ router.get(
 router.post(
   '/',
   authController.restrictTo('user'),
-  bookingController.setUserTourId,
+  handlerFactory.setTourUserIds,
   bookingController.createBooking,
 );
 

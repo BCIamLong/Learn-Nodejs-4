@@ -1,6 +1,7 @@
 const express = require('express');
 const reviewController = require('../controllers/reviewController');
 const authController = require('../controllers/authController');
+const handlerFactory = require('../controllers/handlerFactory');
 
 //* IMPLEMENTS MISSING AUTHETICATION AND AUTHORIZATION FOR REVIEW
 
@@ -19,7 +20,7 @@ router
   .post(
     authController.restrictTo('user'),
     reviewController.checkUserBooking,
-    reviewController.setTourUserIds,
+    handlerFactory.setTourUserIds,
     reviewController.createReviewOfTour,
   );
 

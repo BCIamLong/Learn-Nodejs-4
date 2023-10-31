@@ -7,18 +7,39 @@ import { displayMap } from './mapbox';
 import { updateUserDataSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { showAlert } from './alert';
+import { newResources, removeResources, updateResources } from './resources';
 // import { showAlert } from './alert';
 
 const loginForm = document.querySelector('.login-form .form');
 const signupForm = document.querySelector('.signup-form .form');
 const mapEl = document.querySelector('#map');
 const bodyEl = document.querySelector('body');
+const bookmarkBtn = document.querySelector('.btn--bookmark');
 const bookTourBtn = document.querySelector('#book-tour');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPwdForm = document.querySelector('.form-user-settings');
+const reviewForm = document.querySelector('.form-new-review');
+const myReviewsForms = document.querySelectorAll('.form-my-review');
 
 if (bodyEl?.dataset.alert !== '') showAlert('success', bodyEl?.dataset.alert, 9);
+
+myReviewsForms?.forEach(form => {
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const children = e.target.childNodes;
+    const review = children[3].value;
+    const rating = children[5].value;
+    updateResources('reviews', e.target.dataset.review, { review, rating });
+  });
+});
+reviewForm?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const review = document.querySelector('#review').value;
+  const rating = document.querySelector('#rating').value;
+  console.log(review, rating);
+  newResources('reviews', { review, rating });
+});
 
 userDataForm?.addEventListener('submit', function (e) {
   e.preventDefault();
@@ -70,6 +91,17 @@ loginForm?.addEventListener('submit', function (e) {
   const password = document.querySelector('#password').value;
   // console.log(email, password);
   login(email, password);
+});
+
+bookmarkBtn?.addEventListener('click', function (e) {
+  e.preventDefault();
+  if (!bookmarkBtn?.classList.contains('btn--green')) {
+    bookmarkBtn.classList.add('btn--green');
+    return newResources('bookmarks', {});
+  }
+
+  bookmarkBtn.classList.remove('btn--green');
+  removeResources('bookmarks', bookmarkBtn.dataset.bookmark);
 });
 
 bookTourBtn?.addEventListener('click', function (e) {

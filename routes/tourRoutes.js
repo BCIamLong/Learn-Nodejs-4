@@ -7,6 +7,7 @@ const authController = require('../controllers/authController');
 // const reviewController = require('../controllers/reviewController');
 const reviewRouter = require('./reviewRouter');
 const bookingRouter = require('./bookingRouter');
+const bookmarkROuter = require('./bookmarkRouter');
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router
 //!https://www.mongodb.com/docs/manual/reference/operator/aggregation/geoNear/
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
+router.use('/:tourId/bookmarks', bookmarkROuter);
 router.use('/:tourId/reviews', reviewRouter);
 router.use('/:tourId/bookings', bookingRouter);
 

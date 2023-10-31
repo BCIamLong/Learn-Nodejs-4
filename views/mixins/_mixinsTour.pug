@@ -7,32 +7,51 @@ mixin overviewBox(label,text,icon)
     span.overview-box__label= label
     span.overview-box__text= text
 
-mixin reviewsCard(userName, userPhoto, review, rating)
-  .reviews__card
-    .reviews__avatar
-      img.reviews__avatar-img(src=`/img/users/${userPhoto}`, alt=`${userName}`)
-      h6.reviews__user= userName
-    p.reviews__text= review
-    .reviews__rating
-      //- - const arr = []
-      //- - for(let i=1;i<= review.rating;i++) arr.push(i)
-      //- each num in arr
-      //- * we also can mixing the pug code and JS for loop code
-      - for(let i = 1; i <= 5; i++)
-        - if(i <= rating)
-          svg.reviews__star.reviews__star--active
-            use(xlink:href='/img/icons.svg#icon-star')
-        - else
+mixin reviewsCard(userName, userPhoto, review, review_date, rating, type)
+  if type
+    form.reviews__card.form-review-card.form-new-review
+      .reviews__avatar
+        img.reviews__avatar-img(src=`/img/users/${userPhoto}`, alt=`${userName}`)
+        h6.reviews__user= userName
+      label(for="review") Review
+      textarea#review.reviews__text(name = "review" required)
+      label(for="rating") Rating
+      input#rating.reviews__text( type="number" name = "rating" min="1" max="5" required)
+      .reviews__rating.ma-bt-md
+        //- * we also can mixing the pug code and JS for loop code
+        - for(let i = 1; i <= 5; i++)
           svg.reviews__star.reviews__star--inactive
             use(xlink:href='/img/icons.svg#icon-star')
-      //- - for(let i = 1; i <= rating; i++)
-      //-   svg.reviews__star.reviews__star--active
-      //-     use(xlink:href='/img/icons.svg#icon-star')
-      //- - let check = 5 - rating
-      //- //- - console.log((5 - arr.length))
-      //- - let c = 0;
-      //- //- * pug support while loop(but we also can use JS for loop here)
-      //- while c >= 0 && c < check
-      //-   svg.reviews__star.reviews__star--inactive
-      //-     use(xlink:href='/img/icons.svg#icon-star')
-      //-   - c++
+      button.btn.btn--green(type="submit") Save
+  else 
+    .reviews__card
+      .reviews__avatar.ma-bt-md
+        img.reviews__avatar-img(src=`/img/users/${userPhoto}`, alt=`${userName}`)
+        h6.reviews__user= userName
+      //- p.reviews__text At 
+      //-   - const nextDate = review_date?.toLocaleString("en-US", { month: "long", year: "numeric"})
+      //-   strong= nextDate
+      p.reviews__text= review
+      .reviews__rating.ma-bt-hg
+        //- - const arr = []
+        //- - for(let i=1;i<= review.rating;i++) arr.push(i)
+        //- each num in arr
+        //- * we also can mixing the pug code and JS for loop code
+        - for(let i = 1; i <= 5; i++)
+          - if(i <= rating)
+            svg.reviews__star.reviews__star--active
+              use(xlink:href='/img/icons.svg#icon-star')
+          - else
+            svg.reviews__star.reviews__star--inactive
+              use(xlink:href='/img/icons.svg#icon-star')
+        //- - for(let i = 1; i <= rating; i++)
+        //-   svg.reviews__star.reviews__star--active
+        //-     use(xlink:href='/img/icons.svg#icon-star')
+        //- - let check = 5 - rating
+        //- //- - console.log((5 - arr.length))
+        //- - let c = 0;
+        //- //- * pug support while loop(but we also can use JS for loop here)
+        //- while c >= 0 && c < check
+        //-   svg.reviews__star.reviews__star--inactive
+        //-     use(xlink:href='/img/icons.svg#icon-star')
+        //-   - c++

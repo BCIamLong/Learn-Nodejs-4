@@ -59,16 +59,16 @@ const getReview = handlerFactory.getOne(Review);
 
 //* CHECK TOUR ID AND USER ID WHEN WE CREATE REVIEW BECAUSE WE USE FACTORY CREATE ONE SO IT'S LITTLE BIT DIFFERENT SO WE NEED USE MIDDLEWARE TO SUPPORT THIS
 // ? and this code also doesn't related to much to review
-const setTourUserIds = catchSync(async (req, res, next) => {
-  const { tourId } = req.params;
-  if (!tourId) return next();
-  const tour = await Tour.findById(tourId);
-  if (!tour) return next(new AppError(404, 'No tour found with this id'));
-  req.body.tour = tourId;
+// const setTourUserIds = catchSync(async (req, res, next) => {
+//   const { tourId } = req.params;
+//   if (!tourId) return next();
+//   const tour = await Tour.findById(tourId);
+//   if (!tour) return next(new AppError(404, 'No tour found with this id'));
+//   req.body.tour = tourId;
 
-  req.body.user = req.user.id;
-  next();
-});
+//   req.body.user = req.user.id;
+//   next();
+// });
 
 const createReviewOfTour = handlerFactory.createOne(Review);
 
@@ -131,7 +131,7 @@ module.exports = {
   createReviewOfTour,
   deleteReview,
   updateReview,
-  setTourUserIds,
+  // setTourUserIds,
   getReview,
   setTourIdForNestedReview,
   checkUserBooking,

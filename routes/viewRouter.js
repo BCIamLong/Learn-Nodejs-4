@@ -22,6 +22,8 @@ router.use(authController.isLoggedIn);
 router.use(viewController.checkAlert);
 // * so what we will do now is put it in each router needed
 // router.get('/', bookingController.createBookingCheckout, viewController.getOverview);
+router.get('/my-reviews', viewController.getMyReviews);
+router.get('/my-favorite-tours', viewController.getMyFavoriteTours);
 router.get('/', viewController.getOverview);
 router.get('/tours/:slug', viewController.getTour);
 // router.get('/logout', authController.isLogout, viewController.getOverview);

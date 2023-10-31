@@ -34,6 +34,8 @@ const bookingSchema = new mongoose.Schema({
   },
 });
 
+bookingSchema.index({ user: 1, tour: 1 }, { unique: true });
+
 bookingSchema.pre(/^find/, function (next) {
   // * and in this case we don't have much request to read booking because it's only for admin ,guides for check the bookings, manage bookings... so the performance is still good even we have two populate()
   this.populate('tour'); //.populate({ path: 'user', select: 'name' });

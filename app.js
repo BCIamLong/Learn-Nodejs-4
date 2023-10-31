@@ -18,6 +18,7 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRouter');
 const viewRouter = require('./routes/viewRouter');
 const bookingRouter = require('./routes/bookingRouter');
+const bookmarkRouter = require('./routes/bookmarkRouter');
 const globalErrorsHandler = require('./controllers/errorController');
 const bookingController = require('./controllers/bookingController');
 
@@ -182,6 +183,7 @@ app.use('/api/v1/tours', tourRouter); // FOR /api/v1/tours ROUTE
 app.use('/api/v1/users', userRouter); // FOR /api/v1/users ROUTE
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/bookmarks', bookmarkRouter);
 app.use('/', viewRouter);
 
 app.all('*', (req, res, next) => {

@@ -526,6 +526,10 @@ const verify2FA = catchSync(async (req, res, next) => {
   // next();
 });
 
+// const checkBookmark = (req,res, next)=>{
+//   if(!req.cookies.bookmark) res.cookie('bookmark', [], )
+// };
+
 module.exports = {
   signup,
   login,
@@ -542,4 +546,5 @@ module.exports = {
   checkVerifyEmail,
   generate2FA,
   verify2FA,
+  // checkBookmark,
 };

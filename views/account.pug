@@ -33,7 +33,8 @@ block content
           //- +menu_item('settings', 'Settings')
           +navItem('#','settings', 'Settings', 1)
           +navItem('/my-tours','briefcase', 'My bookings')
-          +navItem('#','star', 'My reviews')
+          +navItem('/my-favorite-tours','bookmark', 'My favorite tours')
+          +navItem('/my-reviews','star', 'My reviews')
           +navItem('#','credit-card', 'Billing')
           
         - if(user.role === 'admin')

@@ -281,16 +281,92 @@ const $2114f23f0d97310e$export$8d5bdbf26681c0c2 = async (tourId)=>{
 
 
 
+/* eslint-disable */ 
+const $075ff7d20839cbac$export$8cb1f130522c94b9 = async (type, data)=>{
+    try {
+        const { tourId: tourId } = document.querySelector(".section-reviews").dataset;
+        const res = await axios({
+            method: "POST",
+            url: `/api/v1/tours/${tourId}/${type}`,
+            data: data
+        });
+        if (res.data.status === "success") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Your ${type} added`);
+            window.setTimeout(()=>{
+                location.reload(true);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+const $075ff7d20839cbac$export$7c4e5c524f1ce05e = async (type, id)=>{
+    try {
+        const res = await axios.delete(`/api/v1/${type}/${id}`);
+        if (res.data === "") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Delete ${type} successfully`);
+            window.setTimeout(()=>{
+                location.reload(true);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+const $075ff7d20839cbac$export$ac459dbf0b216ae9 = async (type, id, data)=>{
+    try {
+        const res = await axios({
+            method: "PATCH",
+            url: `/api/v1/${type}/${id}`,
+            data: data
+        });
+        if (res.data.status === "success") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Your ${type} updated`);
+            window.setTimeout(()=>{
+                location.reload(true);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+
+
 // import { showAlert } from './alert';
 const $4c50ebc26330ccb1$var$loginForm = document.querySelector(".login-form .form");
 const $4c50ebc26330ccb1$var$signupForm = document.querySelector(".signup-form .form");
 const $4c50ebc26330ccb1$var$mapEl = document.querySelector("#map");
 const $4c50ebc26330ccb1$var$bodyEl = document.querySelector("body");
+const $4c50ebc26330ccb1$var$bookmarkBtn = document.querySelector(".btn--bookmark");
 const $4c50ebc26330ccb1$var$bookTourBtn = document.querySelector("#book-tour");
 const $4c50ebc26330ccb1$var$navLogoutBtn = document.querySelector(".nav__el--logout");
 const $4c50ebc26330ccb1$var$userDataForm = document.querySelector(".form-user-data");
 const $4c50ebc26330ccb1$var$userPwdForm = document.querySelector(".form-user-settings");
+const $4c50ebc26330ccb1$var$reviewForm = document.querySelector(".form-new-review");
+const $4c50ebc26330ccb1$var$myReviewsForms = document.querySelectorAll(".form-my-review");
 if ($4c50ebc26330ccb1$var$bodyEl?.dataset.alert !== "") (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", $4c50ebc26330ccb1$var$bodyEl?.dataset.alert, 9);
+$4c50ebc26330ccb1$var$myReviewsForms?.forEach((form)=>{
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const children = e.target.childNodes;
+        const review = children[3].value;
+        const rating = children[5].value;
+        (0, $075ff7d20839cbac$export$ac459dbf0b216ae9)("reviews", e.target.dataset.review, {
+            review: review,
+            rating: rating
+        });
+    });
+});
+$4c50ebc26330ccb1$var$reviewForm?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const review = document.querySelector("#review").value;
+    const rating = document.querySelector("#rating").value;
+    console.log(review, rating);
+    (0, $075ff7d20839cbac$export$8cb1f130522c94b9)("reviews", {
+        review: review,
+        rating: rating
+    });
+});
 $4c50ebc26330ccb1$var$userDataForm?.addEventListener("submit", function(e) {
     e.preventDefault();
     // * because we don't use form event to pass data so we need to create form data with my own
@@ -348,6 +424,15 @@ $4c50ebc26330ccb1$var$loginForm?.addEventListener("submit", function(e) {
     const password = document.querySelector("#password").value;
     // console.log(email, password);
     (0, $740edc1be548417a$export$596d806903d1f59e)(email, password);
+});
+$4c50ebc26330ccb1$var$bookmarkBtn?.addEventListener("click", function(e) {
+    e.preventDefault();
+    if (!$4c50ebc26330ccb1$var$bookmarkBtn?.classList.contains("btn--green")) {
+        $4c50ebc26330ccb1$var$bookmarkBtn.classList.add("btn--green");
+        return (0, $075ff7d20839cbac$export$8cb1f130522c94b9)("bookmarks", {});
+    }
+    $4c50ebc26330ccb1$var$bookmarkBtn.classList.remove("btn--green");
+    (0, $075ff7d20839cbac$export$7c4e5c524f1ce05e)("bookmarks", $4c50ebc26330ccb1$var$bookmarkBtn.dataset.bookmark);
 });
 $4c50ebc26330ccb1$var$bookTourBtn?.addEventListener("click", function(e) {
     e.preventDefault();

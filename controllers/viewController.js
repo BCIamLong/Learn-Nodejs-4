@@ -1,10 +1,26 @@
 const Booking = require('../models/bookingModel');
+const Bookmark = require('../models/bookmarkModel');
+const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 // const User = require('../models/userModel');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
+
+const getMyReviews = catchSync(async (req, res, next) => {
+  const reviews = await Review.find({ user: res.locals.user.id });
+  const tourPromises = reviews.map(review => Tour.findById(review.tour));
+  const tours = await Promise.all(tourPromises);
+
+  res.render('myReviews', { reviews, tours });
+});
+
+const getMyFavoriteTours = catchSync(async (req, res, next) => {
+  const bookmarks = await Bookmark.find({ user: res.locals.user.id });
+
+  res.render('myFavoriteTours', { bookmarks });
+});
 
 const getSignupVerify = (req, res) => {
   res.render('signupVerify');
@@ -100,7 +116,9 @@ const getOverview = catchSync(async (req, res, next) => {
 const getTour = catchSync(async (req, res, next) => {
   const tour = await Tour.findOne({ slug: req.params.slug }).populate('reviews');
   const booking = await Booking.findOne({ user: res.locals.user?.id, tour: tour.id });
+  const bookmark = await Bookmark.findOne({ user: res.locals.user?.id, tour: tour.id });
   if (booking) res.locals.booked = true;
+  if (bookmark) res.locals.bookmarked = bookmark.id;
   // const tour = await Tour.findOne({ slug: req.params.slug }).populate({
   //   path: 'reviews',
   //   fields: 'review rating user',
@@ -122,4 +140,6 @@ module.exports = {
   checkAlert,
   setVerifyEmail,
   getSignupVerify,
+  getMyFavoriteTours,
+  getMyReviews,
 };

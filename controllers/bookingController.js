@@ -4,19 +4,19 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Booking = require('../models/bookingModel');
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
-const AppError = require('../utils/appError');
+// const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 const handlerFactory = require('./handlerFactory');
 
-const setUserTourId = catchSync(async (req, res, next) => {
-  const { tourId } = req.params;
-  if (!tourId) return next();
-  const tour = await Tour.findById(tourId);
-  if (!tour) return next(new AppError(404, 'No tour found with this id'));
-  req.body.tour = tourId;
-  req.body.user = req.user.id;
-  next();
-});
+// const setUserTourId = catchSync(async (req, res, next) => {
+//   const { tourId } = req.params;
+//   if (!tourId) return next();
+//   const tour = await Tour.findById(tourId);
+//   if (!tour) return next(new AppError(404, 'No tour found with this id'));
+//   req.body.tour = tourId;
+//   req.body.user = req.user.id;
+//   next();
+// });
 
 const createBooking = handlerFactory.createOne(Booking);
 const getBooking = handlerFactory.getOne(Booking);
@@ -145,5 +145,5 @@ module.exports = {
   updateBooking,
   deleteBooking,
   webhookCheckout,
-  setUserTourId,
+  // setUserTourId,
 };

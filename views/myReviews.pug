@@ -1,0 +1,36 @@
+extends base
+
+mixin reviewsCard(userName, userPhoto, review_id, review, rating, tour)
+  form.reviews__card.form-review-card.form-my-review(data-review=`${review_id}`)
+    .reviews__avatar
+      img.reviews__avatar-img(src=`/img/users/${userPhoto}`, alt=`${userName}`)
+      h6.reviews__user= userName
+    .reviews__text for 
+      a(href=`/tours/${tour.slug}`) #{tour.name} Tour
+    label(for="review") Review
+    textarea#review.reviews__text(name = "review" required)= review
+    label(for="rating") Rating
+    input#rating.reviews__text(type="number" name = "rating" min="1" max="5" value=`${rating}` required)
+    .reviews__rating.ma-bt-md
+      //- * we also can mixing the pug code and JS for loop code
+      - for(let i = 1; i <= 5; i++)
+        - if(i <= rating)
+          svg.reviews__star.reviews__star--active
+            use(xlink:href='/img/icons.svg#icon-star')
+        - else
+          svg.reviews__star.reviews__star--inactive
+            use(xlink:href='/img/icons.svg#icon-star')
+    button.btn.btn--green.btn--edit-review(type="submit") Edit
+
+block title 
+  title Natours | My Reviews
+
+
+block content 
+  main.main 
+    .reviews.card-container.reviews--v2
+      //- - const sevenDay = 7 * 24 * 60 * 60 * 1000
+      //- - const check = tour.startDates[0]
+      each review,i in reviews
+        //- * Because this code here too long and so we can create mixin to do the code easy to maintain
+        +reviewsCard(review.user.name, review.user.photo, review._id, review.review, review.rating, tours[i])

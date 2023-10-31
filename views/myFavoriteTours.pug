@@ -1,0 +1,47 @@
+extends base
+
+block title 
+  title Natours | My Favorite Tours
+
+
+block content 
+  main.main 
+    .card-container
+      each bookmark in bookmarks
+        .card 
+          .card__header 
+            .card__picture 
+              .card__picture-overlay 
+                img.card__picture-img(src=`/img/tours/${bookmark.tour.imageCover}` alt=`${bookmark.tour.name}`)
+            h3.heading-tertirary
+              span= bookmark.tour.name
+          .card__details 
+            h4.card__sub-heading #{bookmark.tour.difficulty} #{bookmark.tour.duration}-day tour
+            p.card__text= bookmark.tour.summary
+            .card__data 
+              svg.card__icon 
+                use(xlink:href="/img/icons.svg#icon-map-pin")
+              span= bookmark.tour.startLocation.description
+            .card__data 
+              svg.card__icon 
+                use(xlink:href="/img/icons.svg#icon-calendar")
+              - const date = new Date(bookmark.tour.startDates[0])
+              //- span #{date.getMonth()} #{date.getFullYear()}
+              span= bookmark.tour.startDates[0].date.toLocaleString('default', {month: 'long', year: 'numeric'})
+            .card__data 
+              svg.card__icon 
+                use(xlink:href="/img/icons.svg#icon-flag")
+              span #{bookmark.tour.locations.length} stops
+            .card__data 
+              svg.card__icon 
+                use(xlink:href="/img/icons.svg#icon-user")
+              span #{bookmark.tour.maxGroupSize} people
+          .card__footer 
+            p 
+              span.card__footer-value $#{bookmark.tour.price} 
+              //- | 
+              span.card__footer-text per person 
+            p.card__ratings 
+              span.card__footer-value #{bookmark.tour.ratingAverage}
+              span.card__footer-text rating (#{bookmark.tour.ratingsQuantity})
+            a.btn.btn--green.btn--small(href = `/tours/${bookmark.tour.slug}`) Details

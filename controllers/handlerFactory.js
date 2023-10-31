@@ -105,4 +105,12 @@ const getAll = Model =>
     });
   });
 
-module.exports = { deleteOne, updateOne, createOne, getOne, getAll };
+const setTourUserIds = catchSync(async (req, res, next) => {
+  const { tourId } = req.params;
+  if (!tourId) return next();
+  req.body.tour = tourId;
+  req.body.user = req.user.id;
+  next();
+});
+
+module.exports = { deleteOne, updateOne, createOne, getOne, getAll, setTourUserIds };
