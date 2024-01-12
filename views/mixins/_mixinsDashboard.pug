@@ -1,0 +1,18 @@
+
+mixin tableItem(type, data)
+  - if(type === 'tours')
+    .table-item
+      p= data.name
+      p= data.duration
+      p= data.maxGroupSize
+      p= data.difficulty
+      p= data.ratingsAverage
+      p= data.price
+      p= data.summary
+      p
+        button#btn--edit(data-item-id=`${data.id}` data-item-type=`${type}`)
+          svg
+            use(xlink:href='/img/icons.svg#icon-edit')
+        button#btn--delete(data-item-id=`${data.id}` data-item-type=`${type}`) 
+          svg
+            use(xlink:href='/img/icons.svg#icon-delete')

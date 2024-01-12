@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,300i,700" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png" />
+
+    <title>Natours | Add new tour</title>
+  </head>
+  <body>
+    <header class="header">
+      <nav class="nav nav--tours">
+        <a href="#" class="nav__el">All tours</a>
+        <form class="nav__search">
+          <button class="nav__search-btn">
+            <svg>
+              <use xlink:href="img/icons.svg#icon-search"></use>
+            </svg>
+          </button>
+          <input type="text" placeholder="Search tours" class="nav__search-input" />
+        </form>
+      </nav>
+      <div class="header__logo">
+        <img src="img/logo-white.png" alt="Natours logo" />
+      </div>
+      <nav class="nav nav--user">
+        <a href="#" class="nav__el">My bookings</a>
+        <a href="#" class="nav__el">
+          <img src="img/user.jpg" alt="User photo" class="nav__user-img" />
+          <span>Jonas</span>
+        </a>
+
+        <!-- <button class="nav__el">Log in</button>
+        <button class="nav__el nav__el--cta">Sign up</button> -->
+      </nav>
+    </header>
+
+    <!-- In video, this <main> element is wrongly called: <section class="overview">. So in pug template, please use main.main instead of section.overview -->
+    <main class="main-dashboard">
+      <div class="user-view">
+        <nav class="user-view__menu">
+          <div class="admin-nav">
+            <h5 class="admin-nav__heading">Admin</h5>
+            <ul class="side-nav">
+              <li>
+                <a href="#">
+                  <svg>
+                    <use xlink:href="img/icons.svg#icon-map"></use></svg
+                  >Manage tours</a
+                >
+              </li>
+              <li>
+                <a href="#">
+                  <svg>
+                    <use xlink:href="img/icons.svg#icon-users"></use></svg
+                  >Manage users</a
+                >
+              </li>
+              <li>
+                <a href="#">
+                  <svg>
+                    <use xlink:href="img/icons.svg#icon-star"></use></svg
+                  >Manage reviews</a
+                >
+              </li>
+              <li>
+                <a href="#">
+                  <svg>
+                    <use xlink:href="img/icons.svg#icon-briefcase"></use></svg
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <div class="user-view__content">
+          <!-- <div class="user-view__form-container"></div>
+          <div class="line">&nbsp;</div>
+          <div class="user-view__form-container"></div> -->
+
+          <a href="#" class="btn add-btn">
+            <svg>
+              <use xlink:href="img/icons.svg#icon-arrow-left"></use></svg
+            ><span>Back</span></a
+          >
+          <div class="user-view__form-container">
+            <h2 class="heading-secondary ma-bt-md">Add new tour</h2>
+            <form class="form form-user-data">
+              <div class="form__group">
+                <label class="form__label" for="name">Name</label>
+                <input
+                  class="form__input"
+                  id="name"
+                  type="text"
+                  value="The Sea Explorer"
+                  required="required"
+                />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="duration">Duration</label>
+                <input
+                  class="form__input"
+                  id="duration"
+                  type="text"
+                  value="7"
+                  required="required"
+                />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="maxGroupSize">Max group size</label>
+                <input
+                  class="form__input"
+                  id="maxGroupSize"
+                  type="text"
+                  value="10"
+                  required="required"
+                />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="difficulty">Difficulty</label>
+                <input
+                  class="form__input"
+                  id="difficulty"
+                  type="text"
+                  value="Medium"
+                  required="required"
+                />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="price">Price</label>
+                <input class="form__input" id="price" type="text" value="497" required="required" />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="summary">Summary</label>
+                <input
+                  class="form__input"
+                  id="summary"
+                  type="text"
+                  value="Exploring the jaw-dropping US east coast by foot and by boat"
+                  required="required"
+                />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="description">Description</label>
+                <textarea class="form__input" id="description" type="text" required="required">
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus eligendi debitis voluptatem asperiores ipsam eum! Incidunt voluptatum, illo nemo quia esse modi, minus cumque dignissimos sit placeat, accusantium ducimus provident.</textarea
+                >
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="imageCover">Image cover</label>
+                <img class="form__user-photo" src="img/user.jpg" alt="Tour image cover" />
+                <input class="form__input" id="imageCover" type="file" required="required" />
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="image1">Image 1</label>
+                <img class="form__user-photo" src="img/user.jpg" alt="Tour image cover" />
+                <input class="form__input" id="image1" type="file" required="required" />
+              </div>
+              <div class="form__group right">
+                <button class="btn btn--small btn--green">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="footer">
+      <div class="footer__logo">
+        <img src="img/logo-green.png" alt="Natours logo" />
+      </div>
+      <ul class="footer__nav">
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Download apps</a></li>
+        <li><a href="#">Become a guide</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <p class="footer__copyright">&copy; by Jonas Schmedtmann. All rights reserved.</p>
+    </div>
+  </body>
+</html>

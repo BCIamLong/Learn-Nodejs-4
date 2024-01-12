@@ -1,0 +1,51 @@
+extends ../base
+
+include ../mixins/_mixinsAccount
+include ../mixins/_mixinsDashboard
+
+block title 
+  title Natours | Manage Tours
+
+block content 
+  main.main-dashboard
+    .user-view
+      nav.user-view__menu
+        .admin-nav
+          h5.admin-nav__heading Admin
+          ul.side-nav
+            +navItem("/dashboard/tours","map", "Manage tours", 1)
+            +navItem("/dashboard/users","users", "Manage users")
+            +navItem("/dashboard/reviews","star", "Manage reviews")
+            +navItem("/dashboard/bookings","briefcase", "Manage bookings")
+      .user-view__content
+        //
+          <div class="user-view__form-container"></div>
+          <div class="line">&nbsp;</div>
+          <div class="user-view__form-container"></div>
+        a.btn.add-btn(href='/dashboard/tours/new')
+          svg
+            use(xlink:href='/img/icons.svg#icon-plus')
+          span Add new tour
+        .table
+          .table-nav
+            h3 Name
+            h3 Duration
+            h3 Max Ground Size
+            h3 Difficult
+            h3 Rating
+            h3 Price
+            h3 Summary
+            h3
+          each tour in tours
+            +tableItem('tours', tour)
+        .pagination
+          - if(page > 1)
+            a(href=`/dashboard/tours?page=${+page-1}`) Previous
+          - for(let i = 1; i <= totalPage; i++)
+            - if(+page === i)
+              a.dot-active(href=`/dashboard/tours?page=${i}`)= i
+            - else
+              a(href=`/dashboard/tours?page=${i}`)= i
+          //- span ...
+          - if(page < totalPage)
+            a(href=`/dashboard/tours?page=${+page+1}`) Next

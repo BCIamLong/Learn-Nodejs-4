@@ -8,6 +8,22 @@ const AppError = require('../utils/appError');
 const catchSync = require('../utils/catchSync');
 // const jwt = require('jsonwebtoken');
 
+const getNewTour = catchSync(async (req, res, next) => {
+  res.render('dashboard/newTour');
+});
+
+const getDashboardTours = catchSync(async (req, res, next) => {
+  const page = req.query.page ? req.query.page : 1;
+  const limit = 6;
+  const count = await Tour.countDocuments();
+  const totalPage = Math.ceil(count / limit);
+  if (page > totalPage) return next(new AppError(400, 'No page found'));
+  const skip = limit * (page - 1);
+  const tours = await Tour.find().limit(limit).skip(skip);
+
+  res.render('dashboard/tours', { tours, totalPage, page });
+});
+
 const getMyReviews = catchSync(async (req, res, next) => {
   const reviews = await Review.find({ user: res.locals.user.id });
   const tourPromises = reviews.map(review => Tour.findById(review.tour));
@@ -142,4 +158,6 @@ module.exports = {
   getSignupVerify,
   getMyFavoriteTours,
   getMyReviews,
+  getDashboardTours,
+  getNewTour,
 };

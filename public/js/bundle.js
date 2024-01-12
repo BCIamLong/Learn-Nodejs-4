@@ -116,7 +116,7 @@ const $8949a5cd0baaab58$export$7200a869094fec36 = async (data)=>{
         if (res.data.status === "success") {
             (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", "Sign up account successfully");
             window.setTimeout(()=>{
-                location.assign("/signup-verify");
+                location.assign("/");
             }, 1000);
             window.setTimeout(()=>{
                 $8949a5cd0baaab58$var$signupForm.classList.remove("form--inactive");
@@ -332,19 +332,134 @@ const $075ff7d20839cbac$export$ac459dbf0b216ae9 = async (type, id, data)=>{
 };
 
 
+/* eslint-disable */ 
+const $ff0b190fd2bb71c3$export$8d8542dbbc23fe1a = async (type, id)=>{
+    try {
+        const res = await axios.delete(`/api/v1/${type}/${id}`);
+        if (res.data === "") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Delete ${type} successfully`);
+            window.setTimeout(()=>{
+                location.reload(true);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+const $ff0b190fd2bb71c3$export$72b8c6d38aa6195b = async (type, data, id)=>{
+    try {
+        const res = await axios({
+            method: "PATCH",
+            data: data,
+            url: `/api/v1/${type}/${id}`
+        });
+        if (res.data.status === "success") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Update ${type} successfully`);
+            window.setTimeout(()=>{
+                location.assign(`/dashboard/${type}`);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+const $ff0b190fd2bb71c3$export$fb9705de59d96855 = async (type, data)=>{
+    try {
+        const res = await axios.post(`/api/v1/${type}`, data);
+        if (res.data.status === "success") {
+            (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", `Add new ${type} successfully`);
+            window.setTimeout(()=>{
+                location.assign(`/dashboard/${type}`);
+            }, 1000);
+        }
+    } catch (err) {
+        (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", err.response.data.message);
+    }
+};
+
+
 // import { showAlert } from './alert';
-const $4c50ebc26330ccb1$var$loginForm = document.querySelector(".login-form .form");
-const $4c50ebc26330ccb1$var$signupForm = document.querySelector(".signup-form .form");
 const $4c50ebc26330ccb1$var$mapEl = document.querySelector("#map");
 const $4c50ebc26330ccb1$var$bodyEl = document.querySelector("body");
 const $4c50ebc26330ccb1$var$bookmarkBtn = document.querySelector(".btn--bookmark");
 const $4c50ebc26330ccb1$var$bookTourBtn = document.querySelector("#book-tour");
 const $4c50ebc26330ccb1$var$navLogoutBtn = document.querySelector(".nav__el--logout");
+const $4c50ebc26330ccb1$var$backBtn = document.querySelector("#btn--back");
+const $4c50ebc26330ccb1$var$addBtn = document.querySelector("#btn--add");
+const $4c50ebc26330ccb1$var$editBtns = document.querySelectorAll("#btn--edit");
+const $4c50ebc26330ccb1$var$deleteBtns = document.querySelectorAll("#btn--delete");
+const $4c50ebc26330ccb1$var$newTourForm = document.querySelector(".form-tour-new");
+const $4c50ebc26330ccb1$var$loginForm = document.querySelector(".login-form .form");
+const $4c50ebc26330ccb1$var$signupForm = document.querySelector(".signup-form .form");
 const $4c50ebc26330ccb1$var$userDataForm = document.querySelector(".form-user-data");
 const $4c50ebc26330ccb1$var$userPwdForm = document.querySelector(".form-user-settings");
 const $4c50ebc26330ccb1$var$reviewForm = document.querySelector(".form-new-review");
 const $4c50ebc26330ccb1$var$myReviewsForms = document.querySelectorAll(".form-my-review");
 if ($4c50ebc26330ccb1$var$bodyEl?.dataset.alert !== "") (0, $fa3c8714c3f1b580$export$de026b00723010c1)("success", $4c50ebc26330ccb1$var$bodyEl?.dataset.alert, 9);
+$4c50ebc26330ccb1$var$newTourForm?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    console.log(document.querySelector("#summary").value);
+    formData.append("name", document.querySelector("#name").value);
+    formData.append("duration", document.querySelector("#duration").value);
+    formData.append("maxGroupSize", document.querySelector("#maxGroupSize").value);
+    formData.append("difficulty", document.querySelector("#difficulty").value);
+    formData.append("price", document.querySelector("#price").value);
+    formData.append("summary", document.querySelector("#summary").value);
+    formData.append("description", document.querySelector("#description").value);
+    formData.append("imageCover", document.querySelector("#imageCover").files[0]);
+    const image1 = document.querySelector("#image1").files[0];
+    const image2 = document.querySelector("#image2").files[0];
+    const image3 = document.querySelector("#image3").files[0];
+    // formData.append('images', [image1, image2, image3]);
+    formData.append("images", document.querySelector("#image1").files[0]);
+    formData.append("images", document.querySelector("#image2").files[0]);
+    formData.append("images", document.querySelector("#image3").files[0]);
+    const startLocation = {
+        type: "Point",
+        coordinates: [
+            -106.822318,
+            39.190872
+        ],
+        address: "419 S Mill St, Aspen, CO 81611, USA",
+        description: "Aspen, USA"
+    };
+    const startDates = [
+        {
+            date: {
+                $date: "2022-01-05T10:00:00.000Z"
+            },
+            participants: 0,
+            soldOut: false,
+            _id: {
+                $oid: "653dff151b5f7e1e2d23f097"
+            }
+        },
+        {
+            date: {
+                $date: "2022-02-12T10:00:00.000Z"
+            },
+            participants: 0,
+            soldOut: false,
+            _id: {
+                $oid: "653dff151b5f7e1e2d23f098"
+            }
+        },
+        {
+            date: {
+                $date: "2023-01-06T10:00:00.000Z"
+            },
+            participants: 0,
+            soldOut: false,
+            _id: {
+                $oid: "653dff151b5f7e1e2d23f099"
+            }
+        }
+    ];
+    // formData.append('startLocation', startLocation);
+    // formData.append('startDates', startDates);
+    (0, $ff0b190fd2bb71c3$export$fb9705de59d96855)($4c50ebc26330ccb1$var$newTourForm.dataset.itemType, formData);
+});
 $4c50ebc26330ccb1$var$myReviewsForms?.forEach((form)=>{
     form.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -424,6 +539,25 @@ $4c50ebc26330ccb1$var$loginForm?.addEventListener("submit", function(e) {
     const password = document.querySelector("#password").value;
     // console.log(email, password);
     (0, $740edc1be548417a$export$596d806903d1f59e)(email, password);
+});
+$4c50ebc26330ccb1$var$editBtns.forEach((editBtn)=>{
+    editBtn?.addEventListener("click", function(e) {
+        e.preventDefault();
+    });
+});
+$4c50ebc26330ccb1$var$deleteBtns?.forEach((deleteBtn)=>{
+    deleteBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        const check = prompt("Enter DELETE to delete data");
+        if (check !== "DELETE") return (0, $fa3c8714c3f1b580$export$de026b00723010c1)("error", "Delete data fail");
+        const type = e.target.closest("#btn--delete").dataset.itemType;
+        const id = e.target.closest("#btn--delete").dataset.itemId;
+        (0, $ff0b190fd2bb71c3$export$8d8542dbbc23fe1a)(type, id);
+    });
+});
+$4c50ebc26330ccb1$var$backBtn?.addEventListener("click", function(e) {
+    e.preventDefault();
+    location.assign(`/dashboard/${$4c50ebc26330ccb1$var$backBtn.dataset.itemType}`);
 });
 $4c50ebc26330ccb1$var$bookmarkBtn?.addEventListener("click", function(e) {
     e.preventDefault();

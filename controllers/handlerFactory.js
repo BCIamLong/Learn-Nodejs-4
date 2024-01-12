@@ -32,6 +32,7 @@ const updateOne = Model =>
 
 const createOne = Model =>
   catchSync(async (req, res, next) => {
+    console.log(req.body);
     const newDoc = await Model.create(req.body);
     // if (newDoc.review) await newDoc.createAverageRating(req.body.tour);
 

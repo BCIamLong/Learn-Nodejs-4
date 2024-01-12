@@ -33,4 +33,10 @@ router.use(authController.protectManually);
 router.get('/my-tours', viewController.getMyTours);
 router.post('/submit-user-data', viewController.updateUserData);
 router.get('/me', authController.passUserDataIntoView, viewController.getAccount);
+
+router.use(authController.restrictTo('admin'));
+
+router.get('/dashboard/tours', viewController.getDashboardTours);
+router.get('/dashboard/tours/new', viewController.getNewTour);
+
 module.exports = router;

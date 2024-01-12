@@ -45,7 +45,42 @@ const resizeTourImages = catchAsync(async (req, res, next) => {
   // * so in case we upload many files it'll be req.files, if one it's req.file
   // if (!req.files) return next();
   if (!req.files.imageCover || !req.files.images) return next();
-  const tourId = req.params.id;
+  let tourId = req.params.id;
+
+  // * for create new tour(because i don't handle to post the locations and dates so it's temporary)
+  const startLocation = {
+    type: 'Point',
+    coordinates: [-106.822318, 39.190872],
+    address: '419 S Mill St, Aspen, CO 81611, USA',
+    description: 'Aspen, USA',
+  };
+  const startDates = [
+    {
+      date: '2022-01-05T10:00:00.000Z',
+
+      participants: 0,
+      soldOut: false,
+    },
+    {
+      date: '2022-02-12T10:00:00.000Z',
+
+      participants: 0,
+      soldOut: false,
+    },
+    {
+      date: '2023-01-06T10:00:00.000Z',
+
+      participants: 0,
+      soldOut: false,
+    },
+  ];
+  if (!tourId) {
+    tourId = req.body.name.toLowerCase().replaceAll(' ', '-');
+    req.body.startLocation = startLocation;
+    req.body.startDates = startDates;
+  }
+  // *------------------------------------------------------------------
+  // console.log(tourId);
   // console.log(req.files);
   // req.filenames = [];
   // * For cover image

@@ -18,5 +18,5 @@ mixin navItem(link,icon,text,active)
   li(class=`${active ? 'side-nav--active' : '' }`)
     a(href=`${link}`)
       svg
-        use(xlink:href=`img/icons.svg#icon-${icon}`)
+        use(xlink:href=`/img/icons.svg#icon-${icon}`)
       | #{text}

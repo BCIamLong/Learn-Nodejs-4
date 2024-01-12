@@ -79,10 +79,10 @@ const signup = catchSync(async (req, res, next) => {
   newUser.password = undefined; //cuz we only want edit in this when we send to client and not update in DB right so we don't use newUser.save()
 
   //! const url = 'http://127.0.0.1:3000/account'; this url only work for development so we need config that to work for both production and development
-  const url = `${req.protocol}://${req.get('host')}?verifyEmail=true`;
-  // console.log(url);
-  const email = new Email(newUser, url);
-  await email.sendWelcome();
+  // const url = `${req.protocol}://${req.get('host')}?verifyEmail=true`;
+  // // console.log(url);
+  // const email = new Email(newUser, url);
+  // await email.sendWelcome();
   sendJWT(res, 200, newUser);
 });
 

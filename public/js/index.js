@@ -8,21 +8,92 @@ import { updateUserDataSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { showAlert } from './alert';
 import { newResources, removeResources, updateResources } from './resources';
+import { addItem, deleteItem } from './dashboard';
 // import { showAlert } from './alert';
 
-const loginForm = document.querySelector('.login-form .form');
-const signupForm = document.querySelector('.signup-form .form');
 const mapEl = document.querySelector('#map');
 const bodyEl = document.querySelector('body');
+
 const bookmarkBtn = document.querySelector('.btn--bookmark');
 const bookTourBtn = document.querySelector('#book-tour');
 const navLogoutBtn = document.querySelector('.nav__el--logout');
+const backBtn = document.querySelector('#btn--back');
+const addBtn = document.querySelector('#btn--add');
+const editBtns = document.querySelectorAll('#btn--edit');
+const deleteBtns = document.querySelectorAll('#btn--delete');
+
+const newTourForm = document.querySelector('.form-tour-new');
+const loginForm = document.querySelector('.login-form .form');
+const signupForm = document.querySelector('.signup-form .form');
 const userDataForm = document.querySelector('.form-user-data');
 const userPwdForm = document.querySelector('.form-user-settings');
 const reviewForm = document.querySelector('.form-new-review');
 const myReviewsForms = document.querySelectorAll('.form-my-review');
 
 if (bodyEl?.dataset.alert !== '') showAlert('success', bodyEl?.dataset.alert, 9);
+
+newTourForm?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const formData = new FormData();
+  console.log(document.querySelector('#summary').value);
+  formData.append('name', document.querySelector('#name').value);
+  formData.append('duration', document.querySelector('#duration').value);
+  formData.append('maxGroupSize', document.querySelector('#maxGroupSize').value);
+  formData.append('difficulty', document.querySelector('#difficulty').value);
+  formData.append('price', document.querySelector('#price').value);
+  formData.append('summary', document.querySelector('#summary').value);
+  formData.append('description', document.querySelector('#description').value);
+  formData.append('imageCover', document.querySelector('#imageCover').files[0]);
+  const image1 = document.querySelector('#image1').files[0];
+  const image2 = document.querySelector('#image2').files[0];
+  const image3 = document.querySelector('#image3').files[0];
+  // formData.append('images', [image1, image2, image3]);
+  formData.append('images', document.querySelector('#image1').files[0]);
+  formData.append('images', document.querySelector('#image2').files[0]);
+  formData.append('images', document.querySelector('#image3').files[0]);
+  const startLocation = {
+    type: 'Point',
+    coordinates: [-106.822318, 39.190872],
+    address: '419 S Mill St, Aspen, CO 81611, USA',
+    description: 'Aspen, USA',
+  };
+  const startDates = [
+    {
+      date: {
+        $date: '2022-01-05T10:00:00.000Z',
+      },
+      participants: 0,
+      soldOut: false,
+      _id: {
+        $oid: '653dff151b5f7e1e2d23f097',
+      },
+    },
+    {
+      date: {
+        $date: '2022-02-12T10:00:00.000Z',
+      },
+      participants: 0,
+      soldOut: false,
+      _id: {
+        $oid: '653dff151b5f7e1e2d23f098',
+      },
+    },
+    {
+      date: {
+        $date: '2023-01-06T10:00:00.000Z',
+      },
+      participants: 0,
+      soldOut: false,
+      _id: {
+        $oid: '653dff151b5f7e1e2d23f099',
+      },
+    },
+  ];
+  // formData.append('startLocation', startLocation);
+  // formData.append('startDates', startDates);
+
+  addItem(newTourForm.dataset.itemType, formData);
+});
 
 myReviewsForms?.forEach(form => {
   form.addEventListener('submit', function (e) {
@@ -91,6 +162,28 @@ loginForm?.addEventListener('submit', function (e) {
   const password = document.querySelector('#password').value;
   // console.log(email, password);
   login(email, password);
+});
+
+editBtns.forEach(editBtn => {
+  editBtn?.addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+});
+
+deleteBtns?.forEach(deleteBtn => {
+  deleteBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    const check = prompt('Enter DELETE to delete data');
+    if (check !== 'DELETE') return showAlert('error', 'Delete data fail');
+    const type = e.target.closest('#btn--delete').dataset.itemType;
+    const id = e.target.closest('#btn--delete').dataset.itemId;
+    deleteItem(type, id);
+  });
+});
+
+backBtn?.addEventListener('click', function (e) {
+  e.preventDefault();
+  location.assign(`/dashboard/${backBtn.dataset.itemType}`);
 });
 
 bookmarkBtn?.addEventListener('click', function (e) {

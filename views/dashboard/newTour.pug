@@ -1,0 +1,66 @@
+extends ../base
+
+include ../mixins/_mixinsAccount
+include ../mixins/_mixinsDashboard
+
+block title 
+  title Natours |  Add tour
+
+block content 
+  main.main-dashboard
+    .user-view
+      nav.user-view__menu
+        .admin-nav
+          h5.admin-nav__heading Admin
+          ul.side-nav
+            +navItem("/dashboard/tours","map", "Manage tours", 1)
+            +navItem("/dashboard/users","users", "Manage users")
+            +navItem("/dashboard/reviews","star", "Manage reviews")
+            +navItem("/dashboard/bookings","briefcase", "Manage bookings")
+      .user-view__content
+        //
+          <div class="user-view__form-container"></div>
+          <div class="line">&nbsp;</div>
+          <div class="user-view__form-container"></div>
+        a#btn--back.btn.add-btn(href='#' data-item-type='tours')
+          svg
+            use(xlink:href='/img/icons.svg#icon-arrow-left')
+          span Back
+        .user-view__form-container
+          h2.heading-secondary.ma-bt-md Add new tour
+          form.form.form-tour-new(data-item-type=`tours`)
+            .form__group
+              label.form__label(for='name') Name
+              input#name.form__input(type='text', placeholder='The Sea Explorer', required='required')
+            .form__group
+              label.form__label(for='duration') Duration
+              input#duration.form__input(type='text', placeholder='7', required='required')
+            .form__group
+              label.form__label(for='maxGroupSize') Max group size
+              input#maxGroupSize.form__input(type='text', placeholder='10', required='required')
+            .form__group
+              label.form__label(for='difficulty') Difficulty
+              input#difficulty.form__input(type='text', placeholder='Medium', required='required')
+            .form__group
+              label.form__label(for='price') Price
+              input#price.form__input(type='text', placeholder='497', required='required')
+            .form__group
+              label.form__label(for='summary') Summary
+              input#summary.form__input(type='text', placeholder='Exploring the jaw-dropping US east coast by foot and by boat', required='required')
+            .form__group
+              label.form__label(for='description') Description
+              textarea#description.form__input(type='text', required='required')
+            .form__group
+              label.form__label(for='imageCover') Image cover
+              input#imageCover.form__input(type='file', required='required')
+            .form__group
+              label.form__label(for='image1') Image 1
+              input#image1.form__input(type='file', required='required')
+            .form__group
+              label.form__label(for='image2') Image 2
+              input#image2.form__input(type='file', required='required')
+            .form__group
+              label.form__label(for='image3') Image 3
+              input#image3.form__input(type='file', required='required')
+            .form__group.right
+              button#btn--add.btn.btn--small.btn--green(type='submit') Add

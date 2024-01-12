@@ -62,7 +62,11 @@ router.use(authController.restrictTo('admin', 'leading-guide')); //!
 router
   .route('/')
   //get don't need any thing authorization for this get all tour because we want expose all tours as part of API to everyone
-  .post(tourController.createTour);
+  .post(
+    tourController.uploadTourImages,
+    tourController.resizeTourImages,
+    tourController.createTour,
+  );
 router
   .route('/:id')
   //.get(tourController.setReivews, tourController.getTour)
