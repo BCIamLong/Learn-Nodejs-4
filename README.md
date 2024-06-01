@@ -6,7 +6,7 @@
 - [Features](#feature)
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
-- [Develoyment](#develoyment)
+- [Deployment](#deployment)
 
 ### Features
 - User Authentication (Login, Signup, JWT)
