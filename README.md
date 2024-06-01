@@ -3,9 +3,10 @@
 
 [Natour](https://natours-final-course-project.onrender.com) is a tour booking website where users can book tours and start their amazing journeys. The website includes features such as user authentication, tour booking, payment processing, reviews, bookmarks, and more.
 ### Table of contents
-- [Features](###feature)
-- [Tech Stack](###tech-stack)
-- [Installation](###installation)
+- [Features](#feature)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Develoyment](#develoyment)
 
 ### Features
 - User Authentication (Login, Signup, JWT)
